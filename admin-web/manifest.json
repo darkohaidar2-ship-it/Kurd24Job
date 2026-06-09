@@ -1,0 +1,22 @@
+{
+  "name": "Kurd24 Job",
+  "short_name": "Kurd24",
+  "description": "Premium Job Search Platform in Kurdistan",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070a13",
+  "theme_color": "#818cf8",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

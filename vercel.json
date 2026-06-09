@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/admin-web/landing.html" },
+    { "source": "/index.html", "destination": "/admin-web/landing.html" },
+    { "source": "/admin-portal", "destination": "/admin-web/index.html" },
+    { "source": "/admin-portal/", "destination": "/admin-web/index.html" },
+    { "source": "/admin-portal/index.html", "destination": "/admin-web/index.html" }
+  ]
+}

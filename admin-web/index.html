@@ -1,0 +1,4083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kurd24 Job - Admin Portal</title>
+  <!-- Google Fonts Vazirmatn -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #818cf8;
+      --primary-glow: rgba(129, 140, 248, 0.15);
+      --accent: #f472b6;
+      --accent-glow: rgba(244, 114, 182, 0.15);
+      --success: #34d399;
+      --success-glow: rgba(52, 211, 153, 0.15);
+      --background: #0b0f19;
+      --card-bg: rgba(15, 23, 42, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: rgba(255, 255, 255, 0.05);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --input-bg: rgba(15, 23, 42, 0.6);
+      --border-radius: 16px;
+    }
+
+    body.light-mode {
+      --background: #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.75);
+      --card-border: rgba(15, 23, 42, 0.08);
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border: rgba(15, 23, 42, 0.05);
+      --primary-glow: rgba(99, 102, 241, 0.1);
+      --accent-glow: rgba(236, 72, 153, 0.1);
+      --success-glow: rgba(16, 185, 129, 0.1);
+      --input-bg: rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Vazirmatn', sans-serif;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.08) 0px, transparent 50%);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body.light-mode {
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.04) 0px, transparent 50%);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--background);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+
+    /* Glassmorphic Utilities */
+    .glass {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--border-radius);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      transition: border-radius 0.3s ease;
+    }
+
+    .glow-hover:hover {
+      border-color: rgba(129, 140, 248, 0.3);
+      box-shadow: 0 0 20px 0 rgba(129, 140, 248, 0.15);
+    }
+
+    /* Login Screen */
+    #login-screen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 40px 30px;
+      text-align: center;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .logo-container {
+      width: 72px;
+      height: 72px;
+      background: var(--primary-glow);
+      border: 2px solid var(--primary);
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 15px rgba(129, 140, 248, 0.2);
+    }
+
+    .logo-container i {
+      color: var(--primary);
+      font-size: 32px;
+    }
+
+    .login-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+
+    .login-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(129, 140, 248, 0.25);
+    }
+
+    .login-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 10px;
+      box-shadow: 0 4px 15px rgba(129, 140, 248, 0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .login-btn:hover {
+      background: #707df0;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(129, 140, 248, 0.35);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .error-msg {
+      color: var(--accent);
+      background: rgba(244, 114, 182, 0.1);
+      border: 1px solid rgba(244, 114, 182, 0.2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+      text-align: left;
+    }
+
+    /* Main App Layout */
+    #app-container {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    /* Top Bar Header */
+    .top-bar {
+      border-bottom: 1px solid var(--card-border);
+      padding: 15px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 80px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: var(--primary-glow);
+      border: 1.5px solid var(--primary);
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .brand-logo i {
+      color: var(--primary);
+      font-size: 18px;
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .desktop-menu {
+      list-style: none;
+      display: flex;
+      gap: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .menu-item:hover, .menu-item.active {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .menu-item.active {
+      background: var(--primary-glow);
+      color: var(--primary);
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .theme-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--background);
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: var(--text-secondary);
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logout-btn:hover {
+      background: rgba(244, 114, 182, 0.05);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Main Area Content */
+    .main-content {
+      padding: 30px;
+      overflow-y: auto;
+      height: calc(100vh - 80px);
+      flex: 1;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--success);
+      color: var(--success);
+      background: var(--success-glow);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--success);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* View Panel Wrappers */
+    .view-panel {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    /* Analytics Cards Grid */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-info h3 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-info p {
+      font-size: 32px;
+      font-weight: 800;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Chart Card */
+    .chart-card {
+      padding: 24px;
+      margin-bottom: 30px;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .chart-title {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .chart-body {
+      height: 300px;
+      position: relative;
+    }
+
+    /* Job Listings Table */
+    .jobs-card {
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    .jobs-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .jobs-table th {
+      padding: 16px;
+      border-bottom: 1.5px solid var(--card-border);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .jobs-table td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .jobs-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .job-row-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-cell {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--primary-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-published {
+      background: var(--success-glow);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .badge-draft {
+      background: var(--primary-glow);
+      color: var(--primary);
+      border: 1px solid rgba(129, 140, 248, 0.2);
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .action-btn.btn-delete:hover {
+      background: rgba(244, 114, 182, 0.1);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .action-btn.btn-edit:hover {
+      background: var(--primary-glow);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Editor Grid Layout */
+    .editor-layout {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 30px;
+      align-items: start;
+    }
+
+    .editor-card {
+      padding: 24px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .textarea-field {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* Image Uploader grid styles */
+    .dynamic-list-container {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.15);
+      margin-bottom: 20px;
+    }
+
+    .list-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .upload-slot {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 1.5px dashed var(--card-border);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .upload-slot:hover {
+      border-color: var(--primary);
+      background: rgba(129, 140, 248, 0.05);
+    }
+
+    .upload-slot.uploaded {
+      border: 1.5px solid var(--primary);
+      background: transparent;
+    }
+
+    .upload-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .upload-slot input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 5;
+    }
+
+    .remove-image-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      border-radius: 4px;
+      padding: 4px;
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: var(--transition);
+    }
+
+    .remove-image-btn:hover {
+      background: rgba(0, 0, 0, 0.9);
+      transform: scale(1.1);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--primary-glow);
+      border-top: 2px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    /* Live Preview Mobile Device Simulation */
+    .preview-sticky {
+      position: sticky;
+      top: 30px;
+    }
+
+    .mobile-frame {
+      width: 320px;
+      height: 600px;
+      background: #0f172a;
+      border: 6px solid #1e293b;
+      border-radius: 36px;
+      margin: 0 auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .mobile-notch {
+      width: 110px;
+      height: 18px;
+      background: #1e293b;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      margin: 0 auto;
+      z-index: 10;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .mobile-screen {
+      flex: 1;
+      padding: 18px 12px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background: #070a13;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.04) 0px, transparent 50%);
+    }
+
+    .preview-lang-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .preview-lang-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .preview-lang-btn.active {
+      background: var(--primary-glow);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Mobile Card Replica */
+    .mobile-card {
+      border: 1.5px solid rgba(255, 255, 255, 0.22);
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.dark-preview .mobile-card {
+      background: rgba(21, 30, 40, 0.92);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #f8fafc;
+    }
+
+    .card-header {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.01);
+    }
+
+    body.dark-preview .card-header {
+      border-bottom-color: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .logo-placeholder {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 9px;
+      margin-right: 8px;
+    }
+
+    .card-title-info {
+      flex: 1;
+    }
+
+    .card-title-company {
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .card-title-sub {
+      font-size: 8px;
+      color: var(--text-muted);
+    }
+
+    .card-bookmark {
+      color: var(--text-muted);
+    }
+
+    .card-content {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-job-title {
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1px 1.5fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .card-meta-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-meta-item {
+      font-size: 8px;
+    }
+
+    .card-meta-lbl {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .card-meta-val {
+      font-weight: 700;
+    }
+
+    .card-divider {
+      background-color: rgba(15, 23, 42, 0.08);
+      width: 1px;
+      height: 100%;
+    }
+
+    body.dark-preview .card-divider {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .card-desc-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-desc-lbl {
+      font-size: 8px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .card-desc-val {
+      font-size: 8.5px;
+      line-height: 11px;
+    }
+
+    .card-gallery {
+      display: flex;
+      gap: 6px;
+      margin: 8px 0;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .card-thumb {
+      width: 42px;
+      height: 42px;
+      border-radius: 4px;
+      background: #e2e8f0;
+      object-fit: cover;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      flex-shrink: 0;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 8px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      align-items: center;
+    }
+
+    .card-footer-left, .card-footer-right {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .card-buttons-bar {
+      display: flex;
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+      background: rgba(0, 0, 0, 0.01);
+    }
+
+    body.dark-preview .card-buttons-bar {
+      border-top-color: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .card-btn {
+      flex: 1;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      border-right: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    body.dark-preview .card-btn {
+      border-right-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .card-btn:last-child {
+      border-right: none;
+    }
+
+    .card-btn.wa { color: #25d366; }
+    .card-btn.email { color: var(--primary); }
+    .card-btn.details { color: var(--accent); }
+
+    /* RTL Layout adjustment */
+    .rtl {
+      direction: rtl;
+      text-align: right;
+    }
+
+    .rtl .logo-placeholder {
+      margin-right: 0;
+      margin-left: 8px;
+    }
+
+    .rtl .card-grid {
+      grid-template-columns: 1.5fr 1px 1fr;
+    }
+
+    /* Keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .brand-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+    .brand-logo img.brand-logo-img {
+      border-radius: 8px;
+    }
+
+    .properties-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .add-prop-card {
+      width: 100%;
+    }
+    .prop-list-card {
+      width: 100%;
+    }
+    @media (max-width: 900px) {
+      .properties-layout {
+        align-items: stretch;
+        max-width: 100%;
+      }
+    }
+
+    /* Sub Tabs & Branding Customization Styling */
+    .sub-tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 25px;
+      gap: 20px;
+    }
+    .sub-tab-item {
+      padding: 12px 8px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border-bottom: 3px solid transparent;
+      font-size: 15px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sub-tab-item:hover {
+      color: var(--text);
+    }
+    .sub-tab-item.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+    .branding-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 30px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .branding-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .color-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .color-picker-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .color-picker-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .color-picker-row input[type="color"] {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      cursor: pointer;
+      background: transparent;
+    }
+    .sim-btn {
+      flex: 1;
+      border: none;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 6px;
+      font-size: 8px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    body.light-mode .sim-btn {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .jobs-table th, .jobs-table td {
+      padding: 12px 16px;
+      line-height: 1.5;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+    .jobs-table th {
+      white-space: nowrap;
+    }
+    .jobs-table td:first-child {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .theme-toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .theme-toggle-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .theme-toggle-info i {
+      width: 16px;
+      height: 16px;
+    }
+    body.light-mode .sun-icon {
+      color: #eab308;
+      display: block;
+    }
+    body.light-mode .moon-icon {
+      display: none;
+    }
+    body:not(.light-mode) .sun-icon {
+      display: none;
+    }
+    body:not(.light-mode) .moon-icon {
+      color: #818cf8;
+      display: block;
+    }
+
+    /* Toggle Switch Switch Styling */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border: 1px solid var(--card-border);
+    }
+    body.light-mode .slider {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-secondary);
+      transition: .3s;
+    }
+    input:checked + .slider {
+      background-color: var(--primary-glow);
+      border-color: var(--primary);
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+      background-color: var(--primary);
+    }
+    .slider.round {
+      border-radius: 24px;
+    }
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    /* Bottom Navigation Bar (Mobile Only) */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--card-border);
+      border-radius: 0;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      flex: 1;
+      height: 100%;
+    }
+
+    .bottom-nav-item i {
+      width: 18px;
+      height: 18px;
+    }
+
+    .bottom-nav-item:hover, .bottom-nav-item.active {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .bottom-nav-item.active {
+      color: var(--primary);
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    /* Unified Settings Pill Sub-tabs */
+    .settings-subtabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6px;
+      border-radius: 30px;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid var(--card-border);
+    }
+    body.light-mode .settings-subtabs {
+      background: rgba(0, 0, 0, 0.03);
+    }
+    .subtab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .subtab-btn:hover {
+      color: var(--text);
+    }
+    .subtab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+    .settings-subpanel {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+    .settings-subpanel.active {
+      display: block;
+    }
+
+    /* Media Queries for Mobile Responsiveness */
+    @media (max-width: 900px) {
+      .editor-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .preview-sticky {
+        position: static;
+        margin-top: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .top-bar {
+        padding: 10px 16px;
+        height: 70px;
+      }
+      .desktop-menu {
+        display: none !important;
+      }
+      .top-bar-right .user-email {
+        display: none !important;
+      }
+      .top-bar-right .theme-label {
+        display: none !important;
+      }
+      .top-bar-right .logout-btn span {
+        display: none !important;
+      }
+      .top-bar-right .logout-btn {
+        padding: 8px;
+      }
+      .bottom-nav {
+        display: flex;
+      }
+      .main-content {
+        padding: 16px;
+        padding-bottom: 80px;
+        height: calc(100vh - 70px);
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .editor-card {
+        padding: 16px;
+      }
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .upload-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .settings-subtabs {
+        flex-direction: row;
+        width: 100%;
+        border-radius: 12px;
+        gap: 6px;
+      }
+      .subtab-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        flex: 1;
+        justify-content: center;
+        border-radius: 8px;
+      }
+    }
+  </style>
+</head>
+<body class="dark-preview">
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen">
+    <form class="login-card glass" onsubmit="event.preventDefault(); handleLogin();">
+      <div class="logo-container" style="background:transparent; border:none; box-shadow:none;">
+        <img src="/assets/images/logo.png" class="brand-logo-img" alt="Kurd24 Job Logo">
+      </div>
+      <h1 class="login-title">Kurd24 Job</h1>
+      <p class="login-subtitle">Admin Web Portal</p>
+      
+      <div class="error-msg" id="login-error">Invalid email or password</div>
+
+      <div class="form-group">
+        <label for="email">Admin Email</label>
+        <input type="email" id="email" class="input-field" placeholder="admin@kurd24.job" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="login-btn" id="login-submit-btn">
+        <span>Log In</span>
+        <i data-lucide="log-in" style="width:16px;height:16px;"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <div id="app-container">
+    <!-- Top Navigation Bar -->
+    <header class="top-bar glass">
+      <div class="brand-row">
+        <div class="brand-logo" style="background:transparent; border:none; box-shadow:none;">
+          <img src="/assets/images/logo.png" class="brand-logo-img" alt="Kurd24 Job Logo">
+        </div>
+        <span class="brand-name">Kurd24 Job</span>
+      </div>
+
+      <ul class="desktop-menu">
+        <li class="menu-item active" onclick="switchTab('analytics')" id="tab-analytics-desktop">
+          <i data-lucide="bar-chart-2"></i>
+          <span>Analytics</span>
+        </li>
+        <li class="menu-item" onclick="switchTab('manage')" id="tab-manage-desktop">
+          <i data-lucide="sliders"></i>
+          <span>Manage Listings</span>
+        </li>
+        <li class="menu-item" onclick="switchTab('create')" id="tab-create-desktop">
+          <i data-lucide="plus-circle"></i>
+          <span>Post New Job</span>
+        </li>
+        <li class="menu-item" onclick="switchTab('distribution')" id="tab-distribution-desktop">
+          <i data-lucide="share-2"></i>
+          <span>App Distribution</span>
+        </li>
+        <li class="menu-item" onclick="switchTab('settings')" id="tab-settings-desktop">
+          <i data-lucide="settings"></i>
+          <span>App Settings & Design</span>
+        </li>
+      </ul>
+
+      <div class="top-bar-right">
+        <div class="theme-toggle-row">
+          <div class="theme-toggle-info">
+            <i data-lucide="sun" class="sun-icon"></i>
+            <i data-lucide="moon" class="moon-icon"></i>
+            <span class="theme-label" id="theme-label-text">Dark Mode</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="theme-toggle" onchange="toggleTheme()">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="user-profile">
+          <div class="user-avatar" id="avatar-letter">A</div>
+          <span class="user-email" id="profile-email">admin@kurd24.job</span>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">
+          <i data-lucide="log-out" style="width:14px;height:14px;"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+    <nav class="bottom-nav glass">
+      <a class="bottom-nav-item active" onclick="switchTab('analytics')" id="tab-analytics-mobile">
+        <i data-lucide="bar-chart-2"></i>
+        <span>Analytics</span>
+      </a>
+      <a class="bottom-nav-item" onclick="switchTab('manage')" id="tab-manage-mobile">
+        <i data-lucide="sliders"></i>
+        <span>Listings</span>
+      </a>
+      <a class="bottom-nav-item" onclick="switchTab('create')" id="tab-create-mobile">
+        <i data-lucide="plus-circle"></i>
+        <span>Post Job</span>
+      </a>
+      <a class="bottom-nav-item" onclick="switchTab('distribution')" id="tab-distribution-mobile">
+        <i data-lucide="share-2"></i>
+        <span>Distribution</span>
+      </a>
+      <a class="bottom-nav-item" onclick="switchTab('settings')" id="tab-settings-mobile">
+        <i data-lucide="settings"></i>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <div class="page-header">
+        <h2 class="page-title" id="page-title-label">Dashboard Overview</h2>
+        <div class="status-badge">
+          <div class="status-dot"></div>
+          <span id="active-mode">Live Syncing</span>
+        </div>
+      </div>
+
+      <!-- ANALYTICS PANEL -->
+      <div class="view-panel active" id="panel-analytics">
+        <div class="analytics-grid">
+          <div class="stat-card glass glow-hover">
+            <div class="stat-info">
+              <h3>Total Active Jobs</h3>
+              <p id="stat-total-jobs">0</p>
+            </div>
+            <div class="stat-icon" style="background:var(--primary-glow);color:var(--primary);">
+              <i data-lucide="briefcase"></i>
+            </div>
+          </div>
+          <div class="stat-card glass glow-hover">
+            <div class="stat-info">
+              <h3>Feed Views</h3>
+              <p id="stat-total-views">0</p>
+            </div>
+            <div class="stat-icon" style="background:var(--success-glow);color:var(--success);">
+              <i data-lucide="eye"></i>
+            </div>
+          </div>
+          <div class="stat-card glass glow-hover">
+            <div class="stat-info">
+              <h3>Applications</h3>
+              <p id="stat-total-applies">0</p>
+            </div>
+            <div class="stat-icon" style="background:var(--accent-glow);color:var(--accent);">
+              <i data-lucide="send"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Analytics Comparative Chart -->
+        <div class="chart-card glass">
+          <div class="chart-header">
+            <i data-lucide="trending-up" style="color:var(--primary);"></i>
+            <span class="chart-title">Job Statistics Summary</span>
+          </div>
+          <div class="chart-body" id="analytics-chart">
+            <svg id="svg-chart" width="100%" height="100%" viewBox="0 0 600 250" style="overflow:visible;">
+              <!-- Grid lines -->
+              <line x1="50" y1="50" x2="550" y2="50" stroke="#1e293b" stroke-width="1"></line>
+              <line x1="50" y1="125" x2="550" y2="125" stroke="#1e293b" stroke-width="1"></line>
+              <line x1="50" y1="200" x2="550" y2="200" stroke="#1e293b" stroke-width="1.5"></line>
+              
+              <!-- Labels -->
+              <text x="35" y="55" fill="#64748b" font-size="10" text-anchor="end">Max</text>
+              <text x="35" y="130" fill="#64748b" font-size="10" text-anchor="end">Mid</text>
+              <text x="35" y="205" fill="#64748b" font-size="10" text-anchor="end">0</text>
+              
+              <!-- Bars -->
+              <!-- Views Bar -->
+              <rect id="chart-bar-views" x="180" y="200" width="80" height="0" rx="6" fill="url(#grad-views)"></rect>
+              <!-- Applies Bar -->
+              <rect id="chart-bar-applies" x="340" y="200" width="80" height="0" rx="6" fill="url(#grad-applies)"></rect>
+
+              <text x="220" y="225" fill="#94a3b8" font-size="12" text-anchor="middle" font-weight="600">Total Views</text>
+              <text x="380" y="225" fill="#94a3b8" font-size="12" text-anchor="middle" font-weight="600">Total Applies</text>
+
+              <!-- Values labels -->
+              <text id="chart-val-views" x="220" y="190" fill="#818cf8" font-size="16" font-weight="800" text-anchor="middle">0</text>
+              <text id="chart-val-applies" x="380" y="190" fill="#f472b6" font-size="16" font-weight="800" text-anchor="middle">0</text>
+              
+              <!-- Definitions -->
+              <defs>
+                <linearGradient id="grad-views" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#818cf8"></stop>
+                  <stop offset="100%" stop-color="rgba(129, 140, 248, 0.2)"></stop>
+                </linearGradient>
+                <linearGradient id="grad-applies" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f472b6"></stop>
+                  <stop offset="100%" stop-color="rgba(244, 114, 182, 0.2)"></stop>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANAGE LISTINGS PANEL -->
+      <div class="view-panel" id="panel-manage">
+        <div class="jobs-card glass">
+          <div class="table-container">
+            <table class="jobs-table">
+              <thead>
+                <tr>
+                  <th>Job Title & Company</th>
+                  <th>City</th>
+                  <th>Category</th>
+                  <th>Salary</th>
+                  <th>Status</th>
+                  <th>Views / Applies</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="listings-tbody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CREATE / EDIT JOB PANEL -->
+      <div class="view-panel" id="panel-create">
+        <div class="editor-layout">
+          <!-- Editor Form Fields -->
+          <div class="editor-card glass">
+            <h3 class="chart-title" style="margin-bottom:20px;" id="editor-action-title">Create New Job Announcement</h3>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>Company Name *</label>
+                <input type="text" id="form-company" class="input-field" placeholder=" Hewlêr Agency" oninput="updateLivePreview()">
+              </div>
+              <div class="form-group" style="display:flex; flex-direction:column; justify-content:center;">
+                <label>Status (Toggle Draft / Publish)</label>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                  <input type="checkbox" id="form-status" style="width:20px; height:20px; cursor:pointer;" checked onchange="updateLivePreview()">
+                  <span style="font-size:14px; font-weight:600;" id="status-toggle-label">Published</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Job Title (Kurdish) - ناونیشانی کار (کوردی) (ئارەزوومەندانە - Optional)</label>
+                <input type="text" id="form-title-ku" class="input-field" placeholder="پسپۆڕی مارکێتینگ..." oninput="updateLivePreview()">
+              </div>
+              <div class="form-group">
+                <label>Job Title (English) - ناونیشانی کار (ئینگلیزی) (ئارەزوومەندانە - Optional)</label>
+                <input type="text" id="form-title-en" class="input-field" placeholder="Marketing Specialist..." oninput="updateLivePreview()">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Salary - مووچە (ئارەزوومەندانە - Optional)</label>
+                <input type="text" id="form-salary" class="input-field" placeholder="e.g. $1,200 - $1,500 / Month (ڕێککەوتن)" oninput="updateLivePreview()">
+              </div>
+              <div class="form-group">
+                <label>Company Logo - لۆگۆی کۆمپانیا (ئارەزوومەندانە - Optional)</label>
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div id="logo-upload-slot" class="upload-slot glass" style="width: 48px; height: 48px; flex-shrink: 0; margin-bottom: 0;">
+                    <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+                    <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:4px;">
+                    <span id="logo-status-label" style="font-size:11px; color:var(--text-secondary); font-weight:600;">No logo uploaded</span>
+                    <span style="font-size:9px; color:var(--text-muted);">JPG, PNG or SVG</span>
+                  </div>
+                  <input type="hidden" id="form-logo-url" value="">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>City - شار (ئارەزوومەندانە - Optional)</label>
+                <select id="form-city" class="input-field" onchange="updateLivePreview()">
+                  <option value="erbil">Erbil (Hewlêr)</option>
+                  <option value="sulaymaniyah">Sulaymaniyah (Silêmanî)</option>
+                  <option value="duhok">Duhok (Duhok)</option>
+                  <option value="halabja">Halabja</option>
+                  <option value="kirkuk">Kirkuk</option>
+                  <option value="remote">Remote</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Job Type - جۆری کار (ئارەزوومەندانە - Optional)</label>
+                <select id="form-type" class="input-field" onchange="updateLivePreview()">
+                  <option value="fullTime">Full-time</option>
+                  <option value="partTime">Part-time</option>
+                  <option value="contract">Contract</option>
+                  <option value="remote">Remote</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Experience Level - ئاستی ئەزموون (ئارەزوومەندانە - Optional)</label>
+                <select id="form-experience" class="input-field" onchange="updateLivePreview()">
+                  <option value="junior">Junior</option>
+                  <option value="mid">Mid-level</option>
+                  <option value="senior">Senior</option>
+                  <option value="lead">Lead / Manager</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Category - پۆلێن (ئارەزوومەندانە - Optional)</label>
+                <select id="form-category" class="input-field">
+                  <option value="software">Software Development</option>
+                  <option value="design">Design & Creative</option>
+                  <option value="marketing">Marketing & Sales</option>
+                  <option value="finance">Finance & Accounting</option>
+                  <option value="education">Education & Teaching</option>
+                  <option value="translation">Translation & Content</option>
+                  <option value="engineering">Engineering & Operations</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Industry - بوار (ئارەزوومەندانە - Optional)</label>
+                <select id="form-industry" class="input-field">
+                  <option value="tech">Tech & Software</option>
+                  <option value="health">Health & Medical</option>
+                  <option value="education">Education</option>
+                  <option value="retail">Sales & Retail</option>
+                  <option value="finance">Finance & Banking</option>
+                  <option value="engineering">Engineering</option>
+                  <option value="media">Media & PR</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <!-- Spacer -->
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Job Description (Kurdish) - دەربارەی کار (کوردی) (ئارەزوومەندانە - Optional)</label>
+                <textarea id="form-desc-ku" class="input-field textarea-field" placeholder="کورتەیەک بنووسە..." oninput="updateLivePreview()"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Job Description (English) - دەربارەی کار (ئینگلیزی) (ئارەزوومەندانە - Optional)</label>
+                <textarea id="form-desc-en" class="input-field textarea-field" placeholder="Write job description..." oninput="updateLivePreview()"></textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Requirements (Kurdish) - مەرجەکان (کوردی) (ئارەزوومەندانە - Optional)</label>
+                <textarea id="form-req-ku" class="input-field textarea-field" placeholder="ئەزموونی ٢ ساڵ&#10;شارەزایی لە دیزاین"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Requirements (English) - مەرجەکان (ئینگلیزی) (ئارەزوومەندانە - Optional)</label>
+                <textarea id="form-req-en" class="input-field textarea-field" placeholder="2+ years experience&#10;Figma proficiency"></textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>WhatsApp Number - ژمارەی وەنیسئەپ (ئارەزوومەندانە - Optional)</label>
+                <input type="text" id="form-whatsapp" class="input-field" placeholder="9647501234567">
+              </div>
+              <div class="form-group">
+                <label>Application Email - ئیمێڵی پێشکەشکردن (ئارەزوومەندانە - Optional)</label>
+                <input type="email" id="form-email" class="input-field" placeholder="jobs@company.com">
+              </div>
+            </div>
+
+            <!-- Dynamic Image Upload Grid (3 to 5 images) -->
+            <div class="dynamic-list-container">
+              <div class="list-title">
+                <span>Job/Project Images - وێنەکانی کارەکە (Upload 3 to 5 images)</span>
+              </div>
+              <div class="upload-grid" id="image-upload-grid">
+                <!-- 5 image upload slots, populated in JS -->
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-secondary" onclick="switchTab('manage')">Cancel</button>
+              <button class="login-btn" style="margin-top:0; width:auto;" onclick="saveJob()">
+                <i data-lucide="check" style="width:16px;height:16px;"></i>
+                <span id="editor-save-label">Publish Announcement</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Real-Time Mobile Device Simulator -->
+          <div class="preview-sticky">
+            <h3 class="chart-title" style="margin-bottom:12px; text-align:center;">Real-Time Mobile Preview</h3>
+            
+            <div class="preview-lang-bar">
+              <button class="preview-lang-btn active" id="btn-prev-ku" onclick="togglePreviewLang('ku')">کوردی (RTL)</button>
+              <button class="preview-lang-btn" id="btn-prev-en" onclick="togglePreviewLang('en')">English (LTR)</button>
+            </div>
+
+            <!-- Device Frame -->
+            <div class="mobile-frame">
+              <div class="mobile-notch"></div>
+              
+              <!-- Screen Simulator -->
+              <div class="mobile-screen">
+                
+                <!-- Telegram Channel Header Replica -->
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:0.5px solid rgba(255,255,255,0.08); padding-bottom:8px; margin-bottom:12px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:26px; height:26px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:10px;">K24</div>
+                    <div>
+                      <div style="font-size:10px; font-weight:700; display:flex; align-items:center; gap:3px;">
+                        <span>Kurd24 Job</span>
+                        <div style="width:7px; height:7px; border-radius:50%; background:#5288c1; display:flex; align-items:center; justify-content:center;"><i data-lucide="check" style="width:5px; height:5px; color:#fff; stroke-width:4px;"></i></div>
+                      </div>
+                      <div style="font-size:7px; color:var(--text-secondary);">154,203 subscribers</div>
+                    </div>
+                  </div>
+                  <div style="display:flex; gap:8px; color:var(--text-secondary);"><i data-lucide="search" style="width:12px;height:12px;"></i><i data-lucide="moon" style="width:12px;height:12px;"></i></div>
+                </div>
+
+                <!-- JobCard Replica -->
+                <div class="mobile-card">
+                  
+                  <!-- Card Window Header -->
+                  <div class="card-header">
+                    <div class="logo-placeholder" id="prev-logo-letter">C</div>
+                    <div class="card-title-info">
+                      <div class="card-title-company" id="prev-company">Company Name</div>
+                      <div class="card-title-sub">Kurd24 Job Channel</div>
+                    </div>
+                    <i data-lucide="bookmark" class="card-bookmark" style="width:10px;height:10px;"></i>
+                  </div>
+
+                  <!-- Card Window Body -->
+                  <div class="card-content">
+                    <div class="card-job-title" id="prev-title">📢 Announcement Title</div>
+                    
+                    <!-- 2 Column Grid -->
+                    <div class="card-grid" id="prev-grid-layout">
+                      <!-- Meta info -->
+                      <div class="card-meta-col">
+                        <div class="card-meta-item">
+                          <span class="card-meta-lbl" id="lbl-city">📍 City:</span>
+                          <span class="card-meta-val" id="prev-city">Erbil</span>
+                        </div>
+                        <div class="card-meta-item">
+                          <span class="card-meta-lbl" id="lbl-type">💼 Type:</span>
+                          <span class="card-meta-val" id="prev-type">Full-time</span>
+                        </div>
+                        <div class="card-meta-item">
+                          <span class="card-meta-lbl" id="lbl-salary">💵 Salary:</span>
+                          <span class="card-meta-val" id="prev-salary">$1,500</span>
+                        </div>
+                        <div class="card-meta-item">
+                          <span class="card-meta-lbl" id="lbl-exp">🎓 Exp:</span>
+                          <span class="card-meta-val" id="prev-experience">Junior</span>
+                        </div>
+                      </div>
+
+                      <!-- Divider -->
+                      <div class="card-divider"></div>
+
+                      <!-- Description -->
+                      <div class="card-desc-col">
+                        <span class="card-desc-lbl" id="lbl-desc">📝 Description:</span>
+                        <span class="card-desc-val" id="prev-desc">Job summary details will be shown here in real-time...</span>
+                      </div>
+                    </div>
+
+                    <!-- Images scroll gallery -->
+                    <div class="card-gallery" id="prev-gallery">
+                      <!-- Rendered dynamically -->
+                    </div>
+
+                    <!-- Footer views -->
+                    <div class="card-footer">
+                      <div class="card-footer-left">
+                        <i data-lucide="eye" style="width:8px;height:8px;"></i>
+                        <span>142</span>
+                      </div>
+                      <div class="card-footer-right">
+                        <span>10:45 AM</span>
+                        <i data-lucide="check-check" style="width:10px;height:10px;color:#5288c1;"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Buttons Bar -->
+                  <div class="card-buttons-bar">
+                    <button class="card-btn wa"><i data-lucide="message-circle" style="width:8px;height:8px;color:#25d366;"></i>WhatsApp</button>
+                    <button class="card-btn email"><i data-lucide="mail" style="width:8px;height:8px;color:var(--primary);"></i>Email</button>
+                    <button class="card-btn details"><i data-lucide="external-link" style="width:8px;height:8px;color:var(--accent);"></i>Details</button>
+                  </div>
+                </div>
+
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APP SETTINGS & DESIGN PANEL -->
+      <div class="view-panel" id="panel-settings">
+        <!-- Pill Buttons Sub-tabs Selector -->
+        <div class="settings-subtabs">
+          <button class="subtab-btn active" id="btn-settings-data" onclick="switchSettingsSubTab('data')">
+            <i data-lucide="database"></i>
+            <span>App Data (داتای ئەپ)</span>
+          </button>
+          <button class="subtab-btn" id="btn-settings-branding" onclick="switchSettingsSubTab('branding')">
+            <i data-lucide="palette"></i>
+            <span>Branding & Design (براندینگ و دیزاین)</span>
+          </button>
+        </div>
+
+        <!-- SUB PANEL 1: App Data -->
+        <div id="sub-panel-settings-data" class="settings-subpanel active">
+          <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; justify-content:center;">
+            <button class="preview-lang-btn active" id="btn-prop-categories" onclick="switchPropertyType('categories')">Categories (کاتیگۆری)</button>
+            <button class="preview-lang-btn" id="btn-prop-cities" onclick="switchPropertyType('cities')">Cities (شارەکان)</button>
+            <button class="preview-lang-btn" id="btn-prop-industries" onclick="switchPropertyType('industries')">Industries (بوارەکان)</button>
+            <button class="preview-lang-btn" id="btn-prop-job_types" onclick="switchPropertyType('job_types')">Job Types (جۆری کار)</button>
+            <button class="preview-lang-btn" id="btn-prop-experience_levels" onclick="switchPropertyType('experience_levels')">Experience Levels (ئاستی ئەزموون)</button>
+          </div>
+
+          <div class="properties-layout">
+            <!-- Add Property Form -->
+            <div class="editor-card glass add-prop-card">
+              <h3 class="chart-title" style="margin-bottom:20px;" id="property-form-title">Add New Category</h3>
+              
+              <div class="form-group">
+                <label>Unique ID / Key (Slug, e.g. software) *</label>
+                <input type="text" id="prop-id" class="input-field" placeholder="e.g. software">
+              </div>
+              
+              <div class="form-group" style="margin-top:15px;">
+                <label>Name (Kurdish - کوردی) *</label>
+                <input type="text" id="prop-name-ku" class="input-field" placeholder="e.g. گەشەپێدانی نەرمەکاڵا">
+              </div>
+
+              <div class="form-group" style="margin-top:15px;">
+                <label>Name (English - ئینگلیزی) *</label>
+                <input type="text" id="prop-name-en" class="input-field" placeholder="e.g. Software Development">
+              </div>
+
+              <button class="login-btn" style="margin-top:20px; width:100%;" onclick="saveProperty()">
+                <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
+                <span>Add Item</span>
+              </button>
+            </div>
+
+            <!-- Properties List Table -->
+            <div class="editor-card glass prop-list-card" style="padding:20px;">
+              <h3 class="chart-title" style="margin-bottom:15px;" id="property-list-title">Category List</h3>
+              <div class="table-container">
+                <table class="jobs-table">
+                  <thead>
+                    <tr>
+                      <th>Key / ID</th>
+                      <th>Name (KU)</th>
+                      <th>Name (EN)</th>
+                      <th style="text-align:right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="properties-tbody">
+                    <!-- Loaded dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB PANEL 2: Branding & Design -->
+        <div id="sub-panel-settings-branding" class="settings-subpanel">
+          <div class="branding-layout">
+            <!-- Style Customization Inputs -->
+            <div class="editor-card glass" style="padding:24px; display:flex; flex-direction:column; gap:20px;">
+              <h3 class="chart-title">Custom Styling & Branding</h3>
+
+              <!-- Logo & Font Assets -->
+              <div style="border: 1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:16px; background:rgba(0,0,0,0.1);">
+                <span style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Branding Files (فایلەکان)</span>
+                
+                <!-- Logo Upload -->
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <div style="width:60px; height:60px; border-radius:12px; border:1px solid var(--card-border); overflow:hidden; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <img id="system-logo-preview-img" src="/assets/images/logo.png" style="width:100%; height:100%; object-fit:contain;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><rect width=%2218%22 height=%2218%22 x=%223%22 y=%223%22 rx=%222%22 ry=%222%22/><circle cx=%229%22 cy=%229%22 r=%222%22/><path d=%22m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21%22/></svg>'">
+                  </div>
+                  <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                    <span style="font-size:13px; font-weight:700;">Global App Logo</span>
+                    <span style="font-size:11px; color:var(--text-muted);">Replaces the logo in sidebar, mobile app, and login.</span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <button class="btn-secondary" style="padding:6px 12px; font-size:11px; position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:6px;">
+                        <i data-lucide="upload" style="width:12px;height:12px;"></i>
+                        <span>Upload Logo</span>
+                        <input type="file" id="brand-logo-file" accept="image/*" onchange="uploadSystemLogo(this)" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;">
+                      </button>
+                      <div class="spinner" id="logo-system-spinner" style="width:14px; height:14px; display:none;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Font Upload -->
+                <div style="border-top: 1px solid var(--border); padding-top:16px; display:flex; align-items:center; gap:16px;">
+                  <div style="width:60px; height:60px; border-radius:12px; border:1px solid var(--card-border); background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i data-lucide="type" style="width:24px; height:24px; color:var(--primary);"></i>
+                  </div>
+                  <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                    <span style="font-size:13px; font-weight:700;">System Font (.ttf)</span>
+                    <span style="font-size:11px; color:var(--text-muted);">Current: <span id="active-font-name" style="font-weight:700; color:var(--primary);">Vazirmatn (Default)</span></span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <button class="btn-secondary" style="padding:6px 12px; font-size:11px; position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:6px;">
+                        <i data-lucide="upload" style="width:12px;height:12px;"></i>
+                        <span>Upload Font File</span>
+                        <input type="file" id="system-font-file" accept=".ttf" onchange="uploadSystemFont(this)" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;">
+                      </button>
+                      <div class="spinner" id="font-system-spinner" style="width:14px; height:14px; display:none;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Color Palette -->
+              <div style="border: 1px solid var(--border); border-radius:12px; padding:16px; background:rgba(0,0,0,0.1);">
+                <span style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:15px;">App Colors & Theme (ڕەنگەکان)</span>
+                
+                <div class="color-palette-grid">
+                  <!-- Primary Light -->
+                  <div class="color-picker-group">
+                    <label style="font-size:11px; font-weight:700;">Primary Color (Light)</label>
+                    <div class="color-picker-row">
+                      <input type="color" id="style-primary-light" value="#6366F1" onchange="document.getElementById('style-primary-light-text').value = this.value; updateSimulatorColor();">
+                      <input type="text" id="style-primary-light-text" class="input-field" value="#6366F1" style="padding:8px 12px; font-size:12px;" oninput="document.getElementById('style-primary-light').value = this.value; updateSimulatorColor();">
+                    </div>
+                  </div>
+
+                  <!-- Primary Dark -->
+                  <div class="color-picker-group">
+                    <label style="font-size:11px; font-weight:700;">Primary Color (Dark)</label>
+                    <div class="color-picker-row">
+                      <input type="color" id="style-primary-dark" value="#818CF8" onchange="document.getElementById('style-primary-dark-text').value = this.value; updateSimulatorColor();">
+                      <input type="text" id="style-primary-dark-text" class="input-field" value="#818CF8" style="padding:8px 12px; font-size:12px;" oninput="document.getElementById('style-primary-dark').value = this.value; updateSimulatorColor();">
+                    </div>
+                  </div>
+
+                  <!-- Accent Light -->
+                  <div class="color-picker-group">
+                    <label style="font-size:11px; font-weight:700;">Accent Color (Light)</label>
+                    <div class="color-picker-row">
+                      <input type="color" id="style-accent-light" value="#EC4899" onchange="document.getElementById('style-accent-light-text').value = this.value; updateSimulatorColor();">
+                      <input type="text" id="style-accent-light-text" class="input-field" value="#EC4899" style="padding:8px 12px; font-size:12px;" oninput="document.getElementById('style-accent-light').value = this.value; updateSimulatorColor();">
+                    </div>
+                  </div>
+
+                  <!-- Accent Dark -->
+                  <div class="color-picker-group">
+                    <label style="font-size:11px; font-weight:700;">Accent Color (Dark)</label>
+                    <div class="color-picker-row">
+                      <input type="color" id="style-accent-dark" value="#F472B6" onchange="document.getElementById('style-accent-dark-text').value = this.value; updateSimulatorColor();">
+                      <input type="text" id="style-accent-dark-text" class="input-field" value="#F472B6" style="padding:8px 12px; font-size:12px;" oninput="document.getElementById('style-accent-dark').value = this.value; updateSimulatorColor();">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Corner hardness -->
+              <div style="border: 1px solid var(--border); border-radius:12px; padding:16px; background:rgba(0,0,0,0.1);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <span style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Corner Hardness / Radius</span>
+                  <span id="radius-val" style="font-size:13px; font-weight:700; color:var(--primary);">16px</span>
+                </div>
+                <input type="range" id="style-border-radius" min="0" max="24" value="16" style="width:100%; cursor:pointer; accent-color:var(--primary);" oninput="updateSimulatorRadius()">
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:4px;">
+                  <span>0px (Sharp)</span>
+                  <span>12px (Rounded)</span>
+                  <span>24px (Pill)</span>
+                </div>
+              </div>
+
+              <!-- Save settings action -->
+              <button class="login-btn" id="btn-save-style" style="margin-top:10px; width:100%;" onclick="saveSystemStyle()">
+                <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+                <span>Save Customization</span>
+              </button>
+            </div>
+
+            <!-- Live Simulator -->
+            <div style="display:flex; flex-direction:column; align-items:center;">
+              <h4 style="font-size:14px; font-weight:700; margin-bottom:15px; color:var(--text-secondary);">Real-Time App Preview</h4>
+              
+              <!-- Simulator Device Frame -->
+              <div class="mobile-frame-sim glass" id="sim-device-frame" style="width: 310px; height: 440px; border: 8px solid #1e293b; border-radius: 36px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: var(--transition); box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+                <div class="mobile-notch" style="width: 100px; height: 16px; background: #1e293b; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; margin: 0 auto; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10;"></div>
+                
+                <!-- Screen content -->
+                <div class="mobile-screen-sim" id="sim-screen" style="flex: 1; padding: 22px 12px 12px; display: flex; flex-direction: column; background: #070a13; transition: var(--transition);">
+                  <!-- Simulator theme toggle -->
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:0.5px solid rgba(255,255,255,0.08); padding-bottom:6px; font-family: 'Vazirmatn', sans-serif;">
+                    <span style="font-size:9px; font-weight:700; color:#94a3b8;" id="sim-theme-label">Dark Preview</span>
+                    <button class="preview-lang-btn" id="btn-sim-theme-toggle" onclick="toggleSimTheme()" style="padding:2px 6px; font-size:8px; border-radius:4px; font-family: 'Vazirmatn', sans-serif;">Toggle Theme</button>
+                  </div>
+                  
+                  <!-- Mock Job Card -->
+                  <div class="sim-card" id="sim-job-card" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; background: rgba(15, 23, 42, 0.65); padding: 12px; display: flex; flex-direction: column; transition: var(--transition); color:#fff; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-family: 'Vazirmatn', sans-serif;">
+                    <!-- Header row -->
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                      <div id="sim-logo-badge" style="width:24px; height:24px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:9px; transition: var(--transition);">K</div>
+                      <div>
+                        <div style="font-size:9px; font-weight:700; color:#fff;" id="sim-card-company">Kurd24 Tech</div>
+                        <div style="font-size:8px; color:#94a3b8;">Kurd24 Job Channel</div>
+                      </div>
+                    </div>
+                    
+                    <div style="font-size:10px; font-weight:800; margin-bottom:6px; color:#fff;" id="sim-card-title">📢 Senior React Developer</div>
+                    
+                    <!-- Meta grid -->
+                    <div style="display:grid; grid-template-columns: 1fr 1px 1.5fr; gap:6px; font-size:8px; margin-bottom:8px;">
+                      <div style="display:flex; flex-direction:column; gap:3px;">
+                        <div><span style="color:#64748b; font-weight:600;">📍 City:</span> Erbil</div>
+                        <div><span style="color:#64748b; font-weight:600;">💼 Type:</span> Full-time</div>
+                        <div><span style="color:#64748b; font-weight:600;">💵 Salary:</span> $2,000</div>
+                      </div>
+                      <div style="width:1px; background:rgba(255,255,255,0.08);" id="sim-divider"></div>
+                      <div>
+                        <span style="color:#64748b; font-weight:600; display:block; margin-bottom:1px;">Description:</span>
+                        <span style="color:#e2e8f0; line-height:9px;" id="sim-card-desc">We are looking for a developer to maintain our premium mobile job search app...</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Apply Buttons -->
+                    <div style="display:flex; gap:6px; margin-top:3px; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px;" id="sim-buttons-border">
+                      <button class="sim-btn" style="flex:1; border:none; background:rgba(255,255,255,0.05); border-radius:6px; padding:4px; color:#25d366; font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:2px;"><i data-lucide="message-circle" style="width:8px;height:8px;stroke: #25d366;"></i>WhatsApp</button>
+                      <button class="sim-btn" id="sim-btn-email" style="flex:1; border:none; background:rgba(255,255,255,0.05); border-radius:6px; padding:4px; color:var(--primary); font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:2px; transition: var(--transition);"><i data-lucide="mail" style="width:8px;height:8px;stroke: currentColor;"></i>Email</button>
+                      <button class="sim-btn" id="sim-btn-details" style="flex:1; border:none; background:rgba(255,255,255,0.05); border-radius:6px; padding:4px; color:var(--accent); font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:2px; transition: var(--transition);"><i data-lucide="external-link" style="width:8px;height:8px;stroke: currentColor;"></i>Details</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- Closes sub-panel-settings-branding -->
+    </div> <!-- Closes panel-settings -->
+
+    <!-- APP DISTRIBUTION PANEL -->
+    <div class="view-panel" id="panel-distribution" style="background: rgba(129, 140, 248, 0.03); border: 1px solid rgba(129, 140, 248, 0.12); border-radius: 24px; padding: 24px;">
+      <div class="branding-layout" style="grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: start;">
+          <!-- Left side: Distribution Form -->
+          <div class="editor-card glass" style="padding: 24px; display: flex; flex-direction: column; gap: 24px;">
+            <h3 class="chart-title" style="display:flex; align-items:center; gap:8px; margin-bottom: 0;">
+              <i data-lucide="share-2" style="color:var(--primary); width:20px; height:20px;"></i>
+              <span>App Distribution Settings</span>
+            </h3>
+            
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+              Configure how users download your application from the home landing page. You can either upload the native Android APK file directly or provide a direct link to the Google Play Store page.
+            </p>
+
+            <!-- Download Action Type Selection -->
+            <div style="border: 1px solid var(--border); border-radius:12px; padding:20px; background:rgba(255,255,255,0.02); display:flex; flex-direction:column; gap:12px;">
+              <span style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Download Method (ڕێگای دابەزاندن)</span>
+              
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:6px;">
+                <!-- Option 1: APK -->
+                <label style="border: 1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:8px; cursor:pointer; background:rgba(0,0,0,0.15); transition:var(--transition); position:relative;" id="label-method-apk">
+                  <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <i data-lucide="package" style="color:var(--primary); width:18px; height:18px;"></i>
+                      <span style="font-size:13px; font-weight:700;">Direct APK File</span>
+                    </div>
+                    <input type="radio" name="download-type" value="apk" id="radio-dist-apk" checked onchange="toggleDistributionFields()" style="accent-color: var(--primary);">
+                  </div>
+                  <span style="font-size:11px; color:var(--text-muted);">Users download the installer file directly.</span>
+                </label>
+
+                <!-- Option 2: Link -->
+                <label style="border: 1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:8px; cursor:pointer; background:rgba(0,0,0,0.15); transition:var(--transition); position:relative;" id="label-method-link">
+                  <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <i data-lucide="play" style="color:var(--accent); width:18px; height:18px;"></i>
+                      <span style="font-size:13px; font-weight:700;">Google Play Link</span>
+                    </div>
+                    <input type="radio" name="download-type" value="link" id="radio-dist-link" onchange="toggleDistributionFields()" style="accent-color: var(--primary);">
+                  </div>
+                  <span style="font-size:11px; color:var(--text-muted);">Redirect users to external Google Play Store.</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- APK File Uploader -->
+            <div id="div-dist-apk-upload" style="border: 2px dashed rgba(129, 140, 248, 0.3); border-radius:16px; padding:32px 20px; display:flex; flex-direction:column; align-items:center; gap:16px; background:rgba(99, 102, 241, 0.02); text-align:center; transition: var(--transition); position:relative; width:100%;">
+              <div style="width:64px; height:64px; border-radius:50%; background:var(--primary-glow); display:flex; justify-content:center; align-items:center; color:var(--primary);">
+                <i data-lucide="upload-cloud" style="width:32px; height:32px;"></i>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <span style="font-size:14px; font-weight:700;">Upload Application APK Package</span>
+                <span style="font-size:11px; color:var(--text-muted);">Only Android APK installer file formats are supported (.apk)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; margin-top:4px;">
+                <button class="btn-secondary" style="padding:8px 18px; font-size:12px; position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:8px;">
+                  <i data-lucide="file-plus" style="width:14px;height:14px;"></i>
+                  <span>Choose APK File</span>
+                  <input type="file" id="dist-apk-file" accept=".apk" onchange="uploadAPKFile(this)" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;">
+                </button>
+              </div>
+              <div class="spinner" id="apk-upload-spinner" style="width:20px; height:20px; display:none; margin-top:8px;"></div>
+              <span style="font-size:11px; color:var(--text-muted); margin-top:4px;" id="apk-info-label">Active release file: <strong>kurd24-job.apk</strong></span>
+            </div>
+
+            <!-- Google Play Link Input Card -->
+            <div id="div-dist-link-input" style="border: 1px solid var(--border); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:16px; background:rgba(0,0,0,0.15); display:none; width:100%;">
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <span style="font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px;">
+                  <i data-lucide="link" style="color:var(--accent); width:16px; height:16px;"></i>
+                  <span>Play Store / External URL Link</span>
+                </span>
+                <input type="text" id="dist-play-url" class="editor-input" placeholder="https://play.google.com/store/apps/details?id=com.kurd24.job" style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:12px 14px; color:#fff; font-size:13px; outline:none; transition: var(--transition);">
+                <span style="font-size:11px; color:var(--text-muted);">Visitors clicking the landing page button will be instantly forwarded here.</span>
+              </div>
+            </div>
+
+            <!-- Save settings action -->
+            <button class="login-btn" id="btn-save-distribution" style="margin-top:8px; width:100%; padding:14px;" onclick="saveDistributionSettings()">
+              <i data-lucide="save" style="width:16px;height:16px;"></i>
+              <span>Save Release Settings</span>
+            </button>
+          </div>
+
+          <!-- Right side: Live Distribution Status & Simulation Preview -->
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div class="editor-card glass" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+              <h4 style="font-size:14px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Live Distribution Status</h4>
+              
+              <!-- Status Grid -->
+              <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
+                <!-- Status Row 1 -->
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px;">
+                  <span style="font-size:12px; color:var(--text-muted);">Active Method:</span>
+                  <span id="status-active-method" style="font-size:12px; font-weight:700; color:var(--primary); background:var(--primary-glow); padding:2px 10px; border-radius:12px;">Direct APK</span>
+                </div>
+                <!-- Status Row 2 -->
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px;">
+                  <span style="font-size:12px; color:var(--text-muted);">Landing Page Link:</span>
+                  <a href="/" target="_blank" style="font-size:12px; font-weight:700; color:#fff; text-decoration:underline; display:flex; align-items:center; gap:4px;">
+                    <span>Open Welcome Page</span>
+                    <i data-lucide="external-link" style="width:10px; height:10px;"></i>
+                  </a>
+                </div>
+                <!-- Status Row 3 -->
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:4px;">
+                  <span style="font-size:12px; color:var(--text-muted);">Direct APK Package:</span>
+                  <a href="/assets/kurd24-job.apk" target="_blank" style="font-size:12px; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:4px;">
+                    <span>Download APK</span>
+                    <i data-lucide="download" style="width:10px; height:10px;"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Welcome Button Live Preview Card -->
+            <div class="editor-card glass" style="padding:24px; display:flex; flex-direction:column; gap:16px; align-items:center; text-align:center;">
+              <h4 style="font-size:13px; font-weight:700; color:var(--text-secondary); width:100%; text-align:left; text-transform:uppercase; letter-spacing:0.5px;">Welcome Page Button Preview</h4>
+              
+              <!-- Landing Button Simulation Container -->
+              <div style="margin:20px 0; display:flex; flex-direction:column; align-items:center; gap:12px; padding:20px; border:1px solid var(--border); border-radius:16px; background:rgba(0,0,0,0.2); width:100%;">
+                <span style="font-size:11px; color:var(--text-muted);">This is how the button looks live:</span>
+                
+                <div id="preview-landing-btn-mock" style="background: linear-gradient(135deg, #818cf8 0%, #f472b6 100%); color: white; border-radius: 50px; padding: 12px 24px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap:8px; box-shadow: 0 4px 15px rgba(129, 140, 248, 0.3);">
+                  <i data-lucide="download-cloud" style="width:14px; height:14px;" id="preview-landing-btn-icon"></i>
+                  <span id="preview-landing-btn-text">دابەزاندنی ئەپی Kurd24 Job (APK)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <script>
+    // Global Error Handler for UI debugging
+    window.addEventListener('error', function(e) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.position = 'fixed';
+      errorDiv.style.top = '0';
+      errorDiv.style.left = '0';
+      errorDiv.style.width = '100%';
+      errorDiv.style.background = '#ff4d4d';
+      errorDiv.style.color = '#fff';
+      errorDiv.style.padding = '15px';
+      errorDiv.style.zIndex = '99999';
+      errorDiv.style.fontSize = '14px';
+      errorDiv.style.fontWeight = 'bold';
+      errorDiv.innerHTML = 'JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno;
+      document.body.appendChild(errorDiv);
+    });
+
+    // Supabase Credentials (Pre-populated)
+    const SUPABASE_URL = "https://ojhminrrkkxwyybpgvrs.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_c0y0Fx3rb1O1kIXGTgcskg_SZeezhmX";
+    
+    // Initialize Supabase Client
+    let supabaseClient;
+    try {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e) {
+      console.error("Failed to initialize Supabase:", e);
+    }
+
+    // Global variables
+    let session = null;
+    let jobsList = [];
+    let imageInputs = ["", "", "", "", ""]; // Fits 5 slots
+    let previewLang = "ku";
+    let editModeJobId = null;
+
+    // Cities, Types and Experience mappings
+    const translations = {
+      ku: {
+        lblCity: "📍 شار:",
+        lblType: "💼 جۆر:",
+        lblSalary: "💵 مووچە:",
+        lblExp: "🎓 ئەزموون:",
+        lblDesc: "📝 دەربارە:",
+        categories: { software: "گەشەپێدانی نەرمەکاڵا", design: "دیزاین و دروستکردن", marketing: "مارکێتینگ و فرۆشتن", finance: "دارایی و ژمێریاری", education: "پەروەردە و فێرکردن", translation: "وەرگێڕان و ناوەڕۆک", engineering: "ئەندازیاری و کارەکان" },
+        cities: { erbil: "هەولێر", sulaymaniyah: "سلێمانی", duhok: "دهۆک", halabja: "هەڵەبجە", kirkuk: "کەرکوک", remote: "دوورەکار" },
+        types: { fullTime: "تەواو کات", partTime: "نیوە کات", contract: "گرێبەست", remote: "دوورەکار" },
+        experience: { junior: "سەرەتایی", mid: "ناوەند", senior: "پێشکەوتوو", lead: "سەرپەرشتیار" }
+      },
+      en: {
+        lblCity: "📍 City:",
+        lblType: "💼 Type:",
+        lblSalary: "💵 Salary:",
+        lblExp: "🎓 Exp:",
+        lblDesc: "📝 Description:",
+        categories: { software: "Software Development", design: "Design & Creative", marketing: "Marketing & Sales", finance: "Finance & Accounting", education: "Education & Teaching", translation: "Translation & Content", engineering: "Engineering & Operations" },
+        cities: { erbil: "Erbil", sulaymaniyah: "Sulaymaniyah", duhok: "Duhok", halabja: "Halabja", kirkuk: "Kirkuk", remote: "Remote" },
+        types: { fullTime: "Full-time", partTime: "Part-time", contract: "Contract", remote: "Remote" },
+        experience: { junior: "Junior", mid: "Mid-level", senior: "Senior", lead: "Lead" }
+      }
+    };
+
+    // Branding and custom styles state variables
+    let activeSettings = null;
+    let simTheme = 'dark';
+
+    // Initialize Page
+    document.addEventListener("DOMContentLoaded", async () => {
+      initTheme();
+      lucide.createIcons();
+      checkAuthSession();
+      renderUploadGrid();
+      await loadSystemStyle();
+    });
+
+    // Theme Switcher
+    function initTheme() {
+      const savedTheme = localStorage.getItem("theme") || "dark";
+      const toggle = document.getElementById("theme-toggle");
+      const label = document.getElementById("theme-label-text");
+
+      if (savedTheme === "light") {
+        document.body.classList.add("light-mode");
+        if (toggle) toggle.checked = true;
+        if (label) label.textContent = "Light Mode";
+      } else {
+        document.body.classList.remove("light-mode");
+        if (toggle) toggle.checked = false;
+        if (label) label.textContent = "Dark Mode";
+      }
+      if (activeSettings) {
+        applyGlobalSettings(activeSettings);
+      }
+    }
+
+    function toggleTheme() {
+      const toggle = document.getElementById("theme-toggle");
+      const label = document.getElementById("theme-label-text");
+      
+      if (toggle.checked) {
+        document.body.classList.add("light-mode");
+        localStorage.setItem("theme", "light");
+        if (label) label.textContent = "Light Mode";
+      } else {
+        document.body.classList.remove("light-mode");
+        localStorage.setItem("theme", "dark");
+        if (label) label.textContent = "Dark Mode";
+      }
+      if (activeSettings) {
+        applyGlobalSettings(activeSettings);
+      }
+    }
+
+    // (Sub-tab switcher removed)
+
+    // Dynamic Style Simulator and Style Saving
+    function toggleSimTheme() {
+      simTheme = simTheme === 'dark' ? 'light' : 'dark';
+      const label = document.getElementById("sim-theme-label");
+      const screen = document.getElementById("sim-screen");
+      const card = document.getElementById("sim-job-card");
+      const divider = document.getElementById("sim-divider");
+      const buttonsBorder = document.getElementById("sim-buttons-border");
+      const cardCompany = document.getElementById("sim-card-company");
+      const cardTitle = document.getElementById("sim-card-title");
+      const cardDesc = document.getElementById("sim-card-desc");
+
+      if (simTheme === 'light') {
+        label.textContent = "Light Preview";
+        screen.style.background = "#f8fafc";
+        card.style.background = "rgba(255,255,255,0.9)";
+        card.style.borderColor = "rgba(15,23,42,0.12)";
+        card.style.color = "#0f172a";
+        divider.style.background = "rgba(15,23,42,0.08)";
+        buttonsBorder.style.borderTopColor = "rgba(15,23,42,0.08)";
+        cardCompany.style.color = "#0f172a";
+        cardTitle.style.color = "#0f172a";
+        cardDesc.style.color = "#334155";
+      } else {
+        label.textContent = "Dark Preview";
+        screen.style.background = "#070a13";
+        card.style.background = "rgba(15, 23, 42, 0.65)";
+        card.style.borderColor = "rgba(255,255,255,0.1)";
+        card.style.color = "#fff";
+        divider.style.background = "rgba(255,255,255,0.08)";
+        buttonsBorder.style.borderTopColor = "rgba(255,255,255,0.08)";
+        cardCompany.style.color = "#fff";
+        cardTitle.style.color = "#fff";
+        cardDesc.style.color = "#e2e8f0";
+      }
+      updateSimulatorColor();
+      updateSimulatorRadius();
+    }
+
+    function updateSimulatorColor() {
+      const pLight = document.getElementById("style-primary-light").value;
+      const pDark = document.getElementById("style-primary-dark").value;
+      const aLight = document.getElementById("style-accent-light").value;
+      const aDark = document.getElementById("style-accent-dark").value;
+
+      const primary = simTheme === 'light' ? pLight : pDark;
+      const accent = simTheme === 'light' ? aLight : aDark;
+
+      document.getElementById("sim-logo-badge").style.backgroundColor = primary;
+      document.getElementById("sim-btn-email").style.color = primary;
+      document.getElementById("sim-btn-details").style.color = accent;
+    }
+
+    // Support text input synchronization for hex codes
+    function syncColorInputs(colorId, textId) {
+      const colorVal = document.getElementById(colorId).value;
+      document.getElementById(textId).value = colorVal;
+      updateSimulatorColor();
+    }
+
+    function updateSimulatorRadius() {
+      const radius = document.getElementById("style-border-radius").value;
+      document.getElementById("radius-val").textContent = `${radius}px`;
+      document.getElementById("sim-job-card").style.borderRadius = `${radius}px`;
+    }
+
+    function hexToRgbaCSS(hex, alpha) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function applyGlobalSettings(settings) {
+      if (!settings) return;
+      const root = document.documentElement;
+      
+      const isLight = document.body.classList.contains("light-mode");
+      const primaryColor = isLight ? (settings.primaryColorLight || '#6366F1') : (settings.primaryColorDark || '#818CF8');
+      const accentColor = isLight ? (settings.accentColorLight || '#EC4899') : (settings.accentColorDark || '#F472B6');
+      const borderRadius = settings.borderRadius !== undefined ? `${settings.borderRadius}px` : '16px';
+      
+      root.style.setProperty('--primary', primaryColor);
+      root.style.setProperty('--primary-glow', hexToRgbaCSS(primaryColor, 0.15));
+      root.style.setProperty('--accent', accentColor);
+      root.style.setProperty('--accent-glow', hexToRgbaCSS(accentColor, 0.15));
+      root.style.setProperty('--border-radius', borderRadius);
+    }
+
+    async function loadSystemStyle() {
+      // Setup default fallback settings
+      let settings = {
+        primaryColorLight: "#6366f1",
+        primaryColorDark: "#818cf8",
+        accentColorLight: "#ec4899",
+        accentColorDark: "#f472b6",
+        borderRadius: 16,
+        downloadType: "apk",
+        googlePlayUrl: "https://play.google.com/store/apps/details?id=com.kurd24.job",
+        logoUrl: "/assets/images/logo.png",
+        fontUrl: "",
+        apkUrl: "/assets/kurd24-job.apk"
+      };
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (!isDemo) {
+          // Fetch from Supabase settings table
+          const { data, error } = await supabaseClient
+            .from("system_settings")
+            .select("settings")
+            .eq("id", "app-config")
+            .maybeSingle();
+
+          if (data && data.settings) {
+            settings = { ...settings, ...data.settings };
+          }
+        } else {
+          // Demo fallback
+          const response = await fetch('/assets/settings.json?t=' + Date.now());
+          if (response.ok) {
+            const localSettings = await response.json();
+            settings = { ...settings, ...localSettings };
+          }
+        }
+      } catch (e) {
+        console.log("No custom settings found on load, using default settings", e);
+      }
+
+      activeSettings = settings;
+
+      // Update color picker values
+      if (document.getElementById("style-primary-light")) {
+        document.getElementById("style-primary-light").value = settings.primaryColorLight;
+        document.getElementById("style-primary-light-text").value = settings.primaryColorLight;
+      }
+      if (document.getElementById("style-primary-dark")) {
+        document.getElementById("style-primary-dark").value = settings.primaryColorDark;
+        document.getElementById("style-primary-dark-text").value = settings.primaryColorDark;
+      }
+      if (document.getElementById("style-accent-light")) {
+        document.getElementById("style-accent-light").value = settings.accentColorLight;
+        document.getElementById("style-accent-light-text").value = settings.accentColorLight;
+      }
+      if (document.getElementById("style-accent-dark")) {
+        document.getElementById("style-accent-dark").value = settings.accentColorDark;
+        document.getElementById("style-accent-dark-text").value = settings.accentColorDark;
+      }
+      if (document.getElementById("style-border-radius")) {
+        const radius = settings.borderRadius !== undefined ? settings.borderRadius : 16;
+        document.getElementById("style-border-radius").value = radius;
+        document.getElementById("radius-val").textContent = `${radius}px`;
+      }
+
+      // Set logo references
+      if (settings.logoUrl) {
+        document.querySelectorAll('.brand-logo-img').forEach(img => {
+          img.src = settings.logoUrl;
+        });
+        const prevImg = document.getElementById("system-logo-preview-img");
+        if (prevImg) prevImg.src = settings.logoUrl;
+      }
+
+      // Set active font display name
+      const activeFontLabel = document.getElementById("active-font-name");
+      if (activeFontLabel && settings.fontUrl) {
+        activeFontLabel.textContent = settings.fontUrl.split('/').pop();
+      }
+
+      // Update active release file display name
+      const apkInfoLabel = document.getElementById("apk-info-label");
+      if (apkInfoLabel && settings.apkUrl) {
+        apkInfoLabel.innerHTML = `Active release file: <a href="${settings.apkUrl}" target="_blank" style="color:var(--primary);text-decoration:underline;"><strong>${settings.apkUrl.split('/').pop()}</strong></a>`;
+      }
+
+      // Set distribution settings
+      const radioLink = document.getElementById("radio-dist-link");
+      const radioApk = document.getElementById("radio-dist-apk");
+      const distPlayUrl = document.getElementById("dist-play-url");
+
+      if (radioLink && radioApk && distPlayUrl) {
+        const distType = settings.downloadType || 'apk';
+        if (distType === 'link') {
+          radioLink.checked = true;
+        } else {
+          radioApk.checked = true;
+        }
+        distPlayUrl.value = settings.googlePlayUrl || '';
+        toggleDistributionFields();
+      }
+
+      applyGlobalSettings(settings);
+    }
+
+    async function saveSystemStyle() {
+      const primaryColorLight = document.getElementById("style-primary-light").value;
+      const primaryColorDark = document.getElementById("style-primary-dark").value;
+      const accentColorLight = document.getElementById("style-accent-light").value;
+      const accentColorDark = document.getElementById("style-accent-dark").value;
+      const borderRadius = parseInt(document.getElementById("style-border-radius").value);
+
+      const payload = {
+        ...activeSettings,
+        primaryColorLight,
+        primaryColorDark,
+        accentColorLight,
+        accentColorDark,
+        borderRadius
+      };
+
+      const btn = document.getElementById("btn-save-style");
+      btn.disabled = true;
+      btn.textContent = "Saving...";
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (!isDemo) {
+          // Save in Supabase settings table
+          const { error } = await supabaseClient
+            .from("system_settings")
+            .upsert({ id: "app-config", settings: payload, updated_at: new Date().toISOString() });
+          
+          if (error) throw error;
+        } else {
+          // Demo fallback
+          const response = await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) throw new Error('Save failed');
+        }
+
+        alert('Branding and styles saved successfully!');
+        activeSettings = payload;
+        applyGlobalSettings(payload);
+      } catch (e) {
+        alert('Failed to save styles: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check-circle" style="width:16px;height:16px;"></i><span>Save Customization</span>';
+        lucide.createIcons();
+      }
+    }
+
+    async function uploadSystemLogo(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const spinner = document.getElementById("logo-system-spinner");
+      spinner.style.display = "inline-block";
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (!isDemo) {
+          // Upload to Supabase Storage
+          const fileExt = file.name.split('.').pop();
+          const filePath = `logo_${Date.now()}.${fileExt}`;
+          const { data, error } = await supabaseClient.storage
+            .from('job-images')
+            .upload(filePath, file);
+          
+          if (error) throw error;
+          
+          const { data: urlData } = supabaseClient.storage
+            .from('job-images')
+            .getPublicUrl(filePath);
+          
+          const logoUrl = urlData.publicUrl;
+          activeSettings.logoUrl = logoUrl;
+          
+          // Save updated settings
+          const { error: saveError } = await supabaseClient
+            .from("system_settings")
+            .upsert({ id: "app-config", settings: activeSettings, updated_at: new Date().toISOString() });
+          
+          if (saveError) throw saveError;
+          
+          alert('System logo updated successfully!');
+          document.getElementById("system-logo-preview-img").src = logoUrl;
+          document.querySelectorAll('.brand-logo-img').forEach(img => {
+            img.src = logoUrl;
+          });
+        } else {
+          // Demo fallback
+          const response = await fetch('/api/upload-logo', {
+            method: 'POST',
+            body: file
+          });
+          if (!response.ok) throw new Error('Upload failed');
+          const result = await response.json();
+          alert('System logo updated successfully!');
+          const t = Date.now();
+          document.getElementById("system-logo-preview-img").src = result.url + '?t=' + t;
+          document.querySelectorAll('.brand-logo-img').forEach(img => {
+            img.src = result.url + '?t=' + t;
+          });
+        }
+      } catch (e) {
+        alert('Failed to upload logo: ' + e.message + '\n\nTip: Make sure the "job-images" bucket exists and is set to PUBLIC in Supabase Storage.');
+      } finally {
+        spinner.style.display = "none";
+      }
+    }
+
+    async function uploadSystemFont(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const spinner = document.getElementById("font-system-spinner");
+      spinner.style.display = "inline-block";
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (!isDemo) {
+          // Upload to Supabase Storage
+          const fileExt = file.name.split('.').pop();
+          const filePath = `font_${Date.now()}.${fileExt}`;
+          const { data, error } = await supabaseClient.storage
+            .from('job-images')
+            .upload(filePath, file);
+          
+          if (error) throw error;
+          
+          const { data: urlData } = supabaseClient.storage
+            .from('job-images')
+            .getPublicUrl(filePath);
+          
+          const fontUrl = urlData.publicUrl;
+          activeSettings.fontUrl = fontUrl;
+          
+          // Save updated settings
+          const { error: saveError } = await supabaseClient
+            .from("system_settings")
+            .upsert({ id: "app-config", settings: activeSettings, updated_at: new Date().toISOString() });
+          
+          if (saveError) throw saveError;
+          
+          alert('System font updated successfully! Changes will take effect globally.');
+          document.getElementById("active-font-name").textContent = file.name;
+        } else {
+          // Demo fallback
+          const response = await fetch('/api/upload-font', {
+            method: 'POST',
+            body: file
+          });
+          if (!response.ok) throw new Error('Upload failed');
+          alert('System font updated successfully! Changes will take effect globally.');
+          document.getElementById("active-font-name").textContent = file.name;
+        }
+      } catch (e) {
+        alert('Failed to upload font: ' + e.message + '\n\nTip: Make sure the "job-images" bucket exists and is set to PUBLIC in Supabase Storage.');
+      } finally {
+        spinner.style.display = "none";
+      }
+    }
+
+    function toggleDistributionFields() {
+      const radioApk = document.getElementById("radio-dist-apk");
+      if (!radioApk) return;
+      
+      const isAPK = radioApk.checked;
+      const apkDiv = document.getElementById("div-dist-apk-upload");
+      const linkDiv = document.getElementById("div-dist-link-input");
+      
+      const methodLabel = document.getElementById("label-method-apk");
+      const linkLabel = document.getElementById("label-method-link");
+
+      const activeMethodLabel = document.getElementById("status-active-method");
+      const btnText = document.getElementById("preview-landing-btn-text");
+      const btnIcon = document.getElementById("preview-landing-btn-icon");
+
+      if (isAPK) {
+        if (apkDiv) apkDiv.style.display = "flex";
+        if (linkDiv) linkDiv.style.display = "none";
+        if (methodLabel) {
+          methodLabel.style.borderColor = "var(--primary)";
+          methodLabel.style.background = "rgba(99, 102, 241, 0.05)";
+        }
+        if (linkLabel) {
+          linkLabel.style.borderColor = "var(--border)";
+          linkLabel.style.background = "rgba(0,0,0,0.15)";
+        }
+        
+        if (activeMethodLabel) activeMethodLabel.textContent = "Direct APK";
+        if (btnText) btnText.textContent = "دابەزاندنی ئەپی Kurd24 Job (APK)";
+        if (btnIcon) btnIcon.setAttribute("data-lucide", "download-cloud");
+      } else {
+        if (apkDiv) apkDiv.style.display = "none";
+        if (linkDiv) linkDiv.style.display = "flex";
+        if (methodLabel) {
+          methodLabel.style.borderColor = "var(--border)";
+          methodLabel.style.background = "rgba(0,0,0,0.15)";
+        }
+        if (linkLabel) {
+          linkLabel.style.borderColor = "var(--accent)";
+          linkLabel.style.background = "rgba(244, 114, 182, 0.05)";
+        }
+        
+        if (activeMethodLabel) activeMethodLabel.textContent = "Play Store Link";
+        if (btnText) btnText.textContent = "دابەزاندن لە Google Play";
+        if (btnIcon) btnIcon.setAttribute("data-lucide", "play");
+      }
+      lucide.createIcons();
+    }
+
+    async function uploadAPKFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const spinner = document.getElementById("apk-upload-spinner");
+      const infoLabel = document.getElementById("apk-info-label");
+      
+      spinner.style.display = "inline-block";
+      infoLabel.textContent = `Size: ${(file.size / (1024 * 1024)).toFixed(2)} MB - uploading...`;
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (!isDemo) {
+          // Upload to Supabase Storage
+          const fileExt = file.name.split('.').pop();
+          const filePath = `app_${Date.now()}.${fileExt}`;
+          const { data, error } = await supabaseClient.storage
+            .from('job-images')
+            .upload(filePath, file);
+          
+          if (error) throw error;
+          
+          const { data: urlData } = supabaseClient.storage
+            .from('job-images')
+            .getPublicUrl(filePath);
+          
+          const apkUrl = urlData.publicUrl;
+          activeSettings.apkUrl = apkUrl;
+          
+          // Save updated settings
+          const { error: saveError } = await supabaseClient
+            .from("system_settings")
+            .upsert({ id: "app-config", settings: activeSettings, updated_at: new Date().toISOString() });
+          
+          if (saveError) throw saveError;
+          
+          alert('APK uploaded successfully!');
+          infoLabel.innerHTML = `<span style="color:#25d366;font-weight:700;">Active release file: <a href="${apkUrl}" target="_blank" style="color:var(--primary);text-decoration:underline;"><strong>${file.name}</strong></a> (${(file.size / (1024 * 1024)).toFixed(2)} MB)</span>`;
+        } else {
+          // Demo fallback
+          const response = await fetch('/api/upload-apk', {
+            method: 'POST',
+            body: file
+          });
+          if (!response.ok) throw new Error('Upload failed');
+          const result = await response.json();
+          alert('APK uploaded successfully!');
+          infoLabel.innerHTML = `<span style="color:#25d366;font-weight:700;">Active release file: kurd24-job.apk (${(file.size / (1024 * 1024)).toFixed(2)} MB)</span>`;
+        }
+      } catch (e) {
+        alert('Failed to upload APK: ' + e.message + '\n\nTip: Make sure the "job-images" bucket exists and is set to PUBLIC in Supabase Storage.');
+        infoLabel.innerHTML = `<span style="color:#ff4d4d;font-weight:700;">Upload failed: ${e.message}</span>`;
+      } finally {
+        spinner.style.display = "none";
+      }
+    }
+
+    async function saveDistributionSettings() {
+      const isAPK = document.getElementById("radio-dist-apk").checked;
+      const downloadType = isAPK ? 'apk' : 'link';
+      const googlePlayUrl = document.getElementById("dist-play-url").value;
+
+      const payload = {
+        ...activeSettings,
+        downloadType,
+        googlePlayUrl
+      };
+
+      const btn = document.getElementById("btn-save-distribution");
+      btn.disabled = true;
+      btn.textContent = "Saving Settings...";
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (!isDemo) {
+          // Save in Supabase settings table
+          const { error } = await supabaseClient
+            .from("system_settings")
+            .upsert({ id: "app-config", settings: payload, updated_at: new Date().toISOString() });
+          
+          if (error) throw error;
+        } else {
+          // Demo fallback
+          const response = await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) throw new Error('Save failed');
+        }
+
+        alert('Release settings saved successfully!');
+        activeSettings = payload;
+        
+        // Update status indicators
+        const activeMethodLabel = document.getElementById("status-active-method");
+        if (activeMethodLabel) {
+          activeMethodLabel.textContent = isAPK ? "Direct APK" : "Play Store Link";
+          activeMethodLabel.style.color = isAPK ? "var(--primary)" : "var(--accent)";
+        }
+      } catch (e) {
+        alert('Failed to save distribution settings: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="save" style="width:16px;height:16px;"></i><span>Save Release Settings</span>';
+        lucide.createIcons();
+      }
+    }
+
+    async function checkAuthSession() {
+      // First check local storage for demo session
+      const savedDemo = localStorage.getItem("demo_session");
+      if (savedDemo) {
+        try {
+          session = JSON.parse(savedDemo);
+          showMainApp();
+          return;
+        } catch(e) {
+          localStorage.removeItem("demo_session");
+        }
+      }
+
+      if (!supabaseClient) {
+        showLoginScreen();
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        if (data.session) {
+          session = data.session;
+          showMainApp();
+        } else {
+          showLoginScreen();
+        }
+      } catch (e) {
+        console.error("Session check failed:", e);
+        showLoginScreen();
+      }
+    }
+
+    // Authenticate with fallback to Offline/Demo mode if connection fails or credentials match
+    async function handleLogin() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const errorDiv = document.getElementById("login-error");
+      const btn = document.getElementById("login-submit-btn");
+
+      if (!email || !password) {
+        errorDiv.textContent = "Please fill in all fields.";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Loading...</span>';
+      errorDiv.style.display = "none";
+
+      try {
+        if (!supabaseClient) {
+          console.warn("No Supabase client. Using local mock mode.");
+          session = { user: { email: email } };
+          localStorage.setItem("demo_session", JSON.stringify(session));
+          showMainApp();
+          return;
+        }
+
+        // Try Supabase Auth
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) {
+          // Check for network errors
+          if (error.message.includes("fetch") || error.status === 0 || error.status === 500 || error.message.includes("Network")) {
+            console.warn("Supabase network error. Falling back to local mock mode.");
+            session = { user: { email: email } };
+            localStorage.setItem("demo_session", JSON.stringify(session));
+            showMainApp();
+            return;
+          }
+          throw error;
+        }
+        
+        session = data.session;
+        showMainApp();
+      } catch (err) {
+        console.error("Login error:", err);
+        // Admin credentials bypass for local offline testing
+        if (email === "admin@kurd24.job" && password === "admin123") {
+          console.warn("Bypassing Supabase error for local admin credentials.");
+          session = { user: { email: email } };
+          localStorage.setItem("demo_session", JSON.stringify(session));
+          showMainApp();
+          return;
+        }
+
+        errorDiv.textContent = err.message || "Invalid email or password.";
+        errorDiv.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Log In</span><i data-lucide="log-in" style="width:16px;height:16px;"></i>';
+        lucide.createIcons();
+      }
+    }
+
+    async function handleLogout() {
+      localStorage.removeItem("demo_session");
+      if (supabaseClient) {
+        try {
+          await supabaseClient.auth.signOut();
+        } catch(e) {
+          console.error("Supabase signout error:", e);
+        }
+      }
+      session = null;
+      showLoginScreen();
+    }
+
+    function showLoginScreen() {
+      document.getElementById("login-screen").style.display = "flex";
+      document.getElementById("app-container").style.display = "none";
+    }
+
+    function showMainApp() {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app-container").style.display = "flex";
+      document.getElementById("profile-email").textContent = session.user.email;
+      document.getElementById("avatar-letter").textContent = session.user.email.substring(0, 1).toUpperCase();
+      loadData();
+      loadProperties();
+    }
+
+    // Tab Switching
+    function switchTab(tabName) {
+      document.querySelectorAll(".menu-item, .bottom-nav-item").forEach(item => item.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(panel => panel.classList.remove("active"));
+      
+      // Sync active state for both desktop & mobile navs
+      const dtTab = document.getElementById(`tab-${tabName}-desktop`);
+      if (dtTab) dtTab.classList.add("active");
+      const mbTab = document.getElementById(`tab-${tabName}-mobile`);
+      if (mbTab) mbTab.classList.add("active");
+
+      // Handle combined settings panel routing
+      if (tabName === "properties") {
+        document.getElementById("panel-settings").classList.add("active");
+        switchSettingsSubTab('data');
+      } else if (tabName === "design") {
+        document.getElementById("panel-settings").classList.add("active");
+        switchSettingsSubTab('branding');
+      } else if (tabName === "settings") {
+        document.getElementById("panel-settings").classList.add("active");
+        const activeSub = document.querySelector(".subtab-btn.active");
+        if (!activeSub) {
+          switchSettingsSubTab('data');
+        } else {
+          if (activeSub.id === "btn-settings-branding") {
+            updateSimulatorColor();
+            updateSimulatorRadius();
+          }
+        }
+      } else if (tabName === "distribution") {
+        const panel = document.getElementById("panel-distribution");
+        if (panel) {
+          panel.classList.add("active");
+        }
+        const activeMethodLabel = document.getElementById("status-active-method");
+        const radioApk = document.getElementById("radio-dist-apk");
+        if (activeMethodLabel && radioApk) {
+          const isAPK = radioApk.checked;
+          activeMethodLabel.textContent = isAPK ? "Direct APK" : "Play Store Link";
+          activeMethodLabel.style.color = isAPK ? "var(--primary)" : "var(--accent)";
+        }
+      } else {
+        const panel = document.getElementById(`panel-${tabName}`);
+        if (panel) panel.classList.add("active");
+      }
+
+      const headerLabel = document.getElementById("page-title-label");
+      if (tabName === "analytics") {
+        headerLabel.textContent = "Dashboard Overview";
+        loadData();
+      } else if (tabName === "manage") {
+        headerLabel.textContent = "Job Listing Inventory";
+        loadData();
+      } else if (tabName === "create") {
+        headerLabel.textContent = editModeJobId ? "Edit Job Announcement" : "Create Job Announcement";
+        if (!editModeJobId) {
+          clearEditorForm();
+        }
+      } else if (tabName === "properties" || tabName === "design" || tabName === "settings") {
+        headerLabel.textContent = "App Settings & Design";
+        loadProperties();
+      } else if (tabName === "distribution") {
+        headerLabel.textContent = "App Distribution Settings";
+      }
+    }
+
+    // Settings Sub-tab Switcher
+    function switchSettingsSubTab(subTabName) {
+      document.querySelectorAll(".settings-subpanel").forEach(panel => panel.classList.remove("active"));
+      document.querySelectorAll(".subtab-btn").forEach(btn => btn.classList.remove("active"));
+
+      if (subTabName === 'data') {
+        document.getElementById("sub-panel-settings-data").classList.add("active");
+        document.getElementById("btn-settings-data").classList.add("active");
+      } else if (subTabName === 'branding') {
+        document.getElementById("sub-panel-settings-branding").classList.add("active");
+        document.getElementById("btn-settings-branding").classList.add("active");
+        updateSimulatorColor();
+        updateSimulatorRadius();
+      }
+      lucide.createIcons();
+    }
+
+    // Database loaders
+    async function loadData() {
+      if (!supabaseClient) {
+        loadLocalMockData();
+        return;
+      }
+      document.getElementById("active-mode").textContent = "Syncing...";
+      
+      try {
+        const { data, error } = await supabaseClient.from("jobs").select("*").order("created_at", { ascending: false });
+        if (error) throw error;
+        
+        jobsList = data || [];
+        populateTable();
+        calculateStats();
+        document.getElementById("active-mode").textContent = "Live Syncing";
+      } catch (e) {
+        console.error("Load failed:", e);
+        loadLocalMockData();
+      }
+    }
+
+    // Local Mock Data Loader
+    function loadLocalMockData() {
+      document.getElementById("active-mode").textContent = "Demo Mode (Local)";
+      const localJobs = localStorage.getItem("local_jobs");
+      if (localJobs) {
+        jobsList = JSON.parse(localJobs);
+      } else {
+        // Default mock jobs matching current schema
+        jobsList = [
+          {
+            id: "mock-1",
+            title_ku: "گەشەپێدەری ڕیاکت نەیتیڤ پێشکەوتوو",
+            title_en: "Senior React Native Developer",
+            company: "Kurd24 Tech",
+            city_en: "erbil",
+            category: "software",
+            salary: "$1,800 - $2,500",
+            status: "published",
+            views: 450,
+            clicks: 85,
+            created_at: new Date().toISOString(),
+            description_ku: "کۆمپانیای کورد٢٤ پێویستی بە گەشەپێدەرێکی لێهاتووی ڕیاکت نەیتیڤە بۆ بەڕێوەبردن و باشترکردنی کارایی ئەپەکەمان.",
+            description_en: "Kurd24 Tech is looking for a Senior React Native Developer to maintain and scale our mobile application.",
+            whatsapp: "9647501234567",
+            email: "jobs@kurd24.job",
+            images: ["https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&auto=format&fit=crop&q=60", "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=400&auto=format&fit=crop&q=60"]
+          },
+          {
+            id: "mock-2",
+            title_ku: "پسپۆڕی مارکێتینگ و سۆشیاڵ میدیا",
+            title_en: "Marketing & Social Media Specialist",
+            company: "Hewlêr Media Group",
+            city_en: "erbil",
+            category: "marketing",
+            salary: "$1,000 - $1,300",
+            status: "published",
+            views: 290,
+            clicks: 54,
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            description_ku: "ئێمە بەدوای کەسێکی لێهاتوودا دەگەڕێین بۆ ڕێکلامکردن و باشترکردنی بڵاوکراوەکانمان لە سۆشیاڵ میدیا.",
+            description_en: "We are seeking a talented marketer to optimize and scale our social media ads and audience growth.",
+            whatsapp: "9647509876543",
+            email: "apply@hewlermedia.com",
+            images: ["https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&auto=format&fit=crop&q=60"]
+          }
+        ];
+        localStorage.setItem("local_jobs", JSON.stringify(jobsList));
+      }
+      populateTable();
+      calculateStats();
+    }
+
+    // Populate Jobs Inventory Table
+    function populateTable() {
+      const tbody = document.getElementById("listings-tbody");
+      tbody.innerHTML = "";
+
+      if (jobsList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px;">No job listings found.</td></tr>`;
+        return;
+      }
+
+      jobsList.forEach(job => {
+        const tr = document.createElement("tr");
+        const letter = job.company ? job.company.substring(0, 1).toUpperCase() : "J";
+        const statusBadge = job.status === "published" 
+          ? `<span class="badge badge-published">Published</span>` 
+          : `<span class="badge badge-draft">Draft</span>`;
+        
+        tr.innerHTML = `
+          <td>
+            <div class="job-row-info">
+              <div class="logo-cell">${letter}</div>
+              <div>
+                <div style="font-weight:700;">${job.title_en || job.title_ku}</div>
+                <div style="font-size:11px;color:var(--text-secondary);">${job.company}</div>
+              </div>
+            </div>
+          </td>
+          <td>${job.city_en}</td>
+          <td>${job.category}</td>
+          <td style="font-weight:600;">${job.salary}</td>
+          <td>${statusBadge}</td>
+          <td style="font-weight:600;">
+            <span style="color:var(--primary);">${job.views || 0}</span> / 
+            <span style="color:var(--accent);">${job.clicks || 0}</span>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="action-btn btn-edit" title="Edit" onclick="editJob('${job.id}')"><i data-lucide="edit-3" style="width:14px;height:14px;"></i></button>
+              <button class="action-btn btn-delete" title="Delete" onclick="deleteJob('${job.id}')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    // Stats calculations & Chart rendering
+    function calculateStats() {
+      let total = jobsList.length;
+      let views = 0;
+      let applies = 0;
+
+      jobsList.forEach(j => {
+        views += j.views || 0;
+        applies += j.clicks || 0;
+      });
+
+      document.getElementById("stat-total-jobs").textContent = total;
+      document.getElementById("stat-total-views").textContent = views;
+      document.getElementById("stat-total-applies").textContent = applies;
+
+      // Draw SVG chart values
+      document.getElementById("chart-val-views").textContent = views;
+      document.getElementById("chart-val-applies").textContent = applies;
+
+      // Adjust height of bars in SVG
+      const maxVal = Math.max(views, applies, 1);
+      const heightViews = (views / maxVal) * 130; // Max height in viewport is ~130
+      const heightApplies = (applies / maxVal) * 130;
+
+      const barViews = document.getElementById("chart-bar-views");
+      const barApplies = document.getElementById("chart-bar-applies");
+
+      barViews.setAttribute("height", heightViews);
+      barViews.setAttribute("y", 200 - heightViews);
+      
+      barApplies.setAttribute("height", heightApplies);
+      barApplies.setAttribute("y", 200 - heightApplies);
+      
+      // Update values positions
+      document.getElementById("chart-val-views").setAttribute("y", 190 - heightViews);
+      document.getElementById("chart-val-applies").setAttribute("y", 190 - heightApplies);
+    }
+
+    // Render Upload Slots Grid (3 to 5 images)
+    function renderUploadGrid() {
+      const grid = document.getElementById("image-upload-grid");
+      grid.innerHTML = "";
+
+      for (let i = 0; i < 5; i++) {
+        const slot = document.createElement("div");
+        slot.className = "upload-slot glass";
+        slot.id = `slot-${i}`;
+        
+        const url = imageInputs[i];
+        if (url) {
+          slot.className = "upload-slot glass uploaded";
+          slot.innerHTML = `
+            <img src="${url}">
+            <button class="remove-image-btn" onclick="removeImage(${i}, event)">
+              <i data-lucide="trash" style="width:12px;height:12px;"></i>
+            </button>
+          `;
+        } else {
+          slot.innerHTML = `
+            <i data-lucide="upload-cloud" style="width:20px;height:20px;color:var(--text-muted);margin-bottom:4px;"></i>
+            <span style="font-size:9px;color:var(--text-secondary);font-weight:600;">Slot ${i+1}</span>
+            <input type="file" accept="image/*" onchange="uploadImage(${i}, this)">
+          `;
+        }
+        grid.appendChild(slot);
+      }
+      lucide.createIcons();
+    }
+
+    function removeImage(idx, event) {
+      if (event) event.stopPropagation();
+      imageInputs[idx] = "";
+      renderUploadGrid();
+      updateLivePreview();
+    }
+
+    // Direct upload handler using Supabase Storage
+    async function uploadImage(index, input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const slot = document.getElementById(`slot-${index}`);
+      slot.innerHTML = `
+        <div class="spinner"></div>
+        <span style="font-size:8px;color:var(--text-secondary);margin-top:6px;">Uploading...</span>
+      `;
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `listings/${fileName}`;
+
+        // Upload to 'job-images' bucket
+        let { data, error } = await supabaseClient.storage
+          .from('job-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          // Automatic fallback to existing 'resumes' bucket if 'job-images' doesn't exist
+          if (error.message.includes('Bucket not found')) {
+            console.warn("Storage bucket 'job-images' not found. Trying fallback to 'resumes'...");
+            const { data: fbData, error: fbError } = await supabaseClient.storage
+              .from('resumes')
+              .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (fbError) throw new Error("Storage bucket 'job-images' does not exist. Please create it in your Supabase Dashboard as a PUBLIC bucket.");
+            
+            const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(filePath);
+            imageInputs[index] = urlData.publicUrl;
+            renderUploadGrid();
+            updateLivePreview();
+            return;
+          }
+          throw error;
+        }
+
+        const { data: urlData } = supabaseClient.storage.from('job-images').getPublicUrl(filePath);
+        imageInputs[index] = urlData.publicUrl;
+        renderUploadGrid();
+        updateLivePreview();
+      } catch (err) {
+        alert("Upload Failed: " + err.message + "\n\nTip: Go to Supabase Storage -> click 'New Bucket' -> name it 'job-images' -> toggle 'PUBLIC' access -> Save.");
+        imageInputs[index] = "";
+        renderUploadGrid();
+      }
+    }
+
+    // Live mobile card preview engine
+    function togglePreviewLang(lang) {
+      previewLang = lang;
+      document.getElementById("btn-prev-ku").classList.remove("active");
+      document.getElementById("btn-prev-en").classList.remove("active");
+      document.getElementById(`btn-prev-${lang}`).classList.add("active");
+      updateLivePreview();
+    }
+
+    function updateLivePreview() {
+      const company = document.getElementById("form-company").value || "Company Name";
+      const isPublished = document.getElementById("form-status").checked;
+      const titleKu = document.getElementById("form-title-ku").value || "ناونیشانی کارەکە";
+      const titleEn = document.getElementById("form-title-en").value || "Job Title Announcement";
+      const salary = document.getElementById("form-salary").value || "Discussable (ڕێککەوتن)";
+      const cityKey = document.getElementById("form-city").value;
+      const typeKey = document.getElementById("form-type").value;
+      const expKey = document.getElementById("form-experience").value;
+      const descKu = document.getElementById("form-desc-ku").value || "دەربارە و کورتەی کارەکە لێرە پێشان دەدرێت بە زمانی کوردی...";
+      const descEn = document.getElementById("form-desc-en").value || "The job description overview will be displayed here in English...";
+
+      // Toggle draft indicator
+      const label = document.getElementById("status-toggle-label");
+      if (label) {
+        label.textContent = isPublished ? "Published" : "Draft";
+        label.style.color = isPublished ? "var(--success)" : "var(--primary)";
+      }
+
+      // Preview Content selections based on language
+      const trans = translations[previewLang] || translations.ku;
+      const title = previewLang === "ku" ? titleKu : titleEn;
+      const desc = previewLang === "ku" ? descKu : descEn;
+      const city = (trans.cities || {})[cityKey] || cityKey;
+      const type = (trans.types || {})[typeKey] || typeKey;
+      const exp = (trans.experience || {})[expKey] || expKey;
+
+      // Update Preview HTML elements
+      const card = document.querySelector(".mobile-card");
+      if (card) {
+        if (previewLang === "ku") {
+          card.classList.add("rtl");
+        } else {
+          card.classList.remove("rtl");
+        }
+      }
+
+      document.getElementById("prev-company").textContent = company;
+      document.getElementById("prev-logo-letter").textContent = company.substring(0, 1).toUpperCase();
+      document.getElementById("prev-title").textContent = "📢 " + title;
+      
+      // Meta labels
+      document.getElementById("lbl-city").textContent = trans.lblCity;
+      document.getElementById("lbl-type").textContent = trans.lblType;
+      document.getElementById("lbl-salary").textContent = trans.lblSalary;
+      document.getElementById("lbl-exp").textContent = trans.lblExp;
+      document.getElementById("lbl-desc").textContent = trans.lblDesc;
+      
+      // Meta values
+      document.getElementById("prev-city").textContent = city;
+      document.getElementById("prev-type").textContent = type;
+      document.getElementById("prev-salary").textContent = salary;
+      document.getElementById("prev-experience").textContent = exp;
+      document.getElementById("prev-desc").textContent = desc;
+
+      // Populate Image Gallery preview
+      const gallery = document.getElementById("prev-gallery");
+      gallery.innerHTML = "";
+      
+      const activeImages = imageInputs.map(img => img.trim()).filter(img => img !== "");
+      if (activeImages.length > 0) {
+        gallery.style.display = "flex";
+        activeImages.forEach(imgUrl => {
+          const img = document.createElement("img");
+          img.className = "card-thumb";
+          img.src = imgUrl;
+          img.onerror = () => { img.style.display = "none"; }; // hide broken urls
+          gallery.appendChild(img);
+        });
+      } else {
+        gallery.style.display = "none";
+      }
+
+      // Re-initialize Lucide Icons on layout update
+      lucide.createIcons();
+    }
+
+    function clearEditorForm() {
+      editModeJobId = null;
+      document.getElementById("editor-action-title").textContent = "Create New Job Announcement";
+      document.getElementById("editor-save-label").textContent = "Publish Announcement";
+      
+      document.getElementById("form-company").value = "";
+      document.getElementById("form-status").checked = true;
+      document.getElementById("form-title-ku").value = "";
+      document.getElementById("form-title-en").value = "";
+      document.getElementById("form-salary").value = "";
+      
+      // Reset Logo upload slot
+      document.getElementById("form-logo-url").value = "";
+      const logoSlot = document.getElementById("logo-upload-slot");
+      logoSlot.innerHTML = `
+        <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+        <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+      `;
+      document.getElementById("logo-status-label").textContent = "No logo uploaded";
+      
+      document.getElementById("form-city").value = "erbil";
+      document.getElementById("form-type").value = "fullTime";
+      document.getElementById("form-experience").value = "junior";
+      document.getElementById("form-category").value = "software";
+      document.getElementById("form-industry").value = "tech";
+      document.getElementById("form-desc-ku").value = "";
+      document.getElementById("form-desc-en").value = "";
+      document.getElementById("form-req-ku").value = "";
+      document.getElementById("form-req-en").value = "";
+      document.getElementById("form-whatsapp").value = "";
+      document.getElementById("form-email").value = "";
+      
+      imageInputs = ["", "", "", "", ""];
+      renderUploadGrid();
+      updateLivePreview();
+    }
+
+    // Logo upload functions
+    function removeLogo(event) {
+      if (event) event.stopPropagation();
+      document.getElementById("form-logo-url").value = "";
+      const logoSlot = document.getElementById("logo-upload-slot");
+      logoSlot.innerHTML = `
+        <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+        <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+      `;
+      document.getElementById("logo-status-label").textContent = "No logo uploaded";
+      lucide.createIcons();
+      updateLivePreview();
+    }
+
+    async function uploadLogo(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const slot = document.getElementById("logo-upload-slot");
+      const statusLabel = document.getElementById("logo-status-label");
+      
+      slot.innerHTML = `<div class="spinner" style="width:16px;height:16px;margin:0;"></div>`;
+      statusLabel.textContent = "Uploading...";
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `logo_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `logos/${fileName}`;
+
+        // Upload to 'job-images' bucket
+        let { data, error } = await supabaseClient.storage
+          .from('job-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          if (error.message.includes('Bucket not found')) {
+            console.warn("Storage bucket 'job-images' not found. Trying fallback to 'resumes'...");
+            const { data: fbData, error: fbError } = await supabaseClient.storage
+              .from('resumes')
+              .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (fbError) throw fbError;
+            
+            const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(filePath);
+            document.getElementById("form-logo-url").value = urlData.publicUrl;
+            slot.innerHTML = `
+              <img src="${urlData.publicUrl}" style="width:100%;height:100%;object-fit:cover;">
+              <button class="remove-image-btn" onclick="removeLogo(event)" style="top:2px;right:2px;padding:2px;">
+                <i data-lucide="trash" style="width:10px;height:10px;"></i>
+              </button>
+            `;
+            statusLabel.textContent = "Logo uploaded";
+            lucide.createIcons();
+            updateLivePreview();
+            return;
+          }
+          throw error;
+        }
+
+        const { data: urlData } = supabaseClient.storage.from('job-images').getPublicUrl(filePath);
+        document.getElementById("form-logo-url").value = urlData.publicUrl;
+        slot.innerHTML = `
+          <img src="${urlData.publicUrl}" style="width:100%;height:100%;object-fit:cover;">
+          <button class="remove-image-btn" onclick="removeLogo(event)" style="top:2px;right:2px;padding:2px;">
+            <i data-lucide="trash" style="width:10px;height:10px;"></i>
+          </button>
+        `;
+        statusLabel.textContent = "Logo uploaded";
+        lucide.createIcons();
+        updateLivePreview();
+      } catch (err) {
+        alert("Logo Upload Failed: " + err.message);
+        slot.innerHTML = `
+          <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+          <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+        `;
+        statusLabel.textContent = "Upload failed";
+        lucide.createIcons();
+      }
+    }
+
+    // Edit Job Action
+    function editJob(jobId) {
+      const job = jobsList.find(j => j.id === jobId);
+      if (!job) return;
+
+      editModeJobId = jobId;
+      document.getElementById("editor-action-title").textContent = "Edit Job Details (" + job.company + ")";
+      document.getElementById("editor-save-label").textContent = "Save Changes";
+
+      document.getElementById("form-company").value = job.company || "";
+      document.getElementById("form-status").checked = job.status === "published";
+      document.getElementById("form-title-ku").value = job.title_ku || "";
+      document.getElementById("form-title-en").value = job.title_en || "";
+      document.getElementById("form-salary").value = job.salary || "";
+      
+      // Load Logo
+      document.getElementById("form-logo-url").value = job.logo_url || "";
+      const logoSlot = document.getElementById("logo-upload-slot");
+      const statusLabel = document.getElementById("logo-status-label");
+      if (job.logo_url) {
+        logoSlot.innerHTML = `
+          <img src="${job.logo_url}" style="width:100%;height:100%;object-fit:cover;">
+          <button class="remove-image-btn" onclick="removeLogo(event)" style="top:2px;right:2px;padding:2px;">
+            <i data-lucide="trash" style="width:10px;height:10px;"></i>
+          </button>
+        `;
+        statusLabel.textContent = "Logo loaded";
+      } else {
+        logoSlot.innerHTML = `
+          <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+          <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+        `;
+        statusLabel.textContent = "No logo uploaded";
+      }
+      
+      document.getElementById("form-city").value = job.city_en || "erbil";
+      document.getElementById("form-type").value = job.type || "fullTime";
+      document.getElementById("form-experience").value = job.experience_level || "junior";
+      document.getElementById("form-category").value = job.category || "software";
+      document.getElementById("form-industry").value = job.industry || "tech";
+      document.getElementById("form-desc-ku").value = job.description_ku || "";
+      document.getElementById("form-desc-en").value = job.description_en || "";
+      document.getElementById("form-req-ku").value = job.requirements_ku || "";
+      document.getElementById("form-req-en").value = job.requirements_en || "";
+      document.getElementById("form-whatsapp").value = job.whatsapp || "";
+      document.getElementById("form-email").value = job.email || "";
+
+      // Load images
+      const jobImgs = job.images || [];
+      imageInputs = [...jobImgs];
+      while (imageInputs.length < 5) {
+        imageInputs.push("");
+      }
+
+      renderUploadGrid();
+      updateLivePreview();
+      switchTab("create");
+    }
+
+    // Delete Job Action
+    async function deleteJob(jobId) {
+      const job = jobsList.find(j => j.id === jobId);
+      if (!job) return;
+
+      if (!confirm(`Are you sure you want to delete the job listing "${job.title_en || job.title_ku}" from "${job.company}"?`)) {
+        return;
+      }
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (isDemo) {
+          jobsList = jobsList.filter(j => j.id !== jobId);
+          localStorage.setItem("local_jobs", JSON.stringify(jobsList));
+          alert("Listing successfully deleted locally!");
+          populateTable();
+          calculateStats();
+        } else {
+          const { error } = await supabaseClient.from("jobs").delete().eq("id", jobId);
+          if (error) throw error;
+          alert("Listing successfully deleted!");
+          loadData();
+        }
+      } catch (e) {
+        alert("Failed to delete: " + e.message);
+      }
+    }
+
+    // Save Job Form Submission with fallback defaults (Optional fields)
+    async function saveJob() {
+      const company = document.getElementById("form-company").value.trim() || "Kurd24 Employer";
+      const titleKu = document.getElementById("form-title-ku").value.trim();
+      const titleEn = document.getElementById("form-title-en").value.trim();
+      const isPublished = document.getElementById("form-status").checked;
+
+      // Require at least one language title
+      if (!titleKu && !titleEn) {
+        alert("Please fill in at least one Job Title (Kurdish or English).");
+        return;
+      }
+
+      // Safe defaults to ensure database constraint checks pass (Optional inputs)
+      const finalTitleKu = titleKu || titleEn || "ڕیکلامی کار";
+      const finalTitleEn = titleEn || titleKu || "Job Announcement";
+      const salary = document.getElementById("form-salary").value.trim() || "Discussable (ڕێککەوتن)";
+      const logoUrl = document.getElementById("form-logo-url").value.trim() || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80";
+      const city = document.getElementById("form-city").value;
+      const type = document.getElementById("form-type").value;
+      const experience = document.getElementById("form-experience").value;
+      const category = document.getElementById("form-category").value;
+      const industry = document.getElementById("form-industry").value;
+      
+      const descKu = document.getElementById("form-desc-ku").value.trim() || "پێویستی و مەرجەکانی ئەم هەلی کارە بەستراوە بە لێهاتوویی پێشکەشکار. تکایە پەیوەندی بکەن بۆ زانیاری.";
+      const descEn = document.getElementById("form-desc-en").value.trim() || "Job description and details depend on applicant capabilities. Contact for more info.";
+      const reqKu = document.getElementById("form-req-ku").value.trim() || "مەرجەکان لە کاتی چاوپێکەوتن دیاری دەکرێن.";
+      const reqEn = document.getElementById("form-req-en").value.trim() || "Requirements will be discussed in the interview.";
+      const whatsapp = document.getElementById("form-whatsapp").value.trim() || "9647501234567";
+      const email = document.getElementById("form-email").value.trim() || "careers@kurd24.job";
+
+      const activeImages = imageInputs.map(img => img.trim()).filter(img => img !== "");
+
+      const payload = {
+        title_ku: finalTitleKu,
+        title_en: finalTitleEn,
+        company: company,
+        industry: industry,
+        logo_url: logoUrl,
+        images: activeImages,
+        city_ku: city,
+        city_en: city,
+        category: category,
+        type: type,
+        experience_level: experience,
+        salary: salary,
+        description_ku: descKu,
+        description_en: descEn,
+        requirements_ku: reqKu,
+        requirements_en: reqEn,
+        whatsapp: whatsapp,
+        email: email,
+        status: isPublished ? "published" : "draft"
+      };
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (isDemo) {
+          if (editModeJobId) {
+            const idx = jobsList.findIndex(j => j.id === editModeJobId);
+            if (idx !== -1) {
+              jobsList[idx] = { ...jobsList[idx], ...payload, updated_at: new Date().toISOString() };
+            }
+          } else {
+            const newJob = {
+              id: "mock-" + Date.now(),
+              ...payload,
+              views: 0,
+              clicks: 0,
+              created_at: new Date().toISOString()
+            };
+            jobsList.unshift(newJob);
+          }
+          localStorage.setItem("local_jobs", JSON.stringify(jobsList));
+          alert("Job announcement successfully saved locally (Demo Mode)!");
+        } else {
+          if (editModeJobId) {
+            // Update
+            const { error } = await supabaseClient.from("jobs").update(payload).eq("id", editModeJobId);
+            if (error) throw error;
+            alert("Job announcement successfully updated!");
+          } else {
+            // Insert
+            const { error } = await supabaseClient.from("jobs").insert([payload]);
+            if (error) throw error;
+            alert("New job announcement successfully published!");
+          }
+        }
+        
+        clearEditorForm();
+        switchTab("manage");
+      } catch (e) {
+        alert("Failed to save job details: " + e.message + "\n\nTip: If you recently added the 'images' column in Supabase, go to your Supabase SQL Editor and run: NOTIFY pgrst, 'reload schema';");
+      }
+    }
+
+    // Dynamic properties manager variables & functions
+    let currentPropertyType = "categories";
+    let categoriesList = [];
+    let citiesList = [];
+    let industriesList = [];
+    let jobTypesList = [];
+    let experienceLevelsList = [];
+
+    async function loadProperties() {
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      if (isDemo) {
+        // Setup offline fallbacks first
+        const savedCats = localStorage.getItem("local_categories");
+        const savedCities = localStorage.getItem("local_cities");
+        const savedInds = localStorage.getItem("local_industries");
+        const savedTypes = localStorage.getItem("local_job_types");
+        const savedExps = localStorage.getItem("local_experience_levels");
+
+        if (savedCats) categoriesList = JSON.parse(savedCats);
+        else {
+          categoriesList = Object.entries(translations.en.categories || {}).filter(([k]) => k !== 'all').map(([id]) => ({
+            id,
+            name_ku: (translations.ku.categories || {})[id] || id,
+            name_en: (translations.en.categories || {})[id] || id
+          }));
+          localStorage.setItem("local_categories", JSON.stringify(categoriesList));
+        }
+
+        if (savedCities) citiesList = JSON.parse(savedCities);
+        else {
+          citiesList = Object.entries(translations.en.cities || {}).filter(([k]) => k !== 'all').map(([id]) => ({
+            id,
+            name_ku: (translations.ku.cities || {})[id] || id,
+            name_en: (translations.en.cities || {})[id] || id
+          }));
+          localStorage.setItem("local_cities", JSON.stringify(citiesList));
+        }
+
+        if (savedInds) industriesList = JSON.parse(savedInds);
+        else {
+          industriesList = [
+            { id: "tech", name_ku: "تەکنەلۆژیا و نەرمەکاڵا", name_en: "Tech & Software" },
+            { id: "health", name_ku: "تەندروستی و پزیشکی", name_en: "Health & Medical" },
+            { id: "education", name_ku: "پەروەردە", name_en: "Education" },
+            { id: "retail", name_ku: "فرۆشتن و بازرگانی", name_en: "Sales & Retail" },
+            { id: "finance", name_ku: "دارایی و بانک", name_en: "Finance & Banking" },
+            { id: "engineering", name_ku: "ئەندازیاری", name_en: "Engineering" },
+            { id: "media", name_ku: "میدیا و پەیوەندییەکان", name_en: "Media & PR" }
+          ];
+          localStorage.setItem("local_industries", JSON.stringify(industriesList));
+        }
+
+        if (savedTypes) jobTypesList = JSON.parse(savedTypes);
+        else {
+          jobTypesList = Object.entries(translations.en.types || {}).filter(([k]) => k !== 'all').map(([id]) => ({
+            id,
+            name_ku: (translations.ku.types || {})[id] || id,
+            name_en: (translations.en.types || {})[id] || id
+          }));
+          localStorage.setItem("local_job_types", JSON.stringify(jobTypesList));
+        }
+
+        if (savedExps) experienceLevelsList = JSON.parse(savedExps);
+        else {
+          experienceLevelsList = Object.entries(translations.en.experience || {}).filter(([k]) => k !== 'all').map(([id]) => ({
+            id,
+            name_ku: (translations.ku.experience || {})[id] || id,
+            name_en: (translations.en.experience || {})[id] || id
+          }));
+          localStorage.setItem("local_experience_levels", JSON.stringify(experienceLevelsList));
+        }
+
+        renderPropertiesTable();
+        populateDropdowns();
+        return;
+      }
+
+      // Live Syncing Mode (Supabase)
+      try {
+        const [cats, cits, indus, jtypes, exps] = await Promise.all([
+          supabaseClient.from("categories").select("*").order("created_at", { ascending: true }),
+          supabaseClient.from("cities").select("*").order("created_at", { ascending: true }),
+          supabaseClient.from("industries").select("*").order("created_at", { ascending: true }),
+          supabaseClient.from("job_types").select("*").order("created_at", { ascending: true }),
+          supabaseClient.from("experience_levels").select("*").order("created_at", { ascending: true })
+        ]);
+
+        if (cats.data) categoriesList = cats.data;
+        if (cits.data) citiesList = cits.data;
+        if (indus.data) industriesList = indus.data;
+        if (jtypes.data) jobTypesList = jtypes.data;
+        if (exps.data) experienceLevelsList = exps.data;
+
+        renderPropertiesTable();
+        populateDropdowns();
+      } catch (err) {
+        console.error("Failed to load properties from database:", err);
+        renderPropertiesTable();
+        populateDropdowns();
+      }
+    }
+
+    function renderPropertiesTable() {
+      const tbody = document.getElementById("properties-tbody");
+      tbody.innerHTML = "";
+      
+      let list = [];
+      if (currentPropertyType === "categories") list = categoriesList;
+      else if (currentPropertyType === "cities") list = citiesList;
+      else if (currentPropertyType === "industries") list = industriesList;
+      else if (currentPropertyType === "job_types") list = jobTypesList;
+      else if (currentPropertyType === "experience_levels") list = experienceLevelsList;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">No items found.</td></tr>`;
+        return;
+      }
+
+      list.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="font-weight:700;color:var(--primary);">${item.id}</td>
+          <td>${item.name_ku}</td>
+          <td>${item.name_en}</td>
+          <td style="text-align:right;">
+            <button class="action-btn btn-delete" style="display:inline-flex;" title="Delete" onclick="deleteProperty('${item.id}')">
+              <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function switchPropertyType(type) {
+      currentPropertyType = type;
+      
+      // Update active button classes
+      document.querySelectorAll("#panel-settings .preview-lang-btn").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(`btn-prop-${type}`).classList.add("active");
+
+      // Update titles and inputs
+      const singularName = type.replace("_levels", " Level").replace("_types", " Type").replace("categories", "Category").replace("cities", "City").replace("industries", "Industry");
+      document.getElementById("property-form-title").textContent = `Add New ${singularName}`;
+      document.getElementById("property-list-title").textContent = `${singularName} List`;
+
+      // Clear form inputs
+      document.getElementById("prop-id").value = "";
+      document.getElementById("prop-name-ku").value = "";
+      document.getElementById("prop-name-en").value = "";
+
+      renderPropertiesTable();
+    }
+
+    async function saveProperty() {
+      const id = document.getElementById("prop-id").value.trim().toLowerCase();
+      const nameKu = document.getElementById("prop-name-ku").value.trim();
+      const nameEn = document.getElementById("prop-name-en").value.trim();
+
+      if (!id || !nameKu || !nameEn) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+      const newItem = { id, name_ku: nameKu, name_en: nameEn };
+
+      try {
+        if (isDemo) {
+          let list = [];
+          if (currentPropertyType === "categories") { list = categoriesList; list.push(newItem); localStorage.setItem("local_categories", JSON.stringify(list)); }
+          else if (currentPropertyType === "cities") { list = citiesList; list.push(newItem); localStorage.setItem("local_cities", JSON.stringify(list)); }
+          else if (currentPropertyType === "industries") { list = industriesList; list.push(newItem); localStorage.setItem("local_industries", JSON.stringify(list)); }
+          else if (currentPropertyType === "job_types") { list = jobTypesList; list.push(newItem); localStorage.setItem("local_job_types", JSON.stringify(list)); }
+          else if (currentPropertyType === "experience_levels") { list = experienceLevelsList; list.push(newItem); localStorage.setItem("local_experience_levels", JSON.stringify(list)); }
+          
+          alert("Item successfully added locally!");
+          await loadProperties();
+        } else {
+          const { error } = await supabaseClient.from(currentPropertyType).insert([newItem]);
+          if (error) throw error;
+          alert("Item successfully added!");
+          await loadProperties();
+        }
+        
+        // Reset form
+        document.getElementById("prop-id").value = "";
+        document.getElementById("prop-name-ku").value = "";
+        document.getElementById("prop-name-en").value = "";
+      } catch (err) {
+        alert("Failed to add item: " + err.message);
+      }
+    }
+
+    async function deleteProperty(itemId) {
+      if (!confirm(`Are you sure you want to delete the item "${itemId}" from ${currentPropertyType}?`)) {
+        return;
+      }
+
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+
+      try {
+        if (isDemo) {
+          if (currentPropertyType === "categories") { categoriesList = categoriesList.filter(i => i.id !== itemId); localStorage.setItem("local_categories", JSON.stringify(categoriesList)); }
+          else if (currentPropertyType === "cities") { citiesList = citiesList.filter(i => i.id !== itemId); localStorage.setItem("local_cities", JSON.stringify(citiesList)); }
+          else if (currentPropertyType === "industries") { industriesList = industriesList.filter(i => i.id !== itemId); localStorage.setItem("local_industries", JSON.stringify(industriesList)); }
+          else if (currentPropertyType === "job_types") { jobTypesList = jobTypesList.filter(i => i.id !== itemId); localStorage.setItem("local_job_types", JSON.stringify(jobTypesList)); }
+          else if (currentPropertyType === "experience_levels") { experienceLevelsList = experienceLevelsList.filter(i => i.id !== itemId); localStorage.setItem("local_experience_levels", JSON.stringify(experienceLevelsList)); }
+          
+          alert("Item successfully deleted locally!");
+          await loadProperties();
+        } else {
+          const { error } = await supabaseClient.from(currentPropertyType).delete().eq("id", itemId);
+          if (error) throw error;
+          alert("Item successfully deleted!");
+          await loadProperties();
+        }
+      } catch (err) {
+        alert("Failed to delete item: " + err.message);
+      }
+    }
+
+    function populateDropdowns() {
+      populateSelect("form-city", citiesList, "erbil");
+      populateSelect("form-type", jobTypesList, "fullTime");
+      populateSelect("form-experience", experienceLevelsList, "junior");
+      populateSelect("form-category", categoriesList, "software");
+      populateSelect("form-industry", industriesList, "tech");
+
+      // Update translations mappings so the preview matches
+      categoriesList.forEach(item => {
+        if (!translations.ku.categories) translations.ku.categories = {};
+        if (!translations.en.categories) translations.en.categories = {};
+        translations.ku.categories[item.id] = item.name_ku;
+        translations.en.categories[item.id] = item.name_en;
+      });
+      citiesList.forEach(item => {
+        if (!translations.ku.cities) translations.ku.cities = {};
+        if (!translations.en.cities) translations.en.cities = {};
+        translations.ku.cities[item.id] = item.name_ku;
+        translations.en.cities[item.id] = item.name_en;
+      });
+      jobTypesList.forEach(item => {
+        if (!translations.ku.types) translations.ku.types = {};
+        if (!translations.en.types) translations.en.types = {};
+        translations.ku.types[item.id] = item.name_ku;
+        translations.en.types[item.id] = item.name_en;
+      });
+      experienceLevelsList.forEach(item => {
+        if (!translations.ku.experience) translations.ku.experience = {};
+        if (!translations.en.experience) translations.en.experience = {};
+        translations.ku.experience[item.id] = item.name_ku;
+        translations.en.experience[item.id] = item.name_en;
+      });
+
+      updateLivePreview();
+    }
+
+    function populateSelect(selectId, list, defaultValue) {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      const currentValue = select.value || defaultValue;
+      select.innerHTML = "";
+      
+      list.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item.id;
+        opt.textContent = `${item.name_en} (${item.name_ku})`;
+        select.appendChild(opt);
+      });
+      select.value = currentValue;
+    }
+  </script>
+</body>
+</html>
