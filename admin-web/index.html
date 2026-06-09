@@ -3009,7 +3009,7 @@
     }
 
     async function checkAuthSession() {
-      // First check local storage for demo session
+      // Check local storage for bypass session
       const savedDemo = localStorage.getItem("demo_session");
       if (savedDemo) {
         try {
@@ -3041,7 +3041,7 @@
       }
     }
 
-    // Authenticate with fallback to Offline/Demo mode if connection fails or credentials match
+    // Authenticate with fallback to Offline/Demo bypass ONLY for explicit admin credentials
     async function handleLogin() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
@@ -3060,34 +3060,20 @@
 
       try {
         if (!supabaseClient) {
-          console.warn("No Supabase client. Using local mock mode.");
-          session = { user: { email: email } };
-          localStorage.setItem("demo_session", JSON.stringify(session));
-          showMainApp();
-          return;
+          throw new Error("Supabase client is not initialized.");
         }
 
         // Try Supabase Auth
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) {
-          // Check for network errors
-          if (error.message.includes("fetch") || error.status === 0 || error.status === 500 || error.message.includes("Network")) {
-            console.warn("Supabase network error. Falling back to local mock mode.");
-            session = { user: { email: email } };
-            localStorage.setItem("demo_session", JSON.stringify(session));
-            showMainApp();
-            return;
-          }
-          throw error;
-        }
+        if (error) throw error;
         
         session = data.session;
         showMainApp();
       } catch (err) {
         console.error("Login error:", err);
-        // Admin credentials bypass for local offline testing
+        // Admin credentials bypass for local offline testing (requested by user)
         if (email === "admin@kurd24.job" && password === "admin123") {
-          console.warn("Bypassing Supabase error for local admin credentials.");
+          console.warn("Bypassing Supabase login for local admin credentials.");
           session = { user: { email: email } };
           localStorage.setItem("demo_session", JSON.stringify(session));
           showMainApp();
@@ -3397,7 +3383,8 @@
     // Database loaders
     async function loadData() {
       if (!supabaseClient) {
-        loadLocalMockData();
+        document.getElementById("active-mode").textContent = "Disconnected";
+        alert("Supabase client is not initialized.");
         return;
       }
       document.getElementById("active-mode").textContent = "Syncing...";
@@ -3412,60 +3399,12 @@
         document.getElementById("active-mode").textContent = "Live Syncing";
       } catch (e) {
         console.error("Load failed:", e);
-        loadLocalMockData();
+        document.getElementById("active-mode").textContent = "Sync Error";
+        jobsList = [];
+        populateTable();
+        calculateStats();
+        alert("Failed to load jobs from Supabase: " + e.message + "\n\nPlease make sure your database is configured correctly and your internet connection is active.");
       }
-    }
-
-    // Local Mock Data Loader
-    function loadLocalMockData() {
-      document.getElementById("active-mode").textContent = "Demo Mode (Local)";
-      const localJobs = localStorage.getItem("local_jobs");
-      if (localJobs) {
-        jobsList = JSON.parse(localJobs);
-      } else {
-        // Default mock jobs matching current schema
-        jobsList = [
-          {
-            id: "mock-1",
-            title_ku: "گەشەپێدەری ڕیاکت نەیتیڤ پێشکەوتوو",
-            title_en: "Senior React Native Developer",
-            company: "Kurd24 Tech",
-            city_en: "erbil",
-            category: "software",
-            salary: "$1,800 - $2,500",
-            status: "published",
-            views: 450,
-            clicks: 85,
-            created_at: new Date().toISOString(),
-            description_ku: "کۆمپانیای کورد٢٤ پێویستی بە گەشەپێدەرێکی لێهاتووی ڕیاکت نەیتیڤە بۆ بەڕێوەبردن و باشترکردنی کارایی ئەپەکەمان.",
-            description_en: "Kurd24 Tech is looking for a Senior React Native Developer to maintain and scale our mobile application.",
-            whatsapp: "9647501234567",
-            email: "jobs@kurd24.job",
-            images: ["https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&auto=format&fit=crop&q=60", "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=400&auto=format&fit=crop&q=60"]
-          },
-          {
-            id: "mock-2",
-            title_ku: "پسپۆڕی مارکێتینگ و سۆشیاڵ میدیا",
-            title_en: "Marketing & Social Media Specialist",
-            company: "Hewlêr Media Group",
-            city_en: "erbil",
-            category: "marketing",
-            salary: "$1,000 - $1,300",
-            status: "published",
-            views: 290,
-            clicks: 54,
-            created_at: new Date(Date.now() - 86400000).toISOString(),
-            description_ku: "ئێمە بەدوای کەسێکی لێهاتوودا دەگەڕێین بۆ ڕێکلامکردن و باشترکردنی بڵاوکراوەکانمان لە سۆشیاڵ میدیا.",
-            description_en: "We are seeking a talented marketer to optimize and scale our social media ads and audience growth.",
-            whatsapp: "9647509876543",
-            email: "apply@hewlermedia.com",
-            images: ["https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&auto=format&fit=crop&q=60"]
-          }
-        ];
-        localStorage.setItem("local_jobs", JSON.stringify(jobsList));
-      }
-      populateTable();
-      calculateStats();
     }
 
     // Populate Jobs Inventory Table
@@ -3926,21 +3865,12 @@
         return;
       }
 
-      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
-
       try {
-        if (isDemo) {
-          jobsList = jobsList.filter(j => j.id !== jobId);
-          localStorage.setItem("local_jobs", JSON.stringify(jobsList));
-          alert("Listing successfully deleted locally!");
-          populateTable();
-          calculateStats();
-        } else {
-          const { error } = await supabaseClient.from("jobs").delete().eq("id", jobId);
-          if (error) throw error;
-          alert("Listing successfully deleted!");
-          loadData();
-        }
+        if (!supabaseClient) throw new Error("Supabase client is not connected.");
+        const { error } = await supabaseClient.from("jobs").delete().eq("id", jobId);
+        if (error) throw error;
+        alert("Listing successfully deleted!");
+        loadData();
       } catch (e) {
         alert("Failed to delete: " + e.message);
       }
@@ -4001,39 +3931,19 @@
         status: isPublished ? "published" : "draft"
       };
 
-      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
-
       try {
-        if (isDemo) {
-          if (editModeJobId) {
-            const idx = jobsList.findIndex(j => j.id === editModeJobId);
-            if (idx !== -1) {
-              jobsList[idx] = { ...jobsList[idx], ...payload, updated_at: new Date().toISOString() };
-            }
-          } else {
-            const newJob = {
-              id: "mock-" + Date.now(),
-              ...payload,
-              views: 0,
-              clicks: 0,
-              created_at: new Date().toISOString()
-            };
-            jobsList.unshift(newJob);
-          }
-          localStorage.setItem("local_jobs", JSON.stringify(jobsList));
-          alert("Job announcement successfully saved locally (Demo Mode)!");
+        if (!supabaseClient) throw new Error("Supabase client is not connected.");
+
+        if (editModeJobId) {
+          // Update
+          const { error } = await supabaseClient.from("jobs").update(payload).eq("id", editModeJobId);
+          if (error) throw error;
+          alert("Job announcement successfully updated!");
         } else {
-          if (editModeJobId) {
-            // Update
-            const { error } = await supabaseClient.from("jobs").update(payload).eq("id", editModeJobId);
-            if (error) throw error;
-            alert("Job announcement successfully updated!");
-          } else {
-            // Insert
-            const { error } = await supabaseClient.from("jobs").insert([payload]);
-            if (error) throw error;
-            alert("New job announcement successfully published!");
-          }
+          // Insert
+          const { error } = await supabaseClient.from("jobs").insert([payload]);
+          if (error) throw error;
+          alert("New job announcement successfully published!");
         }
         
         clearEditorForm();
@@ -4052,72 +3962,8 @@
     let experienceLevelsList = [];
 
     async function loadProperties() {
-      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
-
-      if (isDemo) {
-        // Setup offline fallbacks first
-        const savedCats = localStorage.getItem("local_categories");
-        const savedCities = localStorage.getItem("local_cities");
-        const savedInds = localStorage.getItem("local_industries");
-        const savedTypes = localStorage.getItem("local_job_types");
-        const savedExps = localStorage.getItem("local_experience_levels");
-
-        if (savedCats) categoriesList = JSON.parse(savedCats);
-        else {
-          categoriesList = Object.entries(translations.en.categories || {}).filter(([k]) => k !== 'all').map(([id]) => ({
-            id,
-            name_ku: (translations.ku.categories || {})[id] || id,
-            name_en: (translations.en.categories || {})[id] || id
-          }));
-          localStorage.setItem("local_categories", JSON.stringify(categoriesList));
-        }
-
-        if (savedCities) citiesList = JSON.parse(savedCities);
-        else {
-          citiesList = Object.entries(translations.en.cities || {}).filter(([k]) => k !== 'all').map(([id]) => ({
-            id,
-            name_ku: (translations.ku.cities || {})[id] || id,
-            name_en: (translations.en.cities || {})[id] || id
-          }));
-          localStorage.setItem("local_cities", JSON.stringify(citiesList));
-        }
-
-        if (savedInds) industriesList = JSON.parse(savedInds);
-        else {
-          industriesList = [
-            { id: "tech", name_ku: "تەکنەلۆژیا و نەرمەکاڵا", name_en: "Tech & Software" },
-            { id: "health", name_ku: "تەندروستی و پزیشکی", name_en: "Health & Medical" },
-            { id: "education", name_ku: "پەروەردە", name_en: "Education" },
-            { id: "retail", name_ku: "فرۆشتن و بازرگانی", name_en: "Sales & Retail" },
-            { id: "finance", name_ku: "دارایی و بانک", name_en: "Finance & Banking" },
-            { id: "engineering", name_ku: "ئەندازیاری", name_en: "Engineering" },
-            { id: "media", name_ku: "میدیا و پەیوەندییەکان", name_en: "Media & PR" }
-          ];
-          localStorage.setItem("local_industries", JSON.stringify(industriesList));
-        }
-
-        if (savedTypes) jobTypesList = JSON.parse(savedTypes);
-        else {
-          jobTypesList = Object.entries(translations.en.types || {}).filter(([k]) => k !== 'all').map(([id]) => ({
-            id,
-            name_ku: (translations.ku.types || {})[id] || id,
-            name_en: (translations.en.types || {})[id] || id
-          }));
-          localStorage.setItem("local_job_types", JSON.stringify(jobTypesList));
-        }
-
-        if (savedExps) experienceLevelsList = JSON.parse(savedExps);
-        else {
-          experienceLevelsList = Object.entries(translations.en.experience || {}).filter(([k]) => k !== 'all').map(([id]) => ({
-            id,
-            name_ku: (translations.ku.experience || {})[id] || id,
-            name_en: (translations.en.experience || {})[id] || id
-          }));
-          localStorage.setItem("local_experience_levels", JSON.stringify(experienceLevelsList));
-        }
-
-        renderPropertiesTable();
-        populateDropdowns();
+      if (!supabaseClient) {
+        console.error("Supabase client is not initialized.");
         return;
       }
 
@@ -4131,6 +3977,12 @@
           supabaseClient.from("experience_levels").select("*").order("created_at", { ascending: true })
         ]);
 
+        if (cats.error) throw cats.error;
+        if (cits.error) throw cits.error;
+        if (indus.error) throw indus.error;
+        if (jtypes.error) throw jtypes.error;
+        if (exps.error) throw exps.error;
+
         if (cats.data) categoriesList = cats.data;
         if (cits.data) citiesList = cits.data;
         if (indus.data) industriesList = indus.data;
@@ -4141,8 +3993,14 @@
         populateDropdowns();
       } catch (err) {
         console.error("Failed to load properties from database:", err);
+        categoriesList = [];
+        citiesList = [];
+        industriesList = [];
+        jobTypesList = [];
+        experienceLevelsList = [];
         renderPropertiesTable();
         populateDropdowns();
+        alert("Failed to load properties from database: " + err.message + "\n\nTip: You might be missing some tables in Supabase. Check the DB Status under Settings.");
       }
     }
 
@@ -4209,26 +4067,14 @@
         return;
       }
 
-      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
       const newItem = { id, name_ku: nameKu, name_en: nameEn };
 
       try {
-        if (isDemo) {
-          let list = [];
-          if (currentPropertyType === "categories") { list = categoriesList; list.push(newItem); localStorage.setItem("local_categories", JSON.stringify(list)); }
-          else if (currentPropertyType === "cities") { list = citiesList; list.push(newItem); localStorage.setItem("local_cities", JSON.stringify(list)); }
-          else if (currentPropertyType === "industries") { list = industriesList; list.push(newItem); localStorage.setItem("local_industries", JSON.stringify(list)); }
-          else if (currentPropertyType === "job_types") { list = jobTypesList; list.push(newItem); localStorage.setItem("local_job_types", JSON.stringify(list)); }
-          else if (currentPropertyType === "experience_levels") { list = experienceLevelsList; list.push(newItem); localStorage.setItem("local_experience_levels", JSON.stringify(list)); }
-          
-          alert("Item successfully added locally!");
-          await loadProperties();
-        } else {
-          const { error } = await supabaseClient.from(currentPropertyType).insert([newItem]);
-          if (error) throw error;
-          alert("Item successfully added!");
-          await loadProperties();
-        }
+        if (!supabaseClient) throw new Error("Supabase client is not connected.");
+        const { error } = await supabaseClient.from(currentPropertyType).insert([newItem]);
+        if (error) throw error;
+        alert("Item successfully added!");
+        await loadProperties();
         
         // Reset form
         document.getElementById("prop-id").value = "";
@@ -4244,24 +4090,12 @@
         return;
       }
 
-      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
-
       try {
-        if (isDemo) {
-          if (currentPropertyType === "categories") { categoriesList = categoriesList.filter(i => i.id !== itemId); localStorage.setItem("local_categories", JSON.stringify(categoriesList)); }
-          else if (currentPropertyType === "cities") { citiesList = citiesList.filter(i => i.id !== itemId); localStorage.setItem("local_cities", JSON.stringify(citiesList)); }
-          else if (currentPropertyType === "industries") { industriesList = industriesList.filter(i => i.id !== itemId); localStorage.setItem("local_industries", JSON.stringify(industriesList)); }
-          else if (currentPropertyType === "job_types") { jobTypesList = jobTypesList.filter(i => i.id !== itemId); localStorage.setItem("local_job_types", JSON.stringify(jobTypesList)); }
-          else if (currentPropertyType === "experience_levels") { experienceLevelsList = experienceLevelsList.filter(i => i.id !== itemId); localStorage.setItem("local_experience_levels", JSON.stringify(experienceLevelsList)); }
-          
-          alert("Item successfully deleted locally!");
-          await loadProperties();
-        } else {
-          const { error } = await supabaseClient.from(currentPropertyType).delete().eq("id", itemId);
-          if (error) throw error;
-          alert("Item successfully deleted!");
-          await loadProperties();
-        }
+        if (!supabaseClient) throw new Error("Supabase client is not connected.");
+        const { error } = await supabaseClient.from(currentPropertyType).delete().eq("id", itemId);
+        if (error) throw error;
+        alert("Item successfully deleted!");
+        await loadProperties();
       } catch (err) {
         alert("Failed to delete item: " + err.message);
       }
