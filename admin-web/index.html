@@ -2573,6 +2573,30 @@
       root.style.setProperty('--accent', accentColor);
       root.style.setProperty('--accent-glow', hexToRgbaCSS(accentColor, 0.15));
       root.style.setProperty('--border-radius', borderRadius);
+
+      // Apply dynamic global font if configured
+      if (settings.fontUrl) {
+        let fontStyle = document.getElementById("dynamic-font-style");
+        if (!fontStyle) {
+          fontStyle = document.createElement("style");
+          fontStyle.id = "dynamic-font-style";
+          document.head.appendChild(fontStyle);
+        }
+        fontStyle.textContent = `
+          @font-face {
+            font-family: 'CustomAppFont';
+            src: url('${settings.fontUrl}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+          }
+          body, html, input, button, select, textarea, div, span, h1, h2, h3, h4, h5, h6, td, th, label {
+            font-family: 'CustomAppFont', 'Vazirmatn', sans-serif !important;
+          }
+        `;
+      } else {
+        const fontStyle = document.getElementById("dynamic-font-style");
+        if (fontStyle) fontStyle.remove();
+      }
     }
 
     async function loadSystemStyle() {
