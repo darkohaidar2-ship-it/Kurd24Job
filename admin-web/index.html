@@ -3233,7 +3233,7 @@
         return;
       }
 
-      container.innerHTML = \`<div style="text-align:center; padding:10px;"><span style="display:inline-block; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--primary); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite;"></span> checking database...</div>\`;
+      container.innerHTML = '<div style="text-align:center; padding:10px;"><span style="display:inline-block; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--primary); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite;"></span> checking database...</div>';
 
       const tablesToCheck = [
         { name: "system_settings", required: true },
@@ -3266,7 +3266,7 @@
         container.innerHTML = `
           <div class="error-msg" style="display:block; margin-bottom:15px; border-color:#eab308; background:rgba(234,179,8,0.05); color:#eab308; line-height: 1.6;">
             <strong>⚠️ Missing Database Tables Detected (خشتەی ناتەواو لە بنکەی داتا)</strong><br>
-            The following tables are missing from your Supabase database: <strong>\${missingList.join(', ')}</strong>.<br>
+            The following tables are missing from your Supabase database: <strong>${missingList.join(', ')}</strong>.<br>
             Please run the SQL setup script from <a href="file:///C:/Users/Diwan-ashley/.gemini/antigravity/brain/83fc1c21-75a4-41ee-9c96-aaa8cecc3884/implementation_plan.md" target="_blank" style="text-decoration:underline;color:currentColor;"><strong>Implementation Plan</strong></a> inside your Supabase Dashboard SQL Editor to establish connections.
           </div>
         `;
@@ -3299,7 +3299,7 @@
         await Promise.all(tables.map(async (tableName) => {
           const { data, error } = await supabaseClient.from(tableName).select("*");
           if (error) {
-            console.warn(\`Could not export table \${tableName}:\`, error.message);
+            console.warn(`Could not export table ${tableName}:`, error.message);
             backupData.data[tableName] = [];
           } else {
             backupData.data[tableName] = data || [];
@@ -3313,7 +3313,7 @@
         const a = document.createElement("a");
         a.href = url;
         const dateStr = new Date().toISOString().split('T')[0];
-        a.download = `kurd24-job-backup-\${dateStr}.json`;
+        a.download = `kurd24-job-backup-${dateStr}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -3356,19 +3356,19 @@
           for (const table of tables) {
             const rows = backup.data[table];
             if (!rows || rows.length === 0) {
-              results.push(\`\${table}: 0 restored (empty)\`);
+              results.push(`${table}: 0 restored (empty)`);
               continue;
             }
 
-            console.log(\`Restoring table \${table} with \${rows.length} rows...\`);
+            console.log(`Restoring table ${table} with ${rows.length} rows...`);
             const { error } = await supabaseClient.from(table).upsert(rows);
             if (error) {
-              throw new Error(\`Failed to restore table \${table}: \${error.message}\`);
+              throw new Error(`Failed to restore table ${table}: ${error.message}`);
             }
-            results.push(\`\${table}: \${rows.length} rows restored/updated\`);
+            results.push(`${table}: ${rows.length} rows restored/updated`);
           }
 
-          alert("Backup Restored Successfully!\\n\\n" + results.join("\\n"));
+          alert("Backup Restored Successfully!\n\n" + results.join("\n"));
           
           // Reload page data
           loadData();
