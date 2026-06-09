@@ -326,12 +326,13 @@
 
         // Apply Logo
         if (settings.logoUrl) {
+          const logoUrlWithCacheBuster = settings.logoUrl + (settings.logoUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
           const logoImg = document.querySelector('.logo-img');
-          if (logoImg) logoImg.src = settings.logoUrl;
+          if (logoImg) logoImg.src = logoUrlWithCacheBuster;
           
           // Apple touch icon
           const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
-          if (appleIcon) appleIcon.href = settings.logoUrl;
+          if (appleIcon) appleIcon.href = logoUrlWithCacheBuster;
         }
 
         downloadType = settings.downloadType || 'apk';

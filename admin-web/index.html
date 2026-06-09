@@ -1944,6 +1944,10 @@
             <i data-lucide="palette"></i>
             <span>Branding & Design (براندینگ و دیزاین)</span>
           </button>
+          <button class="subtab-btn" id="btn-settings-backup" onclick="switchSettingsSubTab('backup')">
+            <i data-lucide="archive"></i>
+            <span>Backup & Restore (پاڵپشتگیری داتا)</span>
+          </button>
         </div>
 
         <!-- SUB PANEL 1: App Data -->
@@ -2170,9 +2174,61 @@
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </div> <!-- Closes sub-panel-settings-branding -->
+
+      <!-- SUB PANEL 3: Backup & Restore -->
+      <div id="sub-panel-settings-backup" class="settings-subpanel">
+        <div id="settings-db-status-container" style="margin-bottom: 20px; width: 100%;">
+          <!-- Database health/status loaded dynamically -->
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%;">
+          <!-- Export Card -->
+          <div class="editor-card glass glow-hover" style="padding: 25px; display: flex; flex-direction: column; justify-content: space-between; min-height: 250px;">
+            <div>
+              <div class="card-icon-header" style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:var(--primary-glow); display:flex; align-items:center; justify-content:center; color:var(--primary);">
+                  <i data-lucide="download"></i>
+                </div>
+                <h3 style="font-size:18px; font-weight:700;">خەزنکردنی داتاکان (Export Backup)</h3>
+              </div>
+              <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:20px;">
+                کۆپییەکی تەواو لە سەرجەم هەلی کارەکان، کاتیگۆرییەکان، شارەکان، بوارەکان، و ڕێکخستنەکانی دیزاین دابەزێنە بۆ پاراستنیان.
+              </p>
+            </div>
+            <button class="login-btn" onclick="exportFullBackup()" style="width: 100%; background:var(--primary); margin-top: auto;">
+              <i data-lucide="download-cloud" style="width:16px; height:16px;"></i>
+              <span>داگرتنی کۆپی داتا (Export Backup)</span>
+            </button>
+          </div>
+
+          <!-- Import Card -->
+          <div class="editor-card glass glow-hover" style="padding: 25px; display: flex; flex-direction: column; justify-content: space-between; min-height: 250px;">
+            <div>
+              <div class="card-icon-header" style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:var(--accent-glow); display:flex; align-items:center; justify-content:center; color:var(--accent);">
+                  <i data-lucide="upload"></i>
+                </div>
+                <h3 style="font-size:18px; font-weight:700;">هێنانەوەی داتاکان (Import Restore)</h3>
+              </div>
+              <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:20px;">
+                فایلێکی پاڵپشتی داتا (JSON) هەڵبژێرە بۆ هێنانەوە و تێکەڵکردنەوەی هەموو کارەکان و ڕێکخستنەکان لەگەڵ Supabase.
+              </p>
+            </div>
+            
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <input type="file" id="import-backup-file" accept=".json" class="input-field" style="padding: 8px;">
+              </div>
+              <button class="login-btn" id="btn-import-backup" onclick="importFullBackup()" style="width: 100%; background:var(--accent);">
+                <i data-lucide="upload-cloud" style="width:16px; height:16px;"></i>
+                <span>دەستپێکردنی هێنانەوە (Import Restore)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div> <!-- Closes panel-settings -->
 
     <!-- APP DISTRIBUTION PANEL -->
@@ -2586,11 +2642,12 @@
 
       // Set logo references
       if (settings.logoUrl) {
+        const logoUrlWithCacheBuster = settings.logoUrl + (settings.logoUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
         document.querySelectorAll('.brand-logo-img').forEach(img => {
-          img.src = settings.logoUrl;
+          img.src = logoUrlWithCacheBuster;
         });
         const prevImg = document.getElementById("system-logo-preview-img");
-        if (prevImg) prevImg.src = settings.logoUrl;
+        if (prevImg) prevImg.src = logoUrlWithCacheBuster;
       }
 
       // Set active font display name
@@ -2711,9 +2768,10 @@
           if (saveError) throw saveError;
           
           alert('System logo updated successfully!');
-          document.getElementById("system-logo-preview-img").src = logoUrl;
+          const logoUrlWithCacheBuster = logoUrl + (logoUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+          document.getElementById("system-logo-preview-img").src = logoUrlWithCacheBuster;
           document.querySelectorAll('.brand-logo-img').forEach(img => {
-            img.src = logoUrl;
+            img.src = logoUrlWithCacheBuster;
           });
         } else {
           // Demo fallback
@@ -3070,6 +3128,7 @@
       document.getElementById("avatar-letter").textContent = session.user.email.substring(0, 1).toUpperCase();
       loadData();
       loadProperties();
+      checkDatabaseIntegrity();
     }
 
     // Tab Switching
@@ -3151,8 +3210,188 @@
         document.getElementById("btn-settings-branding").classList.add("active");
         updateSimulatorColor();
         updateSimulatorRadius();
+      } else if (subTabName === 'backup') {
+        document.getElementById("sub-panel-settings-backup").classList.add("active");
+        document.getElementById("btn-settings-backup").classList.add("active");
+        checkDatabaseIntegrity();
       }
       lucide.createIcons();
+    }
+
+    // Database check & warning UI
+    async function checkDatabaseIntegrity() {
+      const container = document.getElementById("settings-db-status-container");
+      if (!container) return;
+
+      if (!supabaseClient) {
+        container.innerHTML = `
+          <div class="error-msg" style="display:block; margin-bottom:15px; border-color:var(--accent); background:rgba(244,114,182,0.05); color:var(--accent);">
+            <strong>⚠️ Demo Mode / No Supabase Connection</strong><br>
+            Please configure your Supabase URL and Anon Key to test live database syncing.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = \`<div style="text-align:center; padding:10px;"><span style="display:inline-block; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--primary); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite;"></span> checking database...</div>\`;
+
+      const tablesToCheck = [
+        { name: "system_settings", required: true },
+        { name: "jobs", required: true },
+        { name: "categories", required: false },
+        { name: "cities", required: false },
+        { name: "industries", required: false },
+        { name: "job_types", required: false },
+        { name: "experience_levels", required: false }
+      ];
+
+      const results = {};
+
+      await Promise.all(tablesToCheck.map(async (table) => {
+        try {
+          const { error } = await supabaseClient.from(table.name).select("*").limit(1);
+          if (error) {
+            results[table.name] = false;
+          } else {
+            results[table.name] = true;
+          }
+        } catch (e) {
+          results[table.name] = false;
+        }
+      }));
+
+      const missingList = Object.entries(results).filter(([_, exists]) => !exists).map(([name]) => name);
+
+      if (missingList.length > 0) {
+        container.innerHTML = `
+          <div class="error-msg" style="display:block; margin-bottom:15px; border-color:#eab308; background:rgba(234,179,8,0.05); color:#eab308; line-height: 1.6;">
+            <strong>⚠️ Missing Database Tables Detected (خشتەی ناتەواو لە بنکەی داتا)</strong><br>
+            The following tables are missing from your Supabase database: <strong>\${missingList.join(', ')}</strong>.<br>
+            Please run the SQL setup script from <a href="file:///C:/Users/Diwan-ashley/.gemini/antigravity/brain/83fc1c21-75a4-41ee-9c96-aaa8cecc3884/implementation_plan.md" target="_blank" style="text-decoration:underline;color:currentColor;"><strong>Implementation Plan</strong></a> inside your Supabase Dashboard SQL Editor to establish connections.
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px; padding:10px 15px; border-radius:8px; background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.2); color:var(--success); font-size:13px;">
+            <i data-lucide="check-circle" style="width:16px; height:16px;"></i>
+            <strong>All Supabase Database Tables are Connective and Healthy! (هەموو خشتەکان جێگیرن)</strong>
+          </div>
+        `;
+        lucide.createIcons();
+      }
+    }
+
+    // Export Backup Logic
+    async function exportFullBackup() {
+      if (!supabaseClient) {
+        alert("Cannot export backup in Demo mode. Please connect to Supabase first.");
+        return;
+      }
+
+      try {
+        const tables = ["jobs", "system_settings", "categories", "cities", "industries", "job_types", "experience_levels"];
+        const backupData = {
+          exportDate: new Date().toISOString(),
+          version: "1.0.0",
+          data: {}
+        };
+
+        await Promise.all(tables.map(async (tableName) => {
+          const { data, error } = await supabaseClient.from(tableName).select("*");
+          if (error) {
+            console.warn(\`Could not export table \${tableName}:\`, error.message);
+            backupData.data[tableName] = [];
+          } else {
+            backupData.data[tableName] = data || [];
+          }
+        }));
+
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement("a");
+        a.href = url;
+        const dateStr = new Date().toISOString().split('T')[0];
+        a.download = `kurd24-job-backup-\${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert("Failed to export backup: " + e.message);
+      }
+    }
+
+    // Import Backup Logic
+    async function importFullBackup() {
+      const fileInput = document.getElementById("import-backup-file");
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        alert("Please select a JSON backup file first.");
+        return;
+      }
+
+      if (!supabaseClient) {
+        alert("Cannot import backup in Demo mode. Please connect to Supabase first.");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      const importBtn = document.getElementById("btn-import-backup");
+      importBtn.disabled = true;
+      importBtn.textContent = "Restoring...";
+
+      reader.onload = async (e) => {
+        try {
+          const backup = JSON.parse(e.target.result);
+          if (!backup.data || typeof backup.data !== 'object') {
+            throw new Error("Invalid backup file format (missing 'data' object).");
+          }
+
+          const tables = ["system_settings", "categories", "cities", "industries", "job_types", "experience_levels", "jobs"];
+          const results = [];
+
+          for (const table of tables) {
+            const rows = backup.data[table];
+            if (!rows || rows.length === 0) {
+              results.push(\`\${table}: 0 restored (empty)\`);
+              continue;
+            }
+
+            console.log(\`Restoring table \${table} with \${rows.length} rows...\`);
+            const { error } = await supabaseClient.from(table).upsert(rows);
+            if (error) {
+              throw new Error(\`Failed to restore table \${table}: \${error.message}\`);
+            }
+            results.push(\`\${table}: \${rows.length} rows restored/updated\`);
+          }
+
+          alert("Backup Restored Successfully!\\n\\n" + results.join("\\n"));
+          
+          // Reload page data
+          loadData();
+          loadSystemStyle();
+          loadProperties();
+          checkDatabaseIntegrity();
+        } catch (err) {
+          alert("Restore failed: " + err.message);
+        } finally {
+          importBtn.disabled = false;
+          importBtn.innerHTML = '<i data-lucide="upload-cloud" style="width:16px;height:16px;"></i><span>دەستپێکردنی هێنانەوە (Import Restore)</span>';
+          lucide.createIcons();
+        }
+      };
+
+      reader.onerror = () => {
+        alert("Failed to read file.");
+        importBtn.disabled = false;
+        importBtn.innerHTML = '<i data-lucide="upload-cloud" style="width:16px;height:16px;"></i><span>دەستپێکردنی هێنانەوە (Import Restore)</span>';
+        lucide.createIcons();
+      };
+
+      reader.readAsText(file);
     }
 
     // Database loaders
