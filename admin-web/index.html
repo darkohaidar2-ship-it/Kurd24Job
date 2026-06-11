@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kurd24 Job - Admin Portal</title>
-  <!-- Google Fonts Vazirmatn -->
+  <!-- Google Fonts Vazirmatn + NRT (load NRT via @font-face when font file is available) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,34 +14,34 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
-      --primary: #818cf8;
-      --primary-glow: rgba(129, 140, 248, 0.15);
-      --accent: #f472b6;
-      --accent-glow: rgba(244, 114, 182, 0.15);
+      --primary: #00D4AA;
+      --primary-glow: rgba(0, 212, 170, 0.15);
+      --accent: #FFB800;
+      --accent-glow: rgba(255, 184, 0, 0.15);
       --success: #34d399;
       --success-glow: rgba(52, 211, 153, 0.15);
-      --background: #0b0f19;
-      --card-bg: rgba(15, 23, 42, 0.6);
-      --card-border: rgba(255, 255, 255, 0.08);
+      --background: #0A0A0F;
+      --card-bg: rgba(18, 18, 28, 0.85);
+      --card-border: rgba(255, 255, 255, 0.06);
       --text: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
       --border: rgba(255, 255, 255, 0.05);
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      --input-bg: rgba(15, 23, 42, 0.6);
-      --border-radius: 16px;
+      --input-bg: rgba(18, 18, 28, 0.6);
+      --border-radius: 8px;
     }
 
     body.light-mode {
-      --background: #f8fafc;
-      --card-bg: rgba(255, 255, 255, 0.75);
-      --card-border: rgba(15, 23, 42, 0.08);
+      --background: #FAFAFA;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-border: rgba(0, 0, 0, 0.06);
       --text: #0f172a;
       --text-secondary: #475569;
       --text-muted: #64748b;
       --border: rgba(15, 23, 42, 0.05);
-      --primary-glow: rgba(99, 102, 241, 0.1);
-      --accent-glow: rgba(236, 72, 153, 0.1);
+      --primary-glow: rgba(0, 158, 126, 0.1);
+      --accent-glow: rgba(212, 148, 13, 0.1);
       --success-glow: rgba(16, 185, 129, 0.1);
       --input-bg: rgba(0, 0, 0, 0.05);
     }
@@ -59,15 +59,15 @@
       overflow-x: hidden;
       min-height: 100vh;
       background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.08) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(0, 212, 170, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 184, 0, 0.08) 0px, transparent 50%);
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     body.light-mode {
       background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.04) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(0, 212, 170, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 184, 0, 0.04) 0px, transparent 50%);
     }
 
     /* Scrollbars */
@@ -98,8 +98,8 @@
     }
 
     .glow-hover:hover {
-      border-color: rgba(129, 140, 248, 0.3);
-      box-shadow: 0 0 20px 0 rgba(129, 140, 248, 0.15);
+      border-color: rgba(0, 212, 170, 0.3);
+      box-shadow: 0 0 20px 0 rgba(0, 212, 170, 0.15);
     }
 
     /* Login Screen */
@@ -129,7 +129,7 @@
       justify-content: center;
       align-items: center;
       margin: 0 auto 20px;
-      box-shadow: 0 0 15px rgba(129, 140, 248, 0.2);
+      box-shadow: 0 0 15px rgba(0, 212, 170, 0.2);
     }
 
     .logo-container i {
@@ -182,7 +182,7 @@
     .input-field:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 10px rgba(129, 140, 248, 0.25);
+      box-shadow: 0 0 10px rgba(0, 212, 170, 0.25);
     }
 
     .login-btn {
@@ -197,7 +197,7 @@
       cursor: pointer;
       transition: var(--transition);
       margin-top: 10px;
-      box-shadow: 0 4px 15px rgba(129, 140, 248, 0.25);
+      box-shadow: 0 4px 15px rgba(0, 212, 170, 0.25);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -205,9 +205,9 @@
     }
 
     .login-btn:hover {
-      background: #707df0;
+      background: #00B892;
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(129, 140, 248, 0.35);
+      box-shadow: 0 6px 20px rgba(0, 212, 170, 0.35);
     }
 
     .login-btn:active {
@@ -216,8 +216,8 @@
 
     .error-msg {
       color: var(--accent);
-      background: rgba(244, 114, 182, 0.1);
-      border: 1px solid rgba(244, 114, 182, 0.2);
+      background: rgba(255, 184, 0, 0.1);
+      border: 1px solid rgba(255, 184, 0, 0.2);
       border-radius: 8px;
       padding: 10px 12px;
       font-size: 13px;
@@ -367,7 +367,7 @@
     }
 
     .logout-btn:hover {
-      background: rgba(244, 114, 182, 0.05);
+      background: rgba(255, 184, 0, 0.05);
       border-color: var(--accent);
       color: var(--accent);
     }
@@ -557,7 +557,7 @@
     .badge-draft {
       background: var(--primary-glow);
       color: var(--primary);
-      border: 1px solid rgba(129, 140, 248, 0.2);
+      border: 1px solid rgba(0, 212, 170, 0.2);
     }
 
     .actions-cell {
@@ -585,7 +585,7 @@
     }
 
     .action-btn.btn-delete:hover {
-      background: rgba(244, 114, 182, 0.1);
+      background: rgba(255, 184, 0, 0.1);
       border-color: var(--accent);
       color: var(--accent);
     }
@@ -661,7 +661,7 @@
 
     .upload-slot:hover {
       border-color: var(--primary);
-      background: rgba(129, 140, 248, 0.05);
+      background: rgba(0, 212, 170, 0.05);
     }
 
     .upload-slot.uploaded {
@@ -782,8 +782,8 @@
       flex-direction: column;
       background: #070a13;
       background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.04) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(0, 212, 170, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 184, 0, 0.04) 0px, transparent 50%);
     }
 
     .preview-lang-bar {
@@ -825,6 +825,38 @@
       background: rgba(21, 30, 40, 0.92);
       border-color: rgba(255, 255, 255, 0.25);
       color: #f8fafc;
+    }
+
+    .card-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .card-chip {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 7.5px;
+      font-weight: 700;
+    }
+    
+    .card-chip.primary {
+      background: rgba(0, 212, 170, 0.12);
+      color: #00D4AA;
+    }
+    
+    .card-chip.accent {
+      background: rgba(255, 184, 0, 0.12);
+      color: #FFB800;
+    }
+    
+    .card-chip.success {
+      background: rgba(52, 211, 153, 0.12);
+      color: #34d399;
     }
 
     .card-header {
@@ -1197,7 +1229,7 @@
       display: none;
     }
     body:not(.light-mode) .moon-icon {
-      color: #818cf8;
+      color: #00D4AA;
       display: block;
     }
 
@@ -1606,18 +1638,18 @@
               <text x="380" y="225" fill="#94a3b8" font-size="12" text-anchor="middle" font-weight="600">Total Applies</text>
 
               <!-- Values labels -->
-              <text id="chart-val-views" x="220" y="190" fill="#818cf8" font-size="16" font-weight="800" text-anchor="middle">0</text>
-              <text id="chart-val-applies" x="380" y="190" fill="#f472b6" font-size="16" font-weight="800" text-anchor="middle">0</text>
+              <text id="chart-val-views" x="220" y="190" fill="#00D4AA" font-size="16" font-weight="800" text-anchor="middle">0</text>
+              <text id="chart-val-applies" x="380" y="190" fill="#FFB800" font-size="16" font-weight="800" text-anchor="middle">0</text>
               
               <!-- Definitions -->
               <defs>
                 <linearGradient id="grad-views" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#818cf8"></stop>
-                  <stop offset="100%" stop-color="rgba(129, 140, 248, 0.2)"></stop>
+                  <stop offset="0%" stop-color="#00D4AA"></stop>
+                  <stop offset="100%" stop-color="rgba(0, 212, 170, 0.2)"></stop>
                 </linearGradient>
                 <linearGradient id="grad-applies" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#f472b6"></stop>
-                  <stop offset="100%" stop-color="rgba(244, 114, 182, 0.2)"></stop>
+                  <stop offset="0%" stop-color="#FFB800"></stop>
+                  <stop offset="100%" stop-color="rgba(255, 184, 0, 0.2)"></stop>
                 </linearGradient>
               </defs>
             </svg>
@@ -1656,157 +1688,117 @@
           <div class="editor-card glass">
             <h3 class="chart-title" style="margin-bottom:20px;" id="editor-action-title">Create New Job Announcement</h3>
             
+            <!-- Hidden Fields with Defaults for Database Integrity & JS Compatibility -->
+            <div style="display: none;">
+              <input type="text" id="form-company" value="Kurd24">
+              <input type="checkbox" id="form-status" checked>
+              <input type="text" id="form-title-en" value="">
+              <input type="text" id="form-salary" value="ڕێککەوتن">
+              <input type="hidden" id="form-logo-url" value="">
+              <div id="logo-upload-slot"></div>
+              <span id="logo-status-label"></span>
+              
+              <select id="form-city">
+                <option value="erbil" selected>Erbil (Hewlêr)</option>
+                <option value="sulaymaniyah">Sulaymaniyah (Silêmanî)</option>
+                <option value="duhok">Duhok (Duhok)</option>
+                <option value="halabja">Halabja</option>
+                <option value="kirkuk">Kirkuk</option>
+                <option value="remote">Remote</option>
+              </select>
+              
+              <select id="form-type">
+                <option value="fullTime" selected>Full-time</option>
+                <option value="partTime">Part-time</option>
+                <option value="contract">Contract</option>
+                <option value="remote">Remote</option>
+              </select>
+              
+              <select id="form-experience">
+                <option value="junior">Junior</option>
+                <option value="mid" selected>Mid-level</option>
+                <option value="senior">Senior</option>
+                <option value="lead">Lead / Manager</option>
+              </select>
+              
+              <select id="form-category">
+                <option value="software" selected>Software Development</option>
+                <option value="design">Design & Creative</option>
+                <option value="marketing">Marketing & Sales</option>
+                <option value="finance">Finance & Accounting</option>
+                <option value="education">Education & Teaching</option>
+                <option value="translation">Translation & Content</option>
+                <option value="engineering">Engineering & Operations</option>
+              </select>
+              
+              <select id="form-industry">
+                <option value="tech" selected>Tech & Software</option>
+                <option value="health">Health & Medical</option>
+                <option value="education">Education</option>
+                <option value="retail">Sales & Retail</option>
+                <option value="finance">Finance & Banking</option>
+                <option value="engineering">Engineering</option>
+                <option value="media">Media & PR</option>
+              </select>
+              
+              <textarea id="form-desc-en"></textarea>
+              <textarea id="form-req-ku">-</textarea>
+              <textarea id="form-req-en">-</textarea>
+            </div>
+
+            <!-- Visible Simplified Form Fields -->
             <div class="form-row">
-              <div class="form-group">
-                <label>Company Name *</label>
-                <input type="text" id="form-company" class="input-field" placeholder=" Hewlêr Agency" oninput="updateLivePreview()">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label>Job Title / Subject - سەری بابەت یان ناونیشانی هەلی کار *</label>
+                <input type="text" id="form-title-ku" class="input-field" placeholder="ناونیشانەکە لێرە بنووسە..." oninput="updateLivePreview()">
               </div>
-              <div class="form-group" style="display:flex; flex-direction:column; justify-content:center;">
-                <label>Status (Toggle Draft / Publish)</label>
-                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
-                  <input type="checkbox" id="form-status" style="width:20px; height:20px; cursor:pointer;" checked onchange="updateLivePreview()">
-                  <span style="font-size:14px; font-weight:600;" id="status-toggle-label">Published</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label>Details / Description - دیتێڵ *</label>
+                <textarea id="form-desc-ku" class="input-field textarea-field" style="min-height: 150px;" placeholder="دەربارە یان دیتێڵی کارەکە لێرە بنووسە..." oninput="updateLivePreview()"></textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label>Cities - شارەکان (دەتوانی چەند شارێک بە یەک جار دیاری بکەیت) *</label>
+                <div id="form-city-container" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: var(--border-radius); background: var(--input-bg);">
+                  <!-- Dynamically populated in JavaScript -->
                 </div>
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label>Job Title (Kurdish) - ناونیشانی کار (کوردی) (ئارەزوومەندانە - Optional)</label>
-                <input type="text" id="form-title-ku" class="input-field" placeholder="پسپۆڕی مارکێتینگ..." oninput="updateLivePreview()">
+                <label>WhatsApp Number - ژمارەی مۆبایل بۆ وەتسئەپ *</label>
+                <input type="text" id="form-whatsapp" class="input-field" placeholder="e.g. 9647501234567" oninput="updateLivePreview()">
               </div>
               <div class="form-group">
-                <label>Job Title (English) - ناونیشانی کار (ئینگلیزی) (ئارەزوومەندانە - Optional)</label>
-                <input type="text" id="form-title-en" class="input-field" placeholder="Marketing Specialist..." oninput="updateLivePreview()">
+                <label>Email - ئیمێڵی پێشکەشکردن (ئەگەر هەبوو)</label>
+                <input type="email" id="form-email" class="input-field" placeholder="e.g. jobs@company.com" oninput="updateLivePreview()">
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label>Salary - مووچە (ئارەزوومەندانە - Optional)</label>
-                <input type="text" id="form-salary" class="input-field" placeholder="e.g. $1,200 - $1,500 / Month (ڕێککەوتن)" oninput="updateLivePreview()">
+            <div class="form-row" style="margin-top: 10px; margin-bottom: 15px; align-items: center; gap: 20px; display: flex; flex-wrap: wrap;">
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin-bottom: 0;">
+                <input type="checkbox" id="form-is-vip" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent);" onchange="updateLivePreview()">
+                <label for="form-is-vip" style="margin-bottom: 0; cursor: pointer; font-weight: 700; color: var(--accent);">Mark as VIP Listing - نیشانەکردن وەک هەلی کاری VIP ⭐️</label>
               </div>
-              <div class="form-group">
-                <label>Company Logo - لۆگۆی کۆمپانیا (ئارەزوومەندانە - Optional)</label>
-                <div style="display:flex; align-items:center; gap:12px;">
-                  <div id="logo-upload-slot" class="upload-slot glass" style="width: 48px; height: 48px; flex-shrink: 0; margin-bottom: 0;">
-                    <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
-                    <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
-                  </div>
-                  <div style="display:flex; flex-direction:column; gap:4px;">
-                    <span id="logo-status-label" style="font-size:11px; color:var(--text-secondary); font-weight:600;">No logo uploaded</span>
-                    <span style="font-size:9px; color:var(--text-muted);">JPG, PNG or SVG</span>
-                  </div>
-                  <input type="hidden" id="form-logo-url" value="">
-                </div>
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin-bottom: 0;">
+                <input type="checkbox" id="form-is-pinned" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);" onchange="updateLivePreview()">
+                <label for="form-is-pinned" style="margin-bottom: 0; cursor: pointer; font-weight: 700; color: var(--primary);">Pin to Top - جێگیرکردن لە سەرەوە 📌</label>
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label>City - شار (ئارەزوومەندانە - Optional)</label>
-                <select id="form-city" class="input-field" onchange="updateLivePreview()">
-                  <option value="erbil">Erbil (Hewlêr)</option>
-                  <option value="sulaymaniyah">Sulaymaniyah (Silêmanî)</option>
-                  <option value="duhok">Duhok (Duhok)</option>
-                  <option value="halabja">Halabja</option>
-                  <option value="kirkuk">Kirkuk</option>
-                  <option value="remote">Remote</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Job Type - جۆری کار (ئارەزوومەندانە - Optional)</label>
-                <select id="form-type" class="input-field" onchange="updateLivePreview()">
-                  <option value="fullTime">Full-time</option>
-                  <option value="partTime">Part-time</option>
-                  <option value="contract">Contract</option>
-                  <option value="remote">Remote</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Experience Level - ئاستی ئەزموون (ئارەزوومەندانە - Optional)</label>
-                <select id="form-experience" class="input-field" onchange="updateLivePreview()">
-                  <option value="junior">Junior</option>
-                  <option value="mid">Mid-level</option>
-                  <option value="senior">Senior</option>
-                  <option value="lead">Lead / Manager</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Category - پۆلێن (ئارەزوومەندانە - Optional)</label>
-                <select id="form-category" class="input-field">
-                  <option value="software">Software Development</option>
-                  <option value="design">Design & Creative</option>
-                  <option value="marketing">Marketing & Sales</option>
-                  <option value="finance">Finance & Accounting</option>
-                  <option value="education">Education & Teaching</option>
-                  <option value="translation">Translation & Content</option>
-                  <option value="engineering">Engineering & Operations</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Industry - بوار (ئارەزوومەندانە - Optional)</label>
-                <select id="form-industry" class="input-field">
-                  <option value="tech">Tech & Software</option>
-                  <option value="health">Health & Medical</option>
-                  <option value="education">Education</option>
-                  <option value="retail">Sales & Retail</option>
-                  <option value="finance">Finance & Banking</option>
-                  <option value="engineering">Engineering</option>
-                  <option value="media">Media & PR</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <!-- Spacer -->
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Job Description (Kurdish) - دەربارەی کار (کوردی) (ئارەزوومەندانە - Optional)</label>
-                <textarea id="form-desc-ku" class="input-field textarea-field" placeholder="کورتەیەک بنووسە..." oninput="updateLivePreview()"></textarea>
-              </div>
-              <div class="form-group">
-                <label>Job Description (English) - دەربارەی کار (ئینگلیزی) (ئارەزوومەندانە - Optional)</label>
-                <textarea id="form-desc-en" class="input-field textarea-field" placeholder="Write job description..." oninput="updateLivePreview()"></textarea>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Requirements (Kurdish) - مەرجەکان (کوردی) (ئارەزوومەندانە - Optional)</label>
-                <textarea id="form-req-ku" class="input-field textarea-field" placeholder="ئەزموونی ٢ ساڵ&#10;شارەزایی لە دیزاین"></textarea>
-              </div>
-              <div class="form-group">
-                <label>Requirements (English) - مەرجەکان (ئینگلیزی) (ئارەزوومەندانە - Optional)</label>
-                <textarea id="form-req-en" class="input-field textarea-field" placeholder="2+ years experience&#10;Figma proficiency"></textarea>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>WhatsApp Number - ژمارەی وەنیسئەپ (ئارەزوومەندانە - Optional)</label>
-                <input type="text" id="form-whatsapp" class="input-field" placeholder="9647501234567">
-              </div>
-              <div class="form-group">
-                <label>Application Email - ئیمێڵی پێشکەشکردن (ئارەزوومەندانە - Optional)</label>
-                <input type="email" id="form-email" class="input-field" placeholder="jobs@company.com">
-              </div>
-            </div>
-
-            <!-- Dynamic Image Upload Grid (3 to 5 images) -->
-            <div class="dynamic-list-container">
+            <!-- Dynamic Image Upload Grid -->
+            <div class="dynamic-list-container" style="margin-top: 15px;">
               <div class="list-title">
-                <span>Job/Project Images - وێنەکانی کارەکە (Upload 3 to 5 images)</span>
+                <span>Job/Project Images - وێنەکانی کارەکە (ئەگەر هەبوو)</span>
               </div>
               <div class="upload-grid" id="image-upload-grid">
-                <!-- 5 image upload slots, populated in JS -->
+                <!-- Image upload slots, populated in JS -->
               </div>
             </div>
 
@@ -1829,14 +1821,8 @@
             </div>
 
             <!-- Device Frame -->
-            <div class="mobile-frame">
-              <div class="mobile-notch"></div>
-              
-              <!-- Screen Simulator -->
-              <div class="mobile-screen">
-                
-                <!-- Telegram Channel Header Replica -->
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:0.5px solid rgba(255,255,255,0.08); padding-bottom:8px; margin-bottom:12px;">
+                            <!-- Telegram Channel Header Replica -->
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:0.5px solid rgba(255,255,255,0.08); padding-bottom:8px; margin-bottom:10px;">
                   <div style="display:flex; align-items:center; gap:8px;">
                     <div style="width:26px; height:26px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:10px;">K24</div>
                     <div>
@@ -1847,7 +1833,13 @@
                       <div style="font-size:7px; color:var(--text-secondary);">154,203 subscribers</div>
                     </div>
                   </div>
-                  <div style="display:flex; gap:8px; color:var(--text-secondary);"><i data-lucide="search" style="width:12px;height:12px;"></i><i data-lucide="moon" style="width:12px;height:12px;"></i></div>
+                  <div style="display:flex; gap:8px; color:var(--text-secondary);"><i data-lucide="languages" style="width:12px;height:12px;"></i><i data-lucide="moon" style="width:12px;height:12px;"></i></div>
+                </div>
+
+                <!-- Simulated Glassmorphic Search Bar -->
+                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:6px 10px; display:flex; align-items:center; gap:6px; margin-bottom:12px;">
+                  <i data-lucide="search" style="width:10px; height:10px; color:rgba(255,255,255,0.35);"></i>
+                  <span style="font-size:9px; color:rgba(255,255,255,0.35); flex-grow:1; text-align:right;">گەڕان بەدوای ناونیشان یان دەق...</span>
                 </div>
 
                 <!-- JobCard Replica -->
@@ -1860,43 +1852,41 @@
                       <div class="card-title-company" id="prev-company">Company Name</div>
                       <div class="card-title-sub">Kurd24 Job Channel</div>
                     </div>
-                    <i data-lucide="bookmark" class="card-bookmark" style="width:10px;height:10px;"></i>
+                    <i data-lucide="bookmark" class="card-bookmark" style="width:10px;height:10px;color:var(--text-muted);"></i>
                   </div>
 
                   <!-- Card Window Body -->
                   <div class="card-content">
                     <div class="card-job-title" id="prev-title">📢 Announcement Title</div>
                     
-                    <!-- 2 Column Grid -->
-                    <div class="card-grid" id="prev-grid-layout">
-                      <!-- Meta info -->
-                      <div class="card-meta-col">
-                        <div class="card-meta-item">
-                          <span class="card-meta-lbl" id="lbl-city">📍 City:</span>
-                          <span class="card-meta-val" id="prev-city">Erbil</span>
-                        </div>
-                        <div class="card-meta-item">
-                          <span class="card-meta-lbl" id="lbl-type">💼 Type:</span>
-                          <span class="card-meta-val" id="prev-type">Full-time</span>
-                        </div>
-                        <div class="card-meta-item">
-                          <span class="card-meta-lbl" id="lbl-salary">💵 Salary:</span>
-                          <span class="card-meta-val" id="prev-salary">$1,500</span>
-                        </div>
-                        <div class="card-meta-item">
-                          <span class="card-meta-lbl" id="lbl-exp">🎓 Exp:</span>
-                          <span class="card-meta-val" id="prev-experience">Junior</span>
-                        </div>
+                    <!-- Chips Row (City, Type, Salary) - Hidden on feed -->
+                    <div class="card-chips-row" style="display: none;">
+                      <div class="card-chip primary">
+                        <i data-lucide="map-pin" style="width:6px;height:6px;margin-top:1px;"></i>
+                        <span id="prev-city">Erbil</span>
                       </div>
-
-                      <!-- Divider -->
-                      <div class="card-divider"></div>
-
-                      <!-- Description -->
-                      <div class="card-desc-col">
-                        <span class="card-desc-lbl" id="lbl-desc">📝 Description:</span>
-                        <span class="card-desc-val" id="prev-desc">Job summary details will be shown here in real-time...</span>
+                      <div class="card-chip accent">
+                        <i data-lucide="briefcase" style="width:6px;height:6px;margin-top:1px;"></i>
+                        <span id="prev-type">Full-time</span>
                       </div>
+                      <div class="card-chip success">
+                        <span id="prev-salary">ڕێککەوتن</span>
+                      </div>
+                    </div>
+
+                    <!-- Hidden Elements for JS Compatibility -->
+                    <div style="display:none;">
+                      <span id="lbl-city"></span>
+                      <span id="lbl-type"></span>
+                      <span id="lbl-salary"></span>
+                      <span id="lbl-exp"></span>
+                      <span id="lbl-desc"></span>
+                      <span id="prev-experience"></span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="card-desc-val" id="prev-desc" style="font-size: 8.5px; line-height: 12px; margin-bottom: 8px;">
+                      Job summary details will be shown here in real-time...
                     </div>
 
                     <!-- Images scroll gallery -->
@@ -1908,7 +1898,7 @@
                     <div class="card-footer">
                       <div class="card-footer-left">
                         <i data-lucide="eye" style="width:8px;height:8px;"></i>
-                        <span>142</span>
+                        <span>142 views</span>
                       </div>
                       <div class="card-footer-right">
                         <span>10:45 AM</span>
@@ -1917,14 +1907,14 @@
                     </div>
                   </div>
 
-                  <!-- Buttons Bar -->
-                  <div class="card-buttons-bar">
-                    <button class="card-btn wa"><i data-lucide="message-circle" style="width:8px;height:8px;color:#25d366;"></i>WhatsApp</button>
-                    <button class="card-btn email"><i data-lucide="mail" style="width:8px;height:8px;color:var(--primary);"></i>Email</button>
-                    <button class="card-btn details"><i data-lucide="external-link" style="width:8px;height:8px;color:var(--accent);"></i>Details</button>
-                  </div>
+                    <!-- Action Buttons Bar -->
+                    <div class="card-buttons-bar" id="prev-action-bar" style="border-top: 1px solid rgba(255,255,255,0.06); padding: 5px; display: flex;">
+                      <button class="card-btn" id="prev-see-more-btn" style="width: 100%; border: none; font-size: 8px; font-weight: 700; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 4px; background: none; cursor: pointer; padding: 4px 0;">
+                        <i data-lucide="search" style="width:8px;height:8px;color:var(--primary);"></i>
+                        <span id="prev-see-more-text">زانیاری زیاتر 🔍</span>
+                      </button>
+                    </div>
                 </div>
-
               </div>
               </div>
             </div>
@@ -2233,7 +2223,7 @@
     </div> <!-- Closes panel-settings -->
 
     <!-- APP DISTRIBUTION PANEL -->
-    <div class="view-panel" id="panel-distribution" style="background: rgba(129, 140, 248, 0.03); border: 1px solid rgba(129, 140, 248, 0.12); border-radius: 24px; padding: 24px;">
+    <div class="view-panel" id="panel-distribution" style="background: rgba(0, 212, 170, 0.03); border: 1px solid rgba(0, 212, 170, 0.12); border-radius: 24px; padding: 24px;">
       <div class="branding-layout" style="grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: start;">
           <!-- Left side: Distribution Form -->
           <div class="editor-card glass" style="padding: 24px; display: flex; flex-direction: column; gap: 24px;">
@@ -2278,7 +2268,7 @@
             </div>
 
             <!-- APK File Uploader -->
-            <div id="div-dist-apk-upload" style="border: 2px dashed rgba(129, 140, 248, 0.3); border-radius:16px; padding:32px 20px; display:flex; flex-direction:column; align-items:center; gap:16px; background:rgba(99, 102, 241, 0.02); text-align:center; transition: var(--transition); position:relative; width:100%;">
+            <div id="div-dist-apk-upload" style="border: 2px dashed rgba(0, 212, 170, 0.3); border-radius:16px; padding:32px 20px; display:flex; flex-direction:column; align-items:center; gap:16px; background:rgba(0, 212, 170, 0.02); text-align:center; transition: var(--transition); position:relative; width:100%;">
               <div style="width:64px; height:64px; border-radius:50%; background:var(--primary-glow); display:flex; justify-content:center; align-items:center; color:var(--primary);">
                 <i data-lucide="upload-cloud" style="width:32px; height:32px;"></i>
               </div>
@@ -2355,7 +2345,7 @@
               <div style="margin:20px 0; display:flex; flex-direction:column; align-items:center; gap:12px; padding:20px; border:1px solid var(--border); border-radius:16px; background:rgba(0,0,0,0.2); width:100%;">
                 <span style="font-size:11px; color:var(--text-muted);">This is how the button looks live:</span>
                 
-                <div id="preview-landing-btn-mock" style="background: linear-gradient(135deg, #818cf8 0%, #f472b6 100%); color: white; border-radius: 50px; padding: 12px 24px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap:8px; box-shadow: 0 4px 15px rgba(129, 140, 248, 0.3);">
+                <div id="preview-landing-btn-mock" style="background: linear-gradient(135deg, #00D4AA 0%, #FFB800 100%); color: white; border-radius: 50px; padding: 12px 24px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap:8px; box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);">
                   <i data-lucide="download-cloud" style="width:14px; height:14px;" id="preview-landing-btn-icon"></i>
                   <span id="preview-landing-btn-text">دابەزاندنی ئەپی Kurd24 Job (APK)</span>
                 </div>
@@ -2428,6 +2418,74 @@
         experience: { junior: "Junior", mid: "Mid-level", senior: "Senior", lead: "Lead" }
       }
     };
+
+    // Formats and localizes single or multiple city IDs
+    function getLocalizedCity(cityVal, lang = 'en') {
+      if (!cityVal) return "";
+      let ids = [];
+      const trimmed = cityVal.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try { ids = JSON.parse(trimmed); } catch(e) { ids = [cityVal]; }
+      } else if (cityVal.includes(',')) {
+        ids = cityVal.split(',').map(s => s.trim());
+      } else {
+        ids = [cityVal];
+      }
+      const trans = translations[lang] || translations.en;
+      const translated = ids.map(id => {
+        if (trans.cities && trans.cities[id]) return trans.cities[id];
+        const found = citiesList.find(c => c.id.toLowerCase() === id.toLowerCase());
+        if (found) {
+          return lang === 'ku' ? found.name_ku : found.name_en;
+        }
+        return id.charAt(0).toUpperCase() + id.slice(1);
+      });
+      return translated.filter(Boolean).join(lang === 'ku' ? ' ، ' : ', ');
+    }
+
+    // Dispatches push notifications to all registered devices via Expo Push API
+    async function sendPushNotification(jobData) {
+      try {
+        if (!supabaseClient) return;
+        const { data: tokensData, error } = await supabaseClient.from("push_tokens").select("token");
+        if (error) {
+          console.error("Failed to fetch push tokens for notifications:", error);
+          return;
+        }
+        if (!tokensData || tokensData.length === 0) {
+          console.log("No registered push tokens found.");
+          return;
+        }
+        const tokens = tokensData.map(t => t.token);
+        console.log(`Sending notifications to ${tokens.length} devices...`);
+
+        const messages = tokens.map(token => ({
+          to: token,
+          sound: "default",
+          title: jobData.is_vip ? "⭐️ VIP Job Listing" : "📢 New Job Listing",
+          body: `${jobData.company}: ${jobData.title_ku}`,
+          badge: 1,
+          data: { jobId: jobData.id }
+        }));
+
+        for (let i = 0; i < messages.length; i += 100) {
+          const chunk = messages.slice(i, i + 100);
+          const response = await fetch("https://exp.host/--/api/v2/push/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+              "Accept-encoding": "gzip, deflate"
+            },
+            body: JSON.stringify(chunk)
+          });
+          const result = await response.json();
+          console.log("Expo push notification batch response:", result);
+        }
+      } catch (err) {
+        console.error("Failed to dispatch push notification:", err);
+      }
+    }
 
     // Branding and custom styles state variables
     let activeSettings = null;
@@ -2584,13 +2642,13 @@
         }
         fontStyle.textContent = `
           @font-face {
-            font-family: 'CustomAppFont';
+            font-family: 'NRT';
             src: url('${settings.fontUrl}') format('truetype');
             font-weight: normal;
             font-style: normal;
           }
           body, html, input, button, select, textarea, div, span, h1, h2, h3, h4, h5, h6, td, th, label {
-            font-family: 'CustomAppFont', 'Vazirmatn', sans-serif !important;
+            font-family: 'NRT', 'Vazirmatn', sans-serif !important;
           }
         `;
       } else {
@@ -3459,7 +3517,7 @@
               </div>
             </div>
           </td>
-          <td>${job.city_en}</td>
+          <td>${getLocalizedCity(job.city_en, 'en')}</td>
           <td>${job.category}</td>
           <td style="font-weight:600;">${job.salary}</td>
           <td>${statusBadge}</td>
@@ -3627,7 +3685,6 @@
       const titleKu = document.getElementById("form-title-ku").value || "ناونیشانی کارەکە";
       const titleEn = document.getElementById("form-title-en").value || "Job Title Announcement";
       const salary = document.getElementById("form-salary").value || "Discussable (ڕێککەوتن)";
-      const cityKey = document.getElementById("form-city").value;
       const typeKey = document.getElementById("form-type").value;
       const expKey = document.getElementById("form-experience").value;
       const descKu = document.getElementById("form-desc-ku").value || "دەربارە و کورتەی کارەکە لێرە پێشان دەدرێت بە زمانی کوردی...";
@@ -3644,7 +3701,11 @@
       const trans = translations[previewLang] || translations.ku;
       const title = previewLang === "ku" ? titleKu : titleEn;
       const desc = previewLang === "ku" ? descKu : descEn;
-      const city = (trans.cities || {})[cityKey] || cityKey;
+      
+      // Multi-city aggregation for preview
+      const checkedCities = Array.from(document.querySelectorAll('input[name="form-cities"]:checked')).map(el => el.value);
+      const city = getLocalizedCity(JSON.stringify(checkedCities), previewLang) || "Erbil";
+      
       const type = (trans.types || {})[typeKey] || typeKey;
       const exp = (trans.experience || {})[expKey] || expKey;
 
@@ -3658,9 +3719,47 @@
         }
       }
 
-      document.getElementById("prev-company").textContent = company;
-      document.getElementById("prev-logo-letter").textContent = company.substring(0, 1).toUpperCase();
-      document.getElementById("prev-title").textContent = "📢 " + title;
+        const isVip = document.getElementById("form-is-vip").checked;
+        const isPinned = document.getElementById("form-is-pinned").checked;
+        const cardEl = document.querySelector(".mobile-card");
+        const seeMoreBtn = document.getElementById("prev-see-more-btn");
+        const logoLetterEl = document.getElementById("prev-logo-letter");
+
+        if (cardEl && seeMoreBtn) {
+          if (isVip) {
+            cardEl.style.border = "2px solid #FFB800";
+            cardEl.style.borderRadius = "12px";
+            cardEl.style.background = simTheme === 'dark' ? 'rgba(255, 184, 0, 0.03)' : 'rgba(255, 184, 0, 0.06)';
+            document.getElementById("prev-title").textContent = "⭐️ " + title;
+            seeMoreBtn.style.color = "#FFB800";
+            seeMoreBtn.style.borderColor = "#FFB800";
+            seeMoreBtn.style.background = "rgba(255, 184, 0, 0.12)";
+            const icon = seeMoreBtn.querySelector("svg") || seeMoreBtn.querySelector("i");
+            if (icon) icon.style.color = "#FFB800";
+            logoLetterEl.style.color = "#FFB800";
+            logoLetterEl.style.background = "rgba(255, 184, 0, 0.15)";
+          } else {
+            cardEl.style.border = simTheme === 'dark' ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)";
+            cardEl.style.borderRadius = "12px";
+            cardEl.style.background = simTheme === 'dark' ? 'rgba(21, 30, 40, 0.82)' : 'rgba(255, 255, 255, 0.9)';
+            document.getElementById("prev-title").textContent = "📢 " + title;
+            seeMoreBtn.style.color = "var(--primary)";
+            seeMoreBtn.style.borderColor = "var(--primary)";
+            seeMoreBtn.style.background = "var(--primary-glow)";
+            const icon = seeMoreBtn.querySelector("svg") || seeMoreBtn.querySelector("i");
+            if (icon) icon.style.color = "var(--primary)";
+            logoLetterEl.style.color = "var(--primary)";
+            logoLetterEl.style.background = "var(--primary-glow)";
+          }
+        }
+
+        // Render company name with Pin icon if pinned
+        let displayCompany = company;
+        if (isPinned) {
+          displayCompany = "📌 " + displayCompany;
+        }
+        document.getElementById("prev-company").textContent = displayCompany;
+        document.getElementById("prev-logo-letter").textContent = company.substring(0, 1).toUpperCase();
       
       // Meta labels
       document.getElementById("lbl-city").textContent = trans.lblCity;
@@ -3705,6 +3804,8 @@
       
       document.getElementById("form-company").value = "";
       document.getElementById("form-status").checked = true;
+      document.getElementById("form-is-vip").checked = false;
+      document.getElementById("form-is-pinned").checked = false;
       document.getElementById("form-title-ku").value = "";
       document.getElementById("form-title-en").value = "";
       document.getElementById("form-salary").value = "";
@@ -3719,6 +3820,7 @@
       document.getElementById("logo-status-label").textContent = "No logo uploaded";
       
       document.getElementById("form-city").value = "erbil";
+      populateCityCheckboxes(citiesList, ["erbil"]);
       document.getElementById("form-type").value = "fullTime";
       document.getElementById("form-experience").value = "junior";
       document.getElementById("form-category").value = "software";
@@ -3833,6 +3935,8 @@
 
       document.getElementById("form-company").value = job.company || "";
       document.getElementById("form-status").checked = job.status === "published";
+      document.getElementById("form-is-vip").checked = job.is_vip === true;
+      document.getElementById("form-is-pinned").checked = job.is_pinned === true;
       document.getElementById("form-title-ku").value = job.title_ku || "";
       document.getElementById("form-title-en").value = job.title_en || "";
       document.getElementById("form-salary").value = job.salary || "";
@@ -3858,6 +3962,7 @@
       }
       
       document.getElementById("form-city").value = job.city_en || "erbil";
+      populateCityCheckboxes(citiesList, job.city_en || "erbil");
       document.getElementById("form-type").value = job.type || "fullTime";
       document.getElementById("form-experience").value = job.experience_level || "junior";
       document.getElementById("form-category").value = job.category || "software";
@@ -3903,34 +4008,54 @@
 
     // Save Job Form Submission with fallback defaults (Optional fields)
     async function saveJob() {
-      const company = document.getElementById("form-company").value.trim() || "Kurd24 Employer";
+      const company = document.getElementById("form-company").value.trim() || "Kurd24";
       const titleKu = document.getElementById("form-title-ku").value.trim();
       const titleEn = document.getElementById("form-title-en").value.trim();
       const isPublished = document.getElementById("form-status").checked;
+      const isVip = document.getElementById("form-is-vip").checked;
+      const isPinned = document.getElementById("form-is-pinned").checked;
 
-      // Require at least one language title
-      if (!titleKu && !titleEn) {
-        alert("Please fill in at least one Job Title (Kurdish or English).");
+      // Validation for simplified fields
+      if (!titleKu) {
+        alert("تکایە ناونیشانی هەلی کار یان سەری بابەتەکە بنووسە.\nPlease enter a Job Title / Subject.");
         return;
       }
 
+      const descKu = document.getElementById("form-desc-ku").value.trim();
+      if (!descKu) {
+        alert("تکایە دیتێڵ یان دەربارەی کارەکە بنووسە.\nPlease enter Job Details.");
+        return;
+      }
+
+      const whatsapp = document.getElementById("form-whatsapp").value.trim();
+      if (!whatsapp) {
+        alert("تکایە ژمارەی مۆبایل بۆ پەیوەندی وەتسئەپ بنووسە.\nPlease enter a WhatsApp number.");
+        return;
+      }
+
+      // Retrieve selected cities checklist
+      const checkedCities = Array.from(document.querySelectorAll('input[name="form-cities"]:checked')).map(el => el.value);
+      if (checkedCities.length === 0) {
+        alert("تکایە لانی کەم شارێک هەڵبژێره.\nPlease select at least one city.");
+        return;
+      }
+      const cityString = JSON.stringify(checkedCities);
+
       // Safe defaults to ensure database constraint checks pass (Optional inputs)
-      const finalTitleKu = titleKu || titleEn || "ڕیکلامی کار";
-      const finalTitleEn = titleEn || titleKu || "Job Announcement";
-      const salary = document.getElementById("form-salary").value.trim() || "Discussable (ڕێککەوتن)";
+      const finalTitleKu = titleKu;
+      const finalTitleEn = titleEn || titleKu;
+      const salary = document.getElementById("form-salary").value.trim() || "ڕێککەوتن";
       const logoUrl = document.getElementById("form-logo-url").value.trim() || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80";
-      const city = document.getElementById("form-city").value;
+      
       const type = document.getElementById("form-type").value;
       const experience = document.getElementById("form-experience").value;
       const category = document.getElementById("form-category").value;
       const industry = document.getElementById("form-industry").value;
       
-      const descKu = document.getElementById("form-desc-ku").value.trim() || "پێویستی و مەرجەکانی ئەم هەلی کارە بەستراوە بە لێهاتوویی پێشکەشکار. تکایە پەیوەندی بکەن بۆ زانیاری.";
-      const descEn = document.getElementById("form-desc-en").value.trim() || "Job description and details depend on applicant capabilities. Contact for more info.";
-      const reqKu = document.getElementById("form-req-ku").value.trim() || "مەرجەکان لە کاتی چاوپێکەوتن دیاری دەکرێن.";
-      const reqEn = document.getElementById("form-req-en").value.trim() || "Requirements will be discussed in the interview.";
-      const whatsapp = document.getElementById("form-whatsapp").value.trim() || "9647501234567";
-      const email = document.getElementById("form-email").value.trim() || "careers@kurd24.job";
+      const descEn = document.getElementById("form-desc-en").value.trim() || descKu;
+      const reqKu = document.getElementById("form-req-ku").value.trim() || "-";
+      const reqEn = document.getElementById("form-req-en").value.trim() || "-";
+      const email = document.getElementById("form-email").value.trim() || "";
 
       const activeImages = imageInputs.map(img => img.trim()).filter(img => img !== "");
 
@@ -3941,8 +4066,8 @@
         industry: industry,
         logo_url: logoUrl,
         images: activeImages,
-        city_ku: city,
-        city_en: city,
+        city_ku: cityString,
+        city_en: cityString,
         category: category,
         type: type,
         experience_level: experience,
@@ -3953,7 +4078,9 @@
         requirements_en: reqEn,
         whatsapp: whatsapp,
         email: email,
-        status: isPublished ? "published" : "draft"
+        status: isPublished ? "published" : "draft",
+        is_vip: isVip,
+        is_pinned: isPinned
       };
 
       try {
@@ -3966,15 +4093,20 @@
           alert("Job announcement successfully updated!");
         } else {
           // Insert
-          const { error } = await supabaseClient.from("jobs").insert([payload]);
+          const { data, error } = await supabaseClient.from("jobs").insert([payload]).select().single();
           if (error) throw error;
           alert("New job announcement successfully published!");
+          
+          // Trigger push notifications
+          if (isPublished && data) {
+            await sendPushNotification(data);
+          }
         }
         
         clearEditorForm();
         switchTab("manage");
       } catch (e) {
-        alert("Failed to save job details: " + e.message + "\n\nTip: If you recently added the 'images' column in Supabase, go to your Supabase SQL Editor and run: NOTIFY pgrst, 'reload schema';");
+        alert("Failed to save job details: " + e.message);
       }
     }
 
@@ -4126,8 +4258,50 @@
       }
     }
 
+    function populateCityCheckboxes(list, selectedValues = []) {
+      const container = document.getElementById("form-city-container");
+      if (!container) return;
+      container.innerHTML = "";
+      
+      let selectedList = [];
+      if (Array.isArray(selectedValues)) {
+        selectedList = selectedValues;
+      } else if (typeof selectedValues === 'string') {
+        const trimmed = selectedValues.trim();
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          try { selectedList = JSON.parse(trimmed); } catch(e) { selectedList = [selectedValues]; }
+        } else if (selectedValues.includes(',')) {
+          selectedList = selectedValues.split(',').map(s => s.trim());
+        } else {
+          selectedList = [selectedValues];
+        }
+      }
+
+      list.forEach(item => {
+        const checked = selectedList.includes(item.id) ? "checked" : "";
+        const label = document.createElement("label");
+        label.style.display = "inline-flex";
+        label.style.alignItems = "center";
+        label.style.gap = "6px";
+        label.style.padding = "6px 12px";
+        label.style.background = "var(--input-bg)";
+        label.style.border = "1px solid var(--border)";
+        label.style.borderRadius = "20px";
+        label.style.cursor = "pointer";
+        label.style.fontSize = "13px";
+        label.style.userSelect = "none";
+        
+        label.innerHTML = `
+          <input type="checkbox" name="form-cities" value="${item.id}" ${checked} style="accent-color: var(--primary); width:14px; height:14px; margin:0;" onchange="updateLivePreview()">
+          <span>${item.name_en} (${item.name_ku})</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
     function populateDropdowns() {
       populateSelect("form-city", citiesList, "erbil");
+      populateCityCheckboxes(citiesList, ["erbil"]);
       populateSelect("form-type", jobTypesList, "fullTime");
       populateSelect("form-experience", experienceLevelsList, "junior");
       populateSelect("form-category", categoriesList, "software");

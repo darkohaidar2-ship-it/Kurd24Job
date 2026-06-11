@@ -45,8 +45,9 @@ export default function AdminScreen() {
   const [logoUrl, setLogoUrl] = useState<string>('');
   const [images, setImages] = useState<string[]>(['', '', '']);
   const [industry, setIndustry] = useState<string>('tech');
-  const [cityKu, setCityKu] = useState<string>('erbil');
-  const [cityEn, setCityEn] = useState<string>('erbil');
+  const [selectedCities, setSelectedCities] = useState<string[]>(['erbil']);
+  const [isVip, setIsVip] = useState<boolean>(false);
+  const [isPinned, setIsPinned] = useState<boolean>(false);
   const [category, setCategory] = useState<string>('software');
   const [type, setType] = useState<string>('fullTime');
   const [experienceLevel, setExperienceLevel] = useState<string>('junior');
@@ -141,8 +142,9 @@ export default function AdminScreen() {
     setCompany('');
     setLogoUrl('');
     setIndustry('tech');
-    setCityKu('erbil');
-    setCityEn('erbil');
+    setSelectedCities(['erbil']);
+    setIsVip(false);
+    setIsPinned(false);
     setCategory('software');
     setType('fullTime');
     setExperienceLevel('junior');
@@ -165,8 +167,25 @@ export default function AdminScreen() {
     setCompany(job.company);
     setLogoUrl(job.logo_url || '');
     setIndustry(job.industry);
-    setCityKu(job.city_ku);
-    setCityEn(job.city_en);
+    
+    setIsVip(job.is_vip || false);
+    setIsPinned(job.is_pinned || false);
+    
+    let parsedCities: string[] = [];
+    const rawCity = job.city_en || 'erbil';
+    if (rawCity.trim().startsWith('[') && rawCity.trim().endsWith(']')) {
+      try {
+        parsedCities = JSON.parse(rawCity);
+      } catch (e) {
+        parsedCities = [rawCity];
+      }
+    } else if (rawCity.includes(',')) {
+      parsedCities = rawCity.split(',').map(s => s.trim());
+    } else {
+      parsedCities = [rawCity];
+    }
+    setSelectedCities(parsedCities);
+
     setCategory(job.category);
     setType(job.type);
     setExperienceLevel(job.experience_level);
@@ -236,8 +255,8 @@ export default function AdminScreen() {
       logo_url: logoUrl.trim() || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80',
       images: filteredImages,
       industry,
-      city_ku: cityKu,
-      city_en: cityEn,
+      city_ku: JSON.stringify(selectedCities),
+      city_en: JSON.stringify(selectedCities),
       category,
       type,
       experience_level: experienceLevel,
@@ -248,7 +267,9 @@ export default function AdminScreen() {
       requirements_en: requirementsEn.trim() || 'Requirements will be discussed in the interview.',
       whatsapp: whatsapp.trim() || '9647501234567',
       email: email.trim() || 'careers@kurd24.job',
-      status
+      status,
+      is_vip: isVip,
+      is_pinned: isPinned
     };
 
     if (editingJobId) {
@@ -264,9 +285,14 @@ export default function AdminScreen() {
   };
 
   // Sync city selection keys
-  const handleCitySelect = (cityKey: string) => {
-    setCityEn(cityKey);
-    setCityKu(cityKey); // Simple map
+  const handleCityToggle = (cityKey: string) => {
+    if (selectedCities.includes(cityKey)) {
+      if (selectedCities.length > 1) {
+        setSelectedCities(selectedCities.filter(c => c !== cityKey));
+      }
+    } else {
+      setSelectedCities([...selectedCities, cityKey]);
+    }
   };
 
   const rowStyle = isRtl ? styles.rowReverse : styles.row;
@@ -465,6 +491,38 @@ export default function AdminScreen() {
                   </View>
                 </View>
 
+                {/* VIP Toggle */}
+                <View style={[styles.formRow, rowStyle, { justifyContent: 'space-between', marginBottom: 18 }]}>
+                  <Text style={[styles.inputLabel, { color: colors.text, marginBottom: 0 }]}>{language === 'ku' ? 'ڕیکلامی VIP' : 'VIP Ad'}</Text>
+                  <View style={[styles.row, { gap: 8 }]}>
+                    <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '600' }}>
+                      {isVip ? (language === 'ku' ? 'بەڵێ' : 'Yes') : (language === 'ku' ? 'نەخێر' : 'No')}
+                    </Text>
+                    <Switch
+                      value={isVip}
+                      onValueChange={setIsVip}
+                      trackColor={{ false: colors.border, true: '#FFB800' }}
+                      thumbColor={isVip ? '#FFB800' : colors.textMuted}
+                    />
+                  </View>
+                </View>
+
+                {/* Pinned Toggle */}
+                <View style={[styles.formRow, rowStyle, { justifyContent: 'space-between', marginBottom: 18 }]}>
+                  <Text style={[styles.inputLabel, { color: colors.text, marginBottom: 0 }]}>{language === 'ku' ? 'جێگیرکردن (Pin)' : 'Pin Post'}</Text>
+                  <View style={[styles.row, { gap: 8 }]}>
+                    <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '600' }}>
+                      {isPinned ? (language === 'ku' ? 'بەڵێ' : 'Yes') : (language === 'ku' ? 'نەخێر' : 'No')}
+                    </Text>
+                    <Switch
+                      value={isPinned}
+                      onValueChange={setIsPinned}
+                      trackColor={{ false: colors.border, true: colors.primaryGlow }}
+                      thumbColor={isPinned ? colors.primary : colors.textMuted}
+                    />
+                  </View>
+                </View>
+
                 {/* Title Kurdish */}
                 <Text style={[styles.inputLabel, { color: colors.text }, textStyle]}>{t.titleKu} (ئارەزوومەندانە - Optional)</Text>
                 <TextInput
@@ -561,21 +619,24 @@ export default function AdminScreen() {
                 {/* City Picker Grid */}
                 <Text style={[styles.inputLabel, { color: colors.text }, textStyle]}>{t.city} (ئارەزوومەندانە - Optional)</Text>
                 <View style={[styles.pickerGrid, rowStyle]}>
-                  {cities.map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={[
-                        styles.pickerChip,
-                        { borderColor: colors.border },
-                        cityEn === item.id && { backgroundColor: colors.primaryGlow, borderColor: colors.primary }
-                      ]}
-                      onPress={() => handleCitySelect(item.id)}
-                    >
-                      <Text style={[styles.pickerChipText, { color: colors.textSecondary }, cityEn === item.id && { color: colors.primary, fontWeight: '700' }]}>
-                        {language === 'ku' ? item.name_ku : item.name_en}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {cities.map((item) => {
+                    const isSelected = selectedCities.includes(item.id);
+                    return (
+                      <TouchableOpacity
+                        key={item.id}
+                        style={[
+                          styles.pickerChip,
+                          { borderColor: colors.border },
+                          isSelected && { backgroundColor: colors.primaryGlow, borderColor: colors.primary }
+                        ]}
+                        onPress={() => handleCityToggle(item.id)}
+                      >
+                        <Text style={[styles.pickerChipText, { color: colors.textSecondary }, isSelected && { color: colors.primary, fontWeight: '700' }]}>
+                          {language === 'ku' ? item.name_ku : item.name_en}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
 
                 {/* Job Type Grid */}
@@ -790,7 +851,7 @@ export default function AdminScreen() {
   );
 }
 
-const font = 'Vazirmatn';
+const font = 'NRT';
 
 const styles = StyleSheet.create({
   container: {

@@ -1,7 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useApp } from '../../context/AppContext';
-import { Briefcase, Bookmark, ShieldAlert } from 'lucide-react-native';
-import { BlurView } from 'expo-blur';
+import { Briefcase, Bookmark } from 'lucide-react-native';
 import { Platform, StyleSheet, View } from 'react-native';
 import React from 'react';
 
@@ -16,41 +15,31 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors.tabIconDefault,
         headerShown: false,
         tabBarStyle: {
-          position: 'absolute',
-          bottom: Platform.OS === 'ios' ? 24 : 16,
-          left: 16,
-          right: 16,
+          // Fixed bottom tab bar — standard Android style
+          position: 'relative',
           height: 64,
-          borderRadius: 20,
-          borderWidth: 1,
-          borderColor: colors.cardBorder,
-          backgroundColor: theme === 'dark' ? 'rgba(15, 23, 42, 0.75)' : 'rgba(255, 255, 255, 0.8)',
+          borderTopWidth: 1,
+          borderTopColor: colors.cardBorder,
+          backgroundColor: theme === 'dark' ? '#12121C' : '#FFFFFF',
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.1,
-          shadowRadius: 15,
-          elevation: 5,
-          paddingBottom: 0,
-          // Support RTL layouts dynamically if tab bar is horizontal
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 8,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 4,
+          paddingTop: 4,
           flexDirection: isRtl ? 'row-reverse' : 'row',
         },
-        tabBarBackground: () => (
-          Platform.OS === 'ios' ? (
-            <BlurView 
-              intensity={80} 
-              tint={theme === 'dark' ? 'dark' : 'light'} 
-              style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} 
-            />
-          ) : null
-        ),
         tabBarItemStyle: {
-          height: 52,
-          paddingVertical: 6,
+          height: 56,
+          paddingVertical: 4,
+          justifyContent: 'center',
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '600',
-          marginTop: -2,
+          fontWeight: '700',
+          fontFamily: 'NRT',
+          marginTop: 2,
         }
       }}
     >
@@ -59,7 +48,12 @@ export default function TabLayout() {
         options={{
           title: t.findJobs,
           tabBarIcon: ({ color, focused }) => (
-            <Briefcase size={20} color={color} strokeWidth={focused ? 2.5 : 2} />
+            <View style={[
+              styles.tabIconWrapper,
+              focused && { backgroundColor: colors.primaryGlow }
+            ]}>
+              <Briefcase size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+            </View>
           ),
         }}
       />
@@ -68,20 +62,32 @@ export default function TabLayout() {
         options={{
           title: t.savedJobs,
           tabBarIcon: ({ color, focused }) => (
-            <Bookmark size={20} color={color} strokeWidth={focused ? 2.5 : 2} />
+            <View style={[
+              styles.tabIconWrapper,
+              focused && { backgroundColor: colors.primaryGlow }
+            ]}>
+              <Bookmark size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="admin"
         options={{
-          href: null, // Hides the Admin panel tab from regular mobile users
-          title: t.adminPanel,
-          tabBarIcon: ({ color, focused }) => (
-            <ShieldAlert size={20} color={color} strokeWidth={focused ? 2.5 : 2} />
-          ),
+          href: null, // Completely hidden — admin is web-only
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabIconWrapper: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  }
+});

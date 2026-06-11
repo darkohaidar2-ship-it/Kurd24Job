@@ -65,11 +65,12 @@ export default function JobDetails() {
     await JobStorage.incrementClicks(job.id);
 
     const jobTitle = isRtl ? job.title_ku : job.title_en;
+    const cityText = getLocalizedProperty('city', job.city_en);
     
     // Compose WhatsApp message
     const text = language === 'ku'
-      ? `سڵاو، من پێشکەشکارم بۆ هەلی کاری "${jobTitle}" لە ڕێگەی ئەپی Kurd24 Job.`
-      : `Hello, I am applying for the "${jobTitle}" position listed on Kurd24 Job.`;
+      ? `سڵاو، ڕێز و سڵاو 🌷\n\nمن پێشکەشکارم بۆ هەلی کاری ئۆفەرکراو:\n\n📌 *ناونیشانی کار:* ${jobTitle}\n🏢 *کۆمپانیا:* ${job.company}\n📍 *شار:* ${cityText}\n💵 *مووچە:* ${job.salary}\n\nسەرچاوە: ئەپی Kurd24 Job`
+      : `Hello, Best Regards 🌷\n\nI am applying for the listed position:\n\n📌 *Job Title:* ${jobTitle}\n🏢 *Company:* ${job.company}\n📍 *City:* ${cityText}\n💵 *Salary:* ${job.salary}\n\nSource: Kurd24 Job App`;
 
     const whatsappUrl = `https://wa.me/${job.whatsapp}?text=${encodeURIComponent(text)}`;
     
@@ -247,6 +248,30 @@ export default function JobDetails() {
             </GlassView>
           </View>
 
+          {/* VIP Analytics Tracker */}
+          {job.is_vip && (
+            <GlassView style={[styles.contentCard, { borderColor: '#FFB800', borderWidth: 1.5 }]}>
+              <Text style={[styles.cardTitle, { color: '#FFB800' }, textStyle]}>
+                📊 {language === 'ku' ? 'ئاماری فەرمی کار (VIP)' : 'Official Job Stats (VIP)'}
+              </Text>
+              <View style={[styles.analyticsRow, rowStyle]}>
+                <View style={styles.analyticsItem}>
+                  <Text style={[styles.analyticsVal, { color: colors.text }]}>{job.views}</Text>
+                  <Text style={[styles.analyticsLbl, { color: colors.textSecondary }]}>
+                    {language === 'ku' ? 'بینینی گشتی' : 'Total Views'}
+                  </Text>
+                </View>
+                <View style={[styles.analyticsDivider, { backgroundColor: colors.border }]} />
+                <View style={styles.analyticsItem}>
+                  <Text style={[styles.analyticsVal, { color: colors.text }]}>{job.clicks}</Text>
+                  <Text style={[styles.analyticsLbl, { color: colors.textSecondary }]}>
+                    {language === 'ku' ? 'کلیکی وەتسئەپ' : 'WhatsApp Clicks'}
+                  </Text>
+                </View>
+              </View>
+            </GlassView>
+          )}
+
           {/* Job Description */}
           <GlassView style={styles.contentCard}>
             <Text style={[styles.cardTitle, { color: colors.text }, textStyle]}>{t.description}</Text>
@@ -355,7 +380,7 @@ export default function JobDetails() {
   );
 }
 
-const font = 'Vazirmatn';
+const font = 'NRT';
 
 const styles = StyleSheet.create({
   container: {
@@ -635,5 +660,32 @@ const styles = StyleSheet.create({
   lightboxImage: {
     width: '90%',
     height: '70%',
+  },
+  analyticsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginTop: 6,
+  },
+  analyticsItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  analyticsVal: {
+    fontSize: 22,
+    fontWeight: '800',
+    fontFamily: font,
+  },
+  analyticsLbl: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 4,
+    fontFamily: font,
+  },
+  analyticsDivider: {
+    width: 1.5,
+    height: 36,
+    opacity: 0.5,
   }
 });

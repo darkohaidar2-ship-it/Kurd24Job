@@ -2,46 +2,46 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#0F172A', // Slate 900
-    textSecondary: '#475569', // Slate 600
-    textMuted: '#94A3B8', // Slate 400
-    background: '#F8FAFC', // Slate 50
-    cardBg: 'rgba(255, 255, 255, 0.75)',
-    cardBorder: 'rgba(255, 255, 255, 0.5)',
-    border: 'rgba(15, 23, 42, 0.08)',
-    primary: '#6366F1', // Indigo 500
-    primaryGlow: 'rgba(99, 102, 241, 0.15)',
-    accent: '#EC4899', // Pink 500
-    accentGlow: 'rgba(236, 72, 153, 0.15)',
-    success: '#10B981',
-    successGlow: 'rgba(16, 185, 129, 0.15)',
+    text: '#0A0A0F', // Deep black
+    textSecondary: '#5A5A73', // Muted violet-gray
+    textMuted: '#8B8BA3', // Soft gray
+    background: '#FAFAFA', // Near white
+    cardBg: 'rgba(255, 255, 255, 0.85)',
+    cardBorder: 'rgba(0, 0, 0, 0.06)',
+    border: 'rgba(0, 0, 0, 0.06)',
+    primary: '#009E7E', // Darker teal for contrast on white
+    primaryGlow: 'rgba(0, 158, 126, 0.12)',
+    accent: '#D4940D', // Darker gold for contrast on white
+    accentGlow: 'rgba(212, 148, 13, 0.12)',
+    success: '#22C55E',
+    successGlow: 'rgba(34, 197, 94, 0.12)',
     warning: '#F59E0B',
-    shadow: 'rgba(15, 23, 42, 0.06)',
-    tint: '#6366F1',
-    tabIconDefault: '#94A3B8',
-    tabIconSelected: '#6366F1',
-    gradientBg: ['#EEF2F6', '#E2E8F0', '#EEF2F6'],
+    shadow: 'rgba(0, 0, 0, 0.06)',
+    tint: '#009E7E',
+    tabIconDefault: '#8B8BA3',
+    tabIconSelected: '#009E7E',
+    gradientBg: ['#FAFAFA', '#F0F0F5', '#FAFAFA'],
   },
   dark: {
-    text: '#F8FAFC', // Slate 50
-    textSecondary: '#94A3B8', // Slate 400
-    textMuted: '#64748B', // Slate 500
-    background: '#0B0F19', // Deep Midnight Blue
-    cardBg: 'rgba(15, 23, 42, 0.45)', // Translucent Slate 900
-    cardBorder: 'rgba(255, 255, 255, 0.08)',
-    border: 'rgba(255, 255, 255, 0.05)',
-    primary: '#818CF8', // Indigo 400
-    primaryGlow: 'rgba(129, 140, 248, 0.25)',
-    accent: '#F472B6', // Pink 400
-    accentGlow: 'rgba(244, 114, 182, 0.25)',
-    success: '#34D399',
-    successGlow: 'rgba(52, 211, 153, 0.25)',
+    text: '#F0F0F5', // Bright near-white
+    textSecondary: '#8B8BA3', // Soft gray
+    textMuted: '#5A5A73', // Muted violet-gray
+    background: '#0A0A0F', // Deep black
+    cardBg: 'rgba(18, 18, 28, 0.85)', // Dark card
+    cardBorder: 'rgba(255, 255, 255, 0.06)',
+    border: 'rgba(255, 255, 255, 0.06)',
+    primary: '#00D4AA', // Cyan/Teal
+    primaryGlow: 'rgba(0, 212, 170, 0.15)',
+    accent: '#FFB800', // Gold
+    accentGlow: 'rgba(255, 184, 0, 0.15)',
+    success: '#22C55E',
+    successGlow: 'rgba(34, 197, 94, 0.15)',
     warning: '#FBBF24',
-    shadow: 'rgba(0, 0, 0, 0.3)',
-    tint: '#818CF8',
-    tabIconDefault: '#64748B',
-    tabIconSelected: '#818CF8',
-    gradientBg: ['#0B0F19', '#111827', '#070A13'], // Ambient dark gradients
+    shadow: 'rgba(0, 0, 0, 0.4)',
+    tint: '#00D4AA',
+    tabIconDefault: '#5A5A73',
+    tabIconSelected: '#00D4AA',
+    gradientBg: ['#0A0A0F', '#0F0F1A', '#0A0A0F'], // Deep dark gradients
   },
 } as const;
 
@@ -78,26 +78,26 @@ export const Spacing = {
 
 export const GlassStyles = {
   light: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-    borderWidth: 1.5,
-    borderRadius: 20,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.06,
-    shadowRadius: 15,
-    elevation: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderWidth: 1,
+    borderRadius: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   dark: {
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(18, 18, 28, 0.85)',
+    borderColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
-    borderRadius: 20,
+    borderRadius: 8,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 4,
   },
 };
 

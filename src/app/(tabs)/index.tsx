@@ -8,16 +8,35 @@ import {
   TouchableOpacity, 
   Modal, 
   ScrollView, 
-  SafeAreaView, 
+  StatusBar,
   ActivityIndicator,
   RefreshControl,
-  StatusBar,
   Platform,
-  Image
+  Image,
+  Linking,
+  Alert,
+  Share
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Search, SlidersHorizontal, Sun, Moon, Languages, X, HelpCircle, Pin, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { 
+  Search, 
+  Sun, 
+  Moon, 
+  Languages, 
+  X, 
+  HelpCircle, 
+  Pin, 
+  CheckCircle2, 
+  ChevronDown, 
+  ChevronUp,
+  MapPin,
+  Briefcase,
+  Calendar,
+  DollarSign,
+  MessageCircle,
+  Mail
+} from 'lucide-react-native';
 import { useApp } from '../../context/AppContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { JobStorage, Job } from '../../services/JobStorage';
@@ -26,7 +45,7 @@ import GlassView from '../../components/GlassView';
 
 export default function JobsFeed() {
   const router = useRouter();
-  const { colors, theme, toggleTheme, language, setLanguage, t, isDemoMode, categories, cities, industries, jobTypes, experienceLevels, refreshProperties, logoUrl } = useApp();
+  const { colors, theme, toggleTheme, language, setLanguage, t, isDemoMode, categories, cities, industries, jobTypes, experienceLevels, refreshProperties, logoUrl, getLocalizedProperty } = useApp();
   const isRtl = language === 'ku';
   const insets = useSafeAreaInsets();
 
@@ -40,15 +59,29 @@ export default function JobsFeed() {
   const [showPinned, setShowPinned] = useState<boolean>(true);
   const [expandedPinned, setExpandedPinned] = useState<boolean>(false);
 
-  // Search & Filter State
-  const [showFilters, setShowFilters] = useState<boolean>(false);
+  // Details Sheet Drawer State (Removed)
+
+  // Search State
   const [search, setSearch] = useState<string>('');
-  const [selCity, setSelCity] = useState<string>('all');
-  const [selCategory, setSelCategory] = useState<string>('all');
-  const [selType, setSelType] = useState<string>('all');
-  const [selExperience, setSelExperience] = useState<string>('all');
-  const [selIndustry, setSelIndustry] = useState<string>('all');
-  const [selDate, setSelDate] = useState<string>('all');
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+
+  // Apply filters logic (Search text only)
+  const applyFilters = (allJobs: Job[], searchQuery: string) => {
+    let result = [...allJobs];
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(j => 
+        (j.company && j.company.toLowerCase().includes(query)) ||
+        (j.title_ku && j.title_ku.toLowerCase().includes(query)) ||
+        (j.title_en && j.title_en.toLowerCase().includes(query)) ||
+        (j.description_ku && j.description_ku.toLowerCase().includes(query)) ||
+        (j.description_en && j.description_en.toLowerCase().includes(query))
+      );
+    }
+
+    setFilteredJobs(result);
+  };
 
   // Load jobs from Storage
   const loadJobs = async () => {
@@ -56,7 +89,7 @@ export default function JobsFeed() {
     try {
       const data = await JobStorage.getJobs(false); // Only published
       setJobs(data);
-      applyFilters(data, search, selCity, selCategory, selType, selExperience, selIndustry, selDate);
+      applyFilters(data, search);
     } catch (e) {
       console.error(e);
     } finally {
@@ -74,102 +107,19 @@ export default function JobsFeed() {
       await refreshProperties();
       const data = await JobStorage.getJobs(false);
       setJobs(data);
-      applyFilters(data, search, selCity, selCategory, selType, selExperience, selIndustry, selDate);
+      applyFilters(data, search);
     } catch (e) {
       console.error(e);
     } finally {
       setRefreshing(false);
     }
-  }, [search, selCity, selCategory, selType, selExperience, selIndustry, selDate, refreshProperties]);
-
-  // Apply filters logic
-  const applyFilters = (
-    allJobs: Job[],
-    searchQuery: string,
-    city: string,
-    category: string,
-    type: string,
-    experience: string,
-    industry: string,
-    date: string
-  ) => {
-    let result = [...allJobs];
-
-    // Search Query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(j => 
-        j.company.toLowerCase().includes(query) ||
-        j.title_ku.toLowerCase().includes(query) ||
-        j.title_en.toLowerCase().includes(query) ||
-        j.description_ku.toLowerCase().includes(query) ||
-        j.description_en.toLowerCase().includes(query)
-      );
-    }
-
-    // City Filter
-    if (city !== 'all') {
-      result = result.filter(j => j.city_en.toLowerCase() === city.toLowerCase());
-    }
-
-    // Category Filter
-    if (category !== 'all') {
-      result = result.filter(j => j.category === category);
-    }
-
-    // Job Type Filter
-    if (type !== 'all') {
-      result = result.filter(j => j.type === type);
-    }
-
-    // Experience Level Filter
-    if (experience !== 'all') {
-      result = result.filter(j => j.experience_level === experience);
-    }
-
-    // Industry Filter
-    if (industry !== 'all') {
-      result = result.filter(j => j.industry === industry);
-    }
-
-    // Date Posted Filter
-    if (date !== 'all') {
-      const now = new Date();
-      result = result.filter(j => {
-        const postedDate = new Date(j.created_at);
-        const diffTime = Math.abs(now.getTime() - postedDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (date === 'last24h') return diffDays <= 1;
-        if (date === 'lastWeek') return diffDays <= 7;
-        if (date === 'lastMonth') return diffDays <= 30;
-        return true;
-      });
-    }
-
-    setFilteredJobs(result);
-  };
-
-  const handleApplyFilters = () => {
-    applyFilters(jobs, search, selCity, selCategory, selType, selExperience, selIndustry, selDate);
-    setShowFilters(false);
-  };
-
-  const handleResetFilters = () => {
-    setSearch('');
-    setSelCity('all');
-    setSelCategory('all');
-    setSelType('all');
-    setSelExperience('all');
-    setSelIndustry('all');
-    setSelDate('all');
-    applyFilters(jobs, '', 'all', 'all', 'all', 'all', 'all', 'all');
-    setShowFilters(false);
-  };
+  }, [search, refreshProperties]);
 
   const toggleLanguage = () => {
     setLanguage(language === 'ku' ? 'en' : 'ku');
   };
+
+  // Apply handlers removed - actions reside on details page
 
   // UI layout configurations
   const rowStyle = isRtl ? styles.rowReverse : styles.row;
@@ -188,50 +138,85 @@ export default function JobsFeed() {
       )}
 
       <View style={[styles.safeArea, { paddingTop: insets.top }]}>
-        {/* Telegram Header */}
+        {/* Telegram Header / Search Bar Header */}
         <View style={[styles.tgHeader, rowStyle, { borderBottomColor: colors.border }]}>
-          <View style={[styles.tgHeaderLeft, rowStyle]}>
-            <Image 
-              source={logoUrl ? { uri: logoUrl } : require('../../../assets/images/logo.png')} 
-              style={styles.logoIcon} 
-            />
-            <View style={[styles.tgChannelInfo, isRtl ? styles.marginRight : styles.marginLeft]}>
-              <View style={[styles.tgTitleRow, rowStyle]}>
-                <Text style={[styles.tgChannelName, { color: colors.text }]}>{t.appName}</Text>
-                <CheckCircle2 size={14} color="#5288c1" fill="#FFF" style={styles.verifiedIcon} />
-              </View>
-              <Text style={[styles.tgSubs, { color: colors.textSecondary }]}>
-                {language === 'ku' ? '١٥٤،٢٠٣ سەبسکرایبەر' : '154,203 subscribers'}
-              </Text>
+          {isSearching ? (
+            <View style={[styles.searchHeaderWrapper, rowStyle]}>
+              <TouchableOpacity 
+                activeOpacity={0.7} 
+                style={styles.tgIconButton}
+                onPress={() => {
+                  setIsSearching(false);
+                  setSearch('');
+                  applyFilters(jobs, '');
+                }}
+              >
+                <X size={20} color={colors.text} />
+              </TouchableOpacity>
+              <TextInput
+                value={search}
+                autoFocus={true}
+                onChangeText={(text) => {
+                  setSearch(text);
+                  applyFilters(jobs, text);
+                }}
+                placeholder={language === 'ku' ? 'گەڕان بەدوای کار یان کۆمپانیا...' : 'Search jobs or companies...'}
+                placeholderTextColor={colors.textMuted}
+                style={[
+                  styles.headerSearchInput, 
+                  { 
+                    color: colors.text, 
+                    textAlign: isRtl ? 'right' : 'left',
+                    fontFamily: font,
+                  }
+                ]}
+              />
             </View>
-          </View>
+          ) : (
+            <>
+              <View style={[styles.tgHeaderLeft, rowStyle]}>
+                <Image 
+                  source={logoUrl ? { uri: logoUrl } : require('../../../assets/images/logo.png')} 
+                  style={styles.logoIcon} 
+                />
+                <View style={[styles.tgChannelInfo, isRtl ? styles.marginRight : styles.marginLeft]}>
+                  <View style={[styles.tgTitleRow, rowStyle]}>
+                    <Text style={[styles.tgChannelName, { color: colors.text }]}>{t.appName}</Text>
+                    <CheckCircle2 size={14} color="#5288c1" fill="#FFF" style={styles.verifiedIcon} />
+                  </View>
+                  <Text style={[styles.tgSubs, { color: colors.textSecondary }]}>
+                    {language === 'ku' ? '١٥٤،٢٠٣ سەبسکرایبەر' : '154,203 subscribers'}
+                  </Text>
+                </View>
+              </View>
 
-          <View style={[styles.tgHeaderRight, rowStyle]}>
-            {/* Unified Search & Filter Button in Corner */}
-            <TouchableOpacity 
-              activeOpacity={0.7} 
-              style={styles.tgIconButton}
-              onPress={() => setShowFilters(true)}
-            >
-              <Search size={20} color={colors.text} />
-            </TouchableOpacity>
+              <View style={[styles.tgHeaderRight, rowStyle]}>
+                <TouchableOpacity 
+                  activeOpacity={0.7} 
+                  style={styles.tgIconButton}
+                  onPress={() => setIsSearching(true)}
+                >
+                  <Search size={18} color={colors.text} />
+                </TouchableOpacity>
 
-            <TouchableOpacity 
-              activeOpacity={0.7} 
-              style={styles.tgIconButton}
-              onPress={toggleLanguage}
-            >
-              <Languages size={18} color={colors.text} />
-            </TouchableOpacity>
+                <TouchableOpacity 
+                  activeOpacity={0.7} 
+                  style={styles.tgIconButton}
+                  onPress={toggleLanguage}
+                >
+                  <Languages size={18} color={colors.text} />
+                </TouchableOpacity>
 
-            <TouchableOpacity 
-              activeOpacity={0.7} 
-              style={styles.tgIconButton}
-              onPress={toggleTheme}
-            >
-              {theme === 'dark' ? <Sun size={18} color={colors.text} /> : <Moon size={18} color={colors.text} />}
-            </TouchableOpacity>
-          </View>
+                <TouchableOpacity 
+                  activeOpacity={0.7} 
+                  style={styles.tgIconButton}
+                  onPress={toggleTheme}
+                >
+                  {theme === 'dark' ? <Sun size={18} color={colors.text} /> : <Moon size={18} color={colors.text} />}
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
 
         {/* Telegram Pinned Message */}
@@ -274,8 +259,8 @@ export default function JobsFeed() {
                 </Text>
                 <Text style={[styles.pinnedCardBody, { color: colors.textSecondary }, textStyle]}>
                   {language === 'ku' 
-                    ? '١. هەموو هەلی کارەکان ڕاستەوخۆ دەتوانی پێشکەش بکەی.\n٢. لە ناو پۆستەکە کلیک لە "بارکردنی سیڤی" بکە بۆ دروستکردنی بەستەر.\n٣. بەستەرەکە خۆکار لە ناو نامەی وەتسئەپ یان ئیمەیڵەکەت دادەنرێت.\n٤. بەشی ئەدمین بەکاربهێنە بۆ بڵاوکردنەوەی کار.'
-                    : '1. You can apply to all jobs directly from the feed.\n2. Tap "Upload CV" inside the details view to generate a shareable link.\n3. The link will be auto-composed in your WhatsApp/Email application.\n4. Use the Admin Panel to post or manage jobs.'}
+                    ? '١. هەموو هەلی کارەکان ڕاستەوخۆ دەتوانی پێشکەش بکەی.\n٢. بەشی ئەدمین بەکاربهێنە بۆ بڵاوکردنەوەی کار.'
+                    : '1. You can apply to all jobs directly from the feed.\n2. Use the Admin Panel to post or manage jobs.'}
                 </Text>
                 {isDemoMode && (
                   <Text style={[styles.demoWarn, { color: colors.accent }]}>
@@ -323,199 +308,12 @@ export default function JobsFeed() {
             }
           />
         )}
-
-        {/* Combined Search & Filter Modal */}
-        <Modal
-          visible={showFilters}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setShowFilters(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: theme === 'dark' ? '#0F172A' : '#F8FAFC', borderColor: colors.cardBorder }]}>
-              {/* Modal Header */}
-              <View style={[styles.modalHeader, rowStyle, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>
-                  {language === 'ku' ? 'گەڕان و فلتەری کارەکان' : 'Search & Filter'}
-                </Text>
-                <TouchableOpacity 
-                  activeOpacity={0.7} 
-                  style={[styles.closeBtn, { backgroundColor: colors.border }]} 
-                  onPress={() => setShowFilters(false)}
-                >
-                  <X size={16} color={colors.text} />
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView showsVerticalScrollIndicator={false} style={styles.filterScroll}>
-                
-                {/* Search Input Bar (Moved Inside Modal) */}
-                <Text style={[styles.filterSectionTitle, { color: colors.text, marginTop: 4 }, textStyle]}>
-                  {language === 'ku' ? 'گەڕان بە دەق' : 'Text Search'}
-                </Text>
-                <GlassView style={styles.searchBarWrapper}>
-                  <View style={[styles.searchInner, rowStyle]}>
-                    <Search size={18} color={colors.textMuted} style={styles.searchIcon} />
-                    <TextInput
-                      value={search}
-                      onChangeText={setSearch}
-                      placeholder={t.searchPlaceholder}
-                      placeholderTextColor={colors.textMuted}
-                      style={[styles.searchInput, { color: colors.text }, textStyle]}
-                    />
-                  </View>
-                </GlassView>
-
-                {/* 1. City Filter */}
-                <Text style={[styles.filterSectionTitle, { color: colors.text }, textStyle]}>{t.city}</Text>
-                <View style={[styles.optionsGrid, rowStyle]}>
-                  {[{ id: 'all', name_ku: t.cities.all, name_en: t.cities.all }, ...cities].map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border },
-                        selCity === item.id && { backgroundColor: colors.primary, borderColor: colors.primary }
-                      ]}
-                      onPress={() => setSelCity(item.id)}
-                    >
-                      <Text style={[styles.chipText, { color: colors.textSecondary }, selCity === item.id && { color: '#FFF' }]}>
-                        {language === 'ku' ? item.name_ku : item.name_en}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* Category Filter */}
-                <Text style={[styles.filterSectionTitle, { color: colors.text }, textStyle]}>{t.category}</Text>
-                <View style={[styles.optionsGrid, rowStyle]}>
-                  {[{ id: 'all', name_ku: t.categories.all, name_en: t.categories.all }, ...categories].map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border },
-                        selCategory === item.id && { backgroundColor: colors.primary, borderColor: colors.primary }
-                      ]}
-                      onPress={() => setSelCategory(item.id)}
-                    >
-                      <Text style={[styles.chipText, { color: colors.textSecondary }, selCategory === item.id && { color: '#FFF' }]}>
-                        {language === 'ku' ? item.name_ku : item.name_en}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* 2. Job Type */}
-                <Text style={[styles.filterSectionTitle, { color: colors.text }, textStyle]}>{t.jobType}</Text>
-                <View style={[styles.optionsGrid, rowStyle]}>
-                  {[{ id: 'all', name_ku: t.jobTypes.all, name_en: t.jobTypes.all }, ...jobTypes].map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border },
-                        selType === item.id && { backgroundColor: colors.primary, borderColor: colors.primary }
-                      ]}
-                      onPress={() => setSelType(item.id)}
-                    >
-                      <Text style={[styles.chipText, { color: colors.textSecondary }, selType === item.id && { color: '#FFF' }]}>
-                        {language === 'ku' ? item.name_ku : item.name_en}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* 3. Experience Level */}
-                <Text style={[styles.filterSectionTitle, { color: colors.text }, textStyle]}>{t.experienceLevel}</Text>
-                <View style={[styles.optionsGrid, rowStyle]}>
-                  {[{ id: 'all', name_ku: t.experienceLevels.all, name_en: t.experienceLevels.all }, ...experienceLevels].map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border },
-                        selExperience === item.id && { backgroundColor: colors.primary, borderColor: colors.primary }
-                      ]}
-                      onPress={() => setSelExperience(item.id)}
-                    >
-                      <Text style={[styles.chipText, { color: colors.textSecondary }, selExperience === item.id && { color: '#FFF' }]}>
-                        {language === 'ku' ? item.name_ku : item.name_en}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* 4. Industry */}
-                <Text style={[styles.filterSectionTitle, { color: colors.text }, textStyle]}>{t.industry}</Text>
-                <View style={[styles.optionsGrid, rowStyle]}>
-                  {[{ id: 'all', name_ku: t.industries.all, name_en: t.industries.all }, ...industries].map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border },
-                        selIndustry === item.id && { backgroundColor: colors.primary, borderColor: colors.primary }
-                      ]}
-                      onPress={() => setSelIndustry(item.id)}
-                    >
-                      <Text style={[styles.chipText, { color: colors.textSecondary }, selIndustry === item.id && { color: '#FFF' }]}>
-                        {language === 'ku' ? item.name_ku : item.name_en}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* 5. Date Posted */}
-                <Text style={[styles.filterSectionTitle, { color: colors.text }, textStyle]}>{t.datePosted}</Text>
-                <View style={[styles.optionsGrid, rowStyle]}>
-                  {Object.entries(t.dateOptions).map(([key, label]) => (
-                    <TouchableOpacity
-                      key={key}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border },
-                        selDate === key && { backgroundColor: colors.primary, borderColor: colors.primary }
-                      ]}
-                      onPress={() => setSelDate(key)}
-                    >
-                      <Text style={[styles.chipText, { color: colors.textSecondary }, selDate === key && { color: '#FFF' }]}>
-                        {label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <View style={{ height: 40 }} />
-              </ScrollView>
-
-              {/* Action Buttons */}
-              <View style={[styles.modalFooter, rowStyle, { borderTopColor: colors.border }]}>
-                <TouchableOpacity 
-                  activeOpacity={0.7} 
-                  style={[styles.resetBtn, { borderColor: colors.border }]} 
-                  onPress={handleResetFilters}
-                >
-                  <Text style={[styles.resetBtnText, { color: colors.textSecondary }]}>{t.resetFilters}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  activeOpacity={0.8} 
-                  style={[styles.applyBtn, { backgroundColor: colors.primary, shadowColor: colors.primary }]} 
-                  onPress={handleApplyFilters}
-                >
-                  <Text style={styles.applyBtnText}>{t.applyFilters}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
       </View>
     </View>
   );
 }
 
-const font = 'Vazirmatn';
+const font = 'NRT';
 
 const styles = StyleSheet.create({
   container: {
@@ -562,12 +360,6 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 10,
   },
-  tgAvatarText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-    fontFamily: font,
-  },
   tgChannelInfo: {
     justifyContent: 'center',
   },
@@ -594,6 +386,19 @@ const styles = StyleSheet.create({
   },
   tgIconButton: {
     padding: 6,
+  },
+  searchHeaderWrapper: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerSearchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
   },
   marginLeft: {
     marginLeft: 10,
@@ -650,12 +455,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     borderRadius: 12,
     padding: 14,
-  },
-  pinnedExpandedCardTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    fontFamily: font,
-    marginBottom: 8,
+    borderWidth: 1,
   },
   pinnedCardTitle: {
     fontSize: 13,
@@ -673,6 +473,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 8,
     fontFamily: font,
+  },
+  searchBarContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 6,
   },
   searchBarWrapper: {
     width: '100%',
@@ -694,13 +499,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontFamily: font,
   },
-  searchRow: {
-    display: 'none',
-  },
   listContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     paddingTop: 10,
-    paddingBottom: 150,
+    paddingBottom: 100, // Bottom offset to clear the absolute tab bar
   },
   center: {
     flex: 1,
@@ -808,5 +610,135 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFF',
     fontFamily: font,
+  },
+  dragHandle: {
+    width: 38,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: 'rgba(128, 128, 128, 0.4)',
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  detailsSheetTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    fontFamily: font,
+  },
+  detailsSheetSubtitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: font,
+    marginTop: 2,
+  },
+  detailsTagsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginVertical: 10,
+  },
+  detailTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    gap: 4,
+  },
+  tagText: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: font,
+  },
+  detailsInfoRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginVertical: 10,
+  },
+  detailsInfoBox: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingVertical: 10,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  detailsInfoVal: {
+    fontSize: 13,
+    fontWeight: '800',
+    fontFamily: font,
+    marginTop: 4,
+  },
+  detailsInfoLbl: {
+    fontSize: 11,
+    fontWeight: '600',
+    fontFamily: font,
+  },
+  detailsSection: {
+    marginTop: 14,
+  },
+  detailsSectionTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    fontFamily: font,
+    marginBottom: 6,
+  },
+  detailsBodyText: {
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.85,
+    fontFamily: font,
+  },
+  galleryScroll: {
+    gap: 8,
+    marginTop: 4,
+  },
+  thumbnailWrapper: {
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  thumbnail: {
+    width: 70,
+    height: 70,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 5,
+  },
+  bulletPoint: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.85,
+    fontFamily: font,
+  },
+  marginRightTen: {
+    marginRight: 10,
+  },
+  marginLeftTen: {
+    marginLeft: 10,
+  },
+  applyWhatsAppBtn: {
+    flexDirection: 'row',
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  applyEmailBtn: {
+    flexDirection: 'row',
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   }
 });

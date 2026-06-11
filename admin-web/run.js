@@ -156,6 +156,20 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Route privacy policy
+  if (decodedUrl === '/privacy.html' || decodedUrl === '/privacy') {
+    fs.readFile(path.join(__dirname, 'privacy.html'), (err, content) => {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error loading privacy page: ' + err.message);
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(content);
+      }
+    });
+    return;
+  }
+
   // Route root and index.html to serve PWA welcome landing page
   if (decodedUrl === '/' || decodedUrl === '/index.html') {
     fs.readFile(path.join(__dirname, 'landing.html'), (err, content) => {

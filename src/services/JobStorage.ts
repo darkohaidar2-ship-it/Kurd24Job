@@ -25,6 +25,8 @@ export interface Job {
   views: number;
   clicks: number;
   created_at: string;
+  is_vip?: boolean;
+  is_pinned?: boolean;
 }
 
 export interface PropertyItem {
@@ -65,6 +67,7 @@ const MOCK_JOBS: Job[] = [
     views: 245,
     clicks: 43,
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    is_vip: true,
   },
   {
     id: 'job-2',
@@ -340,7 +343,7 @@ const seedDatabaseIfNeeded = async () => {
   }
 };
 
-seedDatabaseIfNeeded();
+// Seeding is handled dynamically inside database methods
 
 export const JobStorage = {
   /**
@@ -354,9 +357,15 @@ export const JobStorage = {
         if (!showDrafts) {
           query = query.eq('status', 'published');
         }
-        const { data, error } = await query.order('created_at', { ascending: false });
-        if (error) throw error;
-        return (data || []) as Job[];
+        // Try ordering by is_pinned first, then created_at
+        let result = await query.order('is_pinned', { ascending: false }).order('created_at', { ascending: false });
+        if (result.error) {
+          // Fallback if is_pinned column is missing
+          console.warn("Sorting by is_pinned failed (column might be missing), retrying with created_at only:", result.error.message);
+          result = await query.order('created_at', { ascending: false });
+        }
+        if (result.error) throw result.error;
+        return (result.data || []) as Job[];
       } catch (e) {
         console.error('Supabase getJobs failed, falling back to AsyncStorage:', e);
       }
@@ -367,7 +376,12 @@ export const JobStorage = {
       const data = await AsyncStorage.getItem(STORAGE_KEY);
       if (data) {
         const jobsList: Job[] = JSON.parse(data);
-        const sortedJobs = jobsList.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const sortedJobs = jobsList.sort((a, b) => {
+          const aPinned = a.is_pinned ? 1 : 0;
+          const bPinned = b.is_pinned ? 1 : 0;
+          if (aPinned !== bPinned) return bPinned - aPinned;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
         if (showDrafts) {
           return sortedJobs;
         }
@@ -444,6 +458,8 @@ export const JobStorage = {
             whatsapp: newJob.whatsapp,
             email: newJob.email,
             status: newJob.status,
+            is_vip: newJob.is_vip ?? false,
+            is_pinned: newJob.is_pinned ?? false,
             views: 0,
             clicks: 0
           }])
@@ -638,6 +654,7 @@ export const JobStorage = {
           whatsapp: job.whatsapp,
           email: job.email,
           status: job.status,
+          is_vip: job.is_vip ?? false,
           views: job.views,
           clicks: job.clicks,
           created_at: job.created_at

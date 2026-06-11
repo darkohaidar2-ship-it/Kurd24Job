@@ -1,9 +1,30 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Linking, Share, Alert, ScrollView, Modal } from 'react-native';
-import { CheckCheck, Eye, MessageCircle, Mail, ExternalLink, Bookmark, X } from 'lucide-react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  Image, 
+  ScrollView, 
+  Modal,
+  Dimensions,
+  Animated,
+  Easing
+} from 'react-native';
+import { 
+  CheckCheck, 
+  Eye, 
+  Bookmark, 
+  X, 
+  CheckCircle2,
+  Pin
+} from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '../context/AppContext';
-import { Job, JobStorage } from '../services/JobStorage';
+import { Job } from '../services/JobStorage';
 import GlassView from './GlassView';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface JobCardProps {
   job: Job;
@@ -20,26 +41,68 @@ export const JobCard: React.FC<JobCardProps> = ({
   onEdit,
   onDelete
 }) => {
-  const { language, toggleBookmark, isBookmarked, colors, t, theme, getLocalizedProperty } = useApp();
+  const { language, toggleBookmark, isBookmarked, colors, theme, getLocalizedProperty } = useApp();
   const isRtl = language === 'ku';
   const bookmarked = isBookmarked(job.id);
 
-  // Lightbox Modal State
+  // States
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [currentImgIndex, setCurrentImgIndex] = useState<number>(0);
 
-  // Layout directions
-  const rowStyle = isRtl ? styles.rowReverse : styles.row;
-  const textStyle = isRtl ? styles.textRight : styles.textLeft;
+  // Animation for VIP Shine Sweep & Pulsing Border
+  const shimmerAnim = useRef(new Animated.Value(-1.5)).current;
+  const borderGlowAnim = useRef(new Animated.Value(0)).current;
 
-  // Localized tags
-  const city = getLocalizedProperty('city', job.city_en);
-  const type = getLocalizedProperty('type', job.type);
-  const level = getLocalizedProperty('experience_level', job.experience_level);
-  const industry = getLocalizedProperty('industry', job.industry);
+  useEffect(() => {
+    if (job.is_vip) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(shimmerAnim, {
+            toValue: 1.5,
+            duration: 2200,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.delay(1800), // Delay between sweeps for subtle elegance
+        ])
+      ).start();
+
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(borderGlowAnim, {
+            toValue: 1,
+            duration: 1500,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: false,
+          }),
+          Animated.timing(borderGlowAnim, {
+            toValue: 0,
+            duration: 1500,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: false,
+          })
+        ])
+      ).start();
+    }
+  }, [job.is_vip]);
+
+  const borderColor = job.is_vip 
+    ? borderGlowAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['#FFB800', '#FFE57F']
+      })
+    : colors.cardBorder;
+
+  const translateX = shimmerAnim.interpolate({
+    inputRange: [-1.5, 1.5],
+    outputRange: [-SCREEN_WIDTH * 1.5, SCREEN_WIDTH * 1.5],
+  });
+
+  // Localized variables
   const title = isRtl ? job.title_ku : job.title_en;
   const description = isRtl ? job.description_ku : job.description_en;
 
-  // Time formatting
+  // Time format
   const dateObj = new Date(job.created_at);
   const timeFormatted = dateObj.toLocaleTimeString(language === 'ku' ? 'ku-IQ' : 'en-US', {
     hour: '2-digit',
@@ -47,212 +110,215 @@ export const JobCard: React.FC<JobCardProps> = ({
     hour12: true
   });
 
-  const handleWhatsAppApply = async () => {
-    await JobStorage.incrementClicks(job.id);
-    const msg = language === 'ku'
-      ? `سڵاو، من پێشکەشکارم بۆ هەلی کاری "${title}" لە ڕێگەی ئەپی Kurd24 Job.`
-      : `Hello, I am applying for the "${title}" position listed on Kurd24 Job.`;
-    const url = `https://wa.me/${job.whatsapp}?text=${encodeURIComponent(msg)}`;
-    Linking.openURL(url).catch(() => Alert.alert('Error', 'WhatsApp is not installed'));
+  const handleScroll = (event: any) => {
+    const contentOffset = event.nativeEvent.contentOffset.x;
+    const viewSize = event.nativeEvent.layoutMeasurement.width;
+    if (viewSize > 0) {
+      const index = Math.round(contentOffset / viewSize);
+      setCurrentImgIndex(index);
+    }
   };
 
-  const handleEmailApply = async () => {
-    await JobStorage.incrementClicks(job.id);
-    const subject = encodeURIComponent(language === 'ku' ? `پێشکەشکردن: ${title}` : `Application: ${title}`);
-    const body = encodeURIComponent(language === 'ku' 
-      ? `من پێشکەشکارم بۆ هەلی کاری "${title}" لە کۆمپانیای ${job.company}.` 
-      : `I am applying for the position of "${title}" at ${job.company}.`
-    );
-    Linking.openURL(`mailto:${job.email}?subject=${subject}&body=${body}`).catch(() => Alert.alert('Error', 'Mail app is not available'));
-  };
+  // Alignments based on RTL
+  const rowStyle = isRtl ? styles.rowReverse : styles.row;
+  const textStyle = isRtl ? styles.textRight : styles.textLeft;
 
   return (
     <View style={styles.cardContainer}>
-      {/* Main Window Card */}
-      <GlassView 
-        noPadding={true}
-        style={[
-          styles.windowCard, 
-          { 
-            backgroundColor: theme === 'dark' ? 'rgba(21, 30, 40, 0.92)' : 'rgba(255, 255, 255, 0.96)', 
-            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(15, 23, 42, 0.22)',
-            borderWidth: 2,
-          }
-        ]}
+      <Animated.View
+        style={{
+          borderWidth: job.is_vip ? 2 : 1,
+          borderColor: borderColor,
+          borderRadius: 12,
+          overflow: 'hidden',
+        }}
       >
-        {/* Window Header Bar */}
-        <View style={[styles.windowHeader, rowStyle, { borderBottomColor: colors.border, backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.01)' }]}>
-          <View style={[styles.channelAvatar, { backgroundColor: colors.primary }]}>
-            <Text style={styles.channelAvatarText}>{job.company.substring(0, 1).toUpperCase()}</Text>
-          </View>
-          <View style={[styles.channelInfo, isRtl ? styles.marginRight : styles.marginLeft]}>
-            <Text style={[styles.channelName, { color: colors.text }]}>{job.company}</Text>
-            <Text style={[styles.channelSub, { color: colors.textSecondary }]}>Kurd24 Job Channel</Text>
-          </View>
-
-          {!isAdmin && (
-            <TouchableOpacity 
-              activeOpacity={0.7} 
-              style={[styles.bookmarkIcon, { backgroundColor: colors.border }]}
-              onPress={() => toggleBookmark(job.id)}
+        <GlassView 
+          noPadding={true}
+          style={[
+            styles.windowCard, 
+            { 
+              backgroundColor: theme === 'dark' ? 'rgba(21, 30, 40, 0.82)' : 'rgba(255, 255, 255, 0.9)',
+              borderWidth: 0,
+              borderRadius: 12,
+            }
+          ]}
+        >
+          {/* Animated Gold Shine Sweep Overlay for VIP */}
+          {job.is_vip && (
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  transform: [
+                    { translateX },
+                    { rotate: '25deg' },
+                  ],
+                  zIndex: 1,
+                  pointerEvents: 'none',
+                }
+              ]}
             >
-              <Bookmark 
-                size={14} 
-                color={bookmarked ? colors.primary : colors.textSecondary} 
-                fill={bookmarked ? colors.primary : 'none'} 
+              <LinearGradient
+                colors={[
+                  'rgba(255, 215, 0, 0)',
+                  'rgba(255, 215, 0, 0.02)',
+                  'rgba(255, 223, 0, 0.25)', // Glowing gold sweep
+                  'rgba(255, 215, 0, 0.02)',
+                  'rgba(255, 215, 0, 0)',
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.shimmerGradient}
               />
-            </TouchableOpacity>
+            </Animated.View>
           )}
-        </View>
 
-        {/* Window Content */}
-        <View style={styles.windowContent}>
-          {/* Job Title */}
-          <Text style={[styles.jobTitle, { color: colors.text }, textStyle]}>
-            📢 {title}
+          {/* Clickable Card Content area */}
+          <TouchableOpacity 
+            activeOpacity={0.8} 
+            style={styles.cardClickableArea}
+            onPress={onPress}
+          >
+            {/* Header Row */}
+            <View style={[styles.headerRow, rowStyle]}>
+              <View style={[styles.companyLogoPlaceholder, { backgroundColor: colors.primaryGlow }]}>
+                <Text style={[styles.logoLetter, { color: colors.primary }]}>
+                  {job.company.substring(0, 1).toUpperCase()}
+                </Text>
+              </View>
+              
+              <View style={[styles.companyDetails, isRtl ? styles.marginRight : styles.marginLeft]}>
+                <View style={[styles.companyNameRow, rowStyle]}>
+                  <Text style={[styles.companyName, { color: colors.text }]}>{job.company}</Text>
+                  <CheckCircle2 size={13} color="#3b82f6" fill="#FFF" style={styles.verifiedIcon} />
+                  {job.is_pinned && (
+                    <View style={[styles.pinBadge, { backgroundColor: colors.primaryGlow }]}>
+                      <Pin size={9} color={colors.primary} fill={colors.primary} />
+                      <Text style={[styles.pinBadgeText, { color: colors.primary }]}>
+                        {language === 'ku' ? 'جێگیرکراو' : 'Pinned'}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={[styles.companySubtitle, { color: colors.textSecondary }]}>
+                  Kurd24 Job Channel
+                </Text>
+              </View>
+
+              {!isAdmin && (
+                <TouchableOpacity 
+                  activeOpacity={0.7} 
+                  style={[styles.bookmarkButton, { backgroundColor: colors.border }]}
+                  onPress={() => toggleBookmark(job.id)}
+                >
+                  <Bookmark 
+                    size={16} 
+                    color={bookmarked ? colors.primary : colors.textSecondary} 
+                    fill={bookmarked ? colors.primary : 'none'} 
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Job Title */}
+            <Text style={[styles.jobTitle, { color: colors.text }, textStyle]}>
+              📢 {title}
+            </Text>
+
+          {/* Description Snippet */}
+          <Text 
+            numberOfLines={3} 
+            ellipsizeMode="tail"
+            style={[styles.descriptionSnippet, { color: colors.textSecondary }, textStyle]}
+          >
+            {description}
           </Text>
 
-          {/* 2-Column Grid */}
-          <View style={[styles.gridContainer, rowStyle]}>
-            
-            {/* Metadata Column (40% width) - aligned based on language */}
-            <View style={[styles.metaColumn, isRtl ? styles.alignRight : styles.alignLeft]}>
-              <View style={styles.metaItem}>
-                <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>{isRtl ? '📍 شار:' : '📍 City:'}</Text>
-                <Text numberOfLines={1} style={[styles.metaValue, { color: colors.text }]}>{city}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>{isRtl ? '💼 جۆر:' : '💼 Type:'}</Text>
-                <Text numberOfLines={1} style={[styles.metaValue, { color: colors.text }]}>{type}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>{isRtl ? '💵 مووچە:' : '💵 Salary:'}</Text>
-                <Text numberOfLines={1} style={[styles.metaValue, { color: colors.text }]}>{job.salary}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>{isRtl ? '🎓 ئەزموون:' : '🎓 Exp:'}</Text>
-                <Text numberOfLines={1} style={[styles.metaValue, { color: colors.text }]}>{level}</Text>
-              </View>
-            </View>
-
-            {/* Vertical Divider */}
-            <View style={[styles.columnDivider, { backgroundColor: colors.border }]} />
-
-            {/* Description Column (60% width) */}
-            <View style={styles.descColumn}>
-              <Text style={[styles.postTextTitle, { color: colors.textSecondary }, textStyle]}>
-                📝 <Text style={styles.boldText}>{isRtl ? 'دەربارە:' : 'Description:'}</Text>
-              </Text>
-              <Text 
-                numberOfLines={5} 
-                ellipsizeMode="tail"
-                style={[styles.postText, { color: colors.text }, textStyle]}
-              >
-                {description}
-              </Text>
-            </View>
-          </View>
-
-          {/* Horizontal Image Gallery (RTL Aligned for Kurdish, LTR for English) */}
+          {/* Premium Overlap Image Slider */}
           {job.images && job.images.length > 0 && (
-            <View style={[styles.galleryContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            <View style={styles.sliderContainer}>
               <ScrollView 
                 horizontal 
+                pagingEnabled
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={[
-                  styles.galleryScroll,
-                  { flexDirection: isRtl ? 'row-reverse' : 'row' }
-                ]}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+                contentContainerStyle={{ flexDirection: isRtl ? 'row-reverse' : 'row' }}
+                style={styles.sliderScroll}
               >
                 {job.images.map((imgUrl, idx) => (
                   <TouchableOpacity
                     key={idx}
-                    activeOpacity={0.8}
+                    activeOpacity={0.9}
                     onPress={() => setActiveImage(imgUrl)}
-                    style={styles.thumbnailWrapper}
+                    style={styles.slideWrapper}
                   >
-                    <Image source={{ uri: imgUrl }} style={styles.thumbnail} />
+                    <Image source={{ uri: imgUrl }} style={styles.slideImage} />
                   </TouchableOpacity>
                 ))}
               </ScrollView>
+
+              {/* Floating translucent counter badge */}
+              <View style={styles.counterOverlay}>
+                <Text style={styles.counterText}>
+                  {currentImgIndex + 1}/{job.images.length}
+                </Text>
+              </View>
             </View>
           )}
 
-          {/* Telegram Footer: Views, Time, and Read Checkmarks */}
-          <View style={[styles.bubbleFooter, rowStyle]}>
-            <View style={[styles.footerViews, rowStyle]}>
-              <Eye size={12} color={colors.textMuted} style={styles.viewIcon} />
-              <Text style={[styles.footerText, { color: colors.textMuted }]}>{job.views}</Text>
+          {/* Time & Views footer */}
+          <View style={[styles.footerRow, rowStyle]}>
+            <View style={[styles.footerItem, rowStyle]}>
+              <Eye size={12} color={colors.textMuted} />
+              <Text style={[styles.footerText, { color: colors.textMuted }, isRtl ? styles.marginRightMini : styles.marginLeftMini]}>
+                {job.views} {language === 'ku' ? 'بینین' : 'views'}
+              </Text>
             </View>
-
-            <View style={[styles.footerTimeRow, rowStyle]}>
+            <View style={[styles.footerItem, rowStyle]}>
               <Text style={[styles.footerText, { color: colors.textMuted }]}>{timeFormatted}</Text>
-              <CheckCheck size={14} color="#5288c1" style={styles.checkIcon} />
+              <CheckCheck size={14} color="#5288c1" style={isRtl ? styles.marginRightMini : styles.marginLeftMini} />
             </View>
           </View>
+        </TouchableOpacity>
 
-          {/* Admin Editing Options */}
-          {isAdmin && (
-            <View style={[styles.adminActions, { borderTopColor: colors.border }, rowStyle]}>
-              <TouchableOpacity onPress={onEdit} style={[styles.adminBtn, { backgroundColor: colors.primaryGlow }]}>
-                <Text style={{ color: colors.primary, fontSize: 12, fontWeight: '700' }}>{t.editJob}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onDelete} style={[styles.adminBtn, { backgroundColor: colors.accentGlow }]}>
-                <Text style={{ color: colors.accent, fontSize: 12, fontWeight: '700' }}>{t.deleteJob}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+        {/* Admin actions row */}
+        {isAdmin && (
+          <View style={[styles.adminActionsRow, { borderTopColor: colors.border }, rowStyle]}>
+            <TouchableOpacity onPress={onEdit} style={[styles.adminBtn, { backgroundColor: colors.primaryGlow }]}>
+              <Text style={[styles.adminBtnText, { color: colors.primary }]}>{language === 'ku' ? 'دەستکاری' : 'Edit'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onDelete} style={[styles.adminBtn, { backgroundColor: colors.accentGlow }]}>
+              <Text style={[styles.adminBtnText, { color: colors.accent }]}>{language === 'ku' ? 'سڕینەوە' : 'Delete'}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-        {/* Borderless Segmented Action Buttons Bar at the very bottom (spans 100% width) */}
-        <View style={[
-          styles.segmentedBar, 
-          { 
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-            backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.015)' : 'rgba(0, 0, 0, 0.01)'
-          }
-        ]}>
+        {/* Action button: See More (زانیاری زیاتر) */}
+        <View style={[styles.seeMoreContainer, { borderTopColor: colors.border }]}>
           <TouchableOpacity 
-            activeOpacity={0.7} 
-            style={styles.segmentBtn}
-            onPress={handleWhatsAppApply}
-          >
-            <MessageCircle size={14} color="#25D366" />
-            <Text style={[styles.segmentBtnText, { color: '#25D366' }]}>
-              {language === 'ku' ? 'وەتسئەپ' : 'WhatsApp'}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={[styles.verticalDivider, { backgroundColor: colors.border }]} />
-
-          <TouchableOpacity 
-            activeOpacity={0.7} 
-            style={styles.segmentBtn}
-            onPress={handleEmailApply}
-          >
-            <Mail size={14} color={colors.primary} />
-            <Text style={[styles.segmentBtnText, { color: colors.primary }]}>
-              {language === 'ku' ? 'ئیمەیڵ' : 'Email'}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={[styles.verticalDivider, { backgroundColor: colors.border }]} />
-
-          <TouchableOpacity 
-            activeOpacity={0.7} 
-            style={styles.segmentBtn}
+            activeOpacity={0.8}
+            style={[
+              styles.seeMoreBtn, 
+              { 
+                backgroundColor: job.is_vip ? 'rgba(255, 184, 0, 0.12)' : colors.primaryGlow,
+                borderColor: job.is_vip ? '#FFB800' : colors.primary,
+              }
+            ]}
             onPress={onPress}
           >
-            <ExternalLink size={14} color={colors.accent} />
-            <Text style={[styles.segmentBtnText, { color: colors.accent }]}>
-              {language === 'ku' ? 'زانیاری' : 'Details'}
+            <Text style={[
+              styles.seeMoreBtnText, 
+              { color: job.is_vip ? '#FFB800' : colors.primary }
+            ]}>
+              {language === 'ku' ? 'زانیاری زیاتر 🔍' : 'More Info 🔍'}
             </Text>
           </TouchableOpacity>
         </View>
       </GlassView>
 
-      {/* Lightbox / Zoom Modal */}
+      {/* Full screen image lightbox zoom */}
       <Modal
         visible={activeImage !== null}
         transparent={true}
@@ -276,11 +342,12 @@ export const JobCard: React.FC<JobCardProps> = ({
           )}
         </View>
       </Modal>
+      </Animated.View>
     </View>
   );
 };
 
-const font = 'Vazirmatn';
+const font = 'NRT';
 
 const styles = StyleSheet.create({
   row: {
@@ -300,42 +367,57 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginBottom: 16,
     width: '100%',
+    paddingHorizontal: 12,
   },
   windowCard: {
     padding: 0,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  windowHeader: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+  cardClickableArea: {
+    padding: 16,
+    paddingBottom: 12,
   },
-  windowContent: {
-    padding: 14,
-    paddingBottom: 8,
+  headerRow: {
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  channelAvatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+  companyLogoPlaceholder: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  channelAvatarText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: 'bold',
+  logoLetter: {
+    fontSize: 15,
+    fontWeight: '800',
     fontFamily: font,
   },
-  channelInfo: {
+  companyDetails: {
     flex: 1,
+  },
+  companyNameRow: {
+    gap: 4,
+    alignItems: 'center',
+  },
+  companyName: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: font,
+  },
+  companySubtitle: {
+    fontSize: 10,
+    opacity: 0.6,
+    fontFamily: font,
+    marginTop: 1,
+  },
+  verifiedIcon: {
+    marginTop: 1,
   },
   marginLeft: {
     marginLeft: 10,
@@ -343,147 +425,85 @@ const styles = StyleSheet.create({
   marginRight: {
     marginRight: 10,
   },
-  channelName: {
-    fontSize: 13,
-    fontWeight: '700',
-    fontFamily: font,
-  },
-  channelSub: {
-    fontSize: 10,
-    opacity: 0.5,
-    fontFamily: font,
-  },
-  bookmarkIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
+  bookmarkButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
   jobTitle: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '800',
+    lineHeight: 24,
     marginBottom: 10,
-    lineHeight: 18,
     fontFamily: font,
   },
-  gridContainer: {
-    flexDirection: 'row',
+  descriptionSnippet: {
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.8,
+    fontFamily: font,
     marginBottom: 12,
   },
-  metaColumn: {
-    flex: 1.1,
-    gap: 8,
-  },
-  alignLeft: {
-    alignItems: 'flex-start',
-  },
-  alignRight: {
-    alignItems: 'flex-end',
-  },
-  metaItem: {
+  sliderContainer: {
+    position: 'relative',
+    height: 180,
     width: '100%',
-  },
-  metaLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    marginBottom: 1,
-    fontFamily: font,
-  },
-  metaValue: {
-    fontSize: 11,
-    fontWeight: '700',
-    fontFamily: font,
-  },
-  columnDivider: {
-    width: 1,
-    height: '100%',
-    marginHorizontal: 12,
-  },
-  descColumn: {
-    flex: 1.9,
-  },
-  postTextTitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginBottom: 4,
-    fontFamily: font,
-  },
-  postText: {
-    fontSize: 11.5,
-    lineHeight: 16,
-    fontFamily: font,
-  },
-  boldText: {
-    fontWeight: '700',
-    fontFamily: font,
-  },
-  galleryContainer: {
-    width: '100%',
-    marginVertical: 10,
-  },
-  galleryScroll: {
-    gap: 8,
-  },
-  thumbnailWrapper: {
-    borderRadius: 6,
+    borderRadius: 14,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    marginBottom: 12,
   },
-  thumbnail: {
-    width: 60,
-    height: 60,
+  sliderScroll: {
+    flex: 1,
   },
-  bubbleFooter: {
+  slideWrapper: {
+    width: SCREEN_WIDTH - 56,
+    height: 180,
+  },
+  slideImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  counterOverlay: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  counterText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: font,
+  },
+  footerRow: {
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: 4,
   },
-  footerViews: {
+  footerItem: {
     alignItems: 'center',
-    gap: 4,
-  },
-  viewIcon: {
-    opacity: 0.7,
-  },
-  footerTimeRow: {
-    alignItems: 'center',
-    gap: 4,
   },
   footerText: {
-    fontSize: 10,
-    fontWeight: '500',
+    fontSize: 12,
     fontFamily: font,
   },
-  checkIcon: {
-    marginLeft: 2,
+  marginLeftMini: {
+    marginLeft: 4,
   },
-  segmentedBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
+  marginRightMini: {
+    marginRight: 4,
   },
-  segmentBtn: {
-    flex: 1,
-    height: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  segmentBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
-    fontFamily: font,
-  },
-  verticalDivider: {
-    width: 1,
-    height: '100%',
-  },
-  adminActions: {
-    marginTop: 10,
-    paddingTop: 8,
+  adminActionsRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderTopWidth: 0.5,
     justifyContent: 'space-between',
     gap: 8,
@@ -491,13 +511,69 @@ const styles = StyleSheet.create({
   adminBtn: {
     flex: 1,
     height: 32,
-    borderRadius: 4,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  adminBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: font,
+  },
+  seeMoreContainer: {
+    borderTopWidth: 1,
+    padding: 10,
+  },
+  seeMoreBtn: {
+    height: 38,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  seeMoreBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    fontFamily: font,
+  },
+  vipBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+    marginLeft: 6,
+    marginRight: 6,
+    alignSelf: 'center',
+  },
+  vipBadgeText: {
+    color: '#000',
+    fontSize: 9,
+    fontWeight: '900',
+    fontFamily: font,
+  },
+  pinBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 6,
+    marginRight: 6,
+    alignSelf: 'center',
+  },
+  pinBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    fontFamily: font,
+  },
+  shimmerGradient: {
+    height: '250%', 
+    width: 120, 
+    top: '-75%'
+  },
   lightboxOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -510,7 +586,7 @@ const styles = StyleSheet.create({
   },
   lightboxImage: {
     width: '90%',
-    height: '70%',
+    height: '75%',
   }
 });
 

@@ -9,7 +9,7 @@ import {
   StatusBar,
   Platform
 } from 'react-native';
-import { useRouter, useIsFocused } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Bookmark, HelpCircle } from 'lucide-react-native';
 import { useApp } from '../../context/AppContext';
@@ -107,6 +107,8 @@ export default function BookmarksScreen() {
   );
 }
 
+const font = 'NRT';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -137,9 +139,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
     letterSpacing: 0.5,
+    fontFamily: font,
   },
   badge: {
     paddingHorizontal: 8,
@@ -150,11 +153,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
+    fontFamily: font,
   },
   listContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingBottom: 150,
   },
   center: {
@@ -172,7 +176,8 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '500',
+    fontFamily: font,
   }
 });

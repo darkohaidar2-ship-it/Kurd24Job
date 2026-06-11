@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <meta name="theme-color" content="#818cf8">
+  <meta name="theme-color" content="#00D4AA">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurd24">
@@ -18,15 +18,15 @@
 
   <style>
     :root {
-      --primary: #818cf8;
-      --primary-glow: rgba(129, 140, 248, 0.15);
-      --accent: #f472b6;
-      --background: #070a13;
-      --card-bg: rgba(15, 23, 42, 0.6);
-      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #00D4AA;
+      --primary-glow: rgba(0, 212, 170, 0.15);
+      --accent: #FFB800;
+      --background: #0A0A0F;
+      --card-bg: rgba(18, 18, 28, 0.85);
+      --card-border: rgba(255, 255, 255, 0.06);
       --text: #f8fafc;
       --text-secondary: #94a3b8;
-      --border-radius: 24px;
+      --border-radius: 8px;
     }
 
     * {
@@ -47,8 +47,8 @@
       align-items: center;
       padding: 20px;
       background-image: 
-      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.1) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(0, 212, 170, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(255, 184, 0, 0.1) 0px, transparent 50%);
     }
 
     .container {
@@ -108,7 +108,7 @@
 
     /* Pulse Button Installation */
     .pulse-btn {
-      background: linear-gradient(135deg, #818cf8 0%, #f472b6 100%);
+      background: linear-gradient(135deg, #00D4AA 0%, #FFB800 100%);
       color: white;
       border: none;
       border-radius: 50px;
@@ -119,7 +119,7 @@
       display: inline-flex;
       align-items: center;
       gap: 12px;
-      box-shadow: 0 0 20px rgba(129, 140, 248, 0.4);
+      box-shadow: 0 0 20px rgba(0, 212, 170, 0.4);
       transition: all 0.3s ease;
       animation: pulse 2s infinite;
       margin-bottom: 40px;
@@ -129,7 +129,7 @@
 
     .pulse-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 30px rgba(244, 114, 182, 0.6);
+      box-shadow: 0 0 30px rgba(255, 184, 0, 0.6);
     }
 
     .pulse-btn:active {
@@ -143,13 +143,13 @@
 
     @keyframes pulse {
       0% {
-        box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.6);
+        box-shadow: 0 0 0 0 rgba(0, 212, 170, 0.6);
       }
       70% {
-        box-shadow: 0 0 0 15px rgba(129, 140, 248, 0);
+        box-shadow: 0 0 0 15px rgba(0, 212, 170, 0);
       }
       100% {
-        box-shadow: 0 0 0 0 rgba(129, 140, 248, 0);
+        box-shadow: 0 0 0 0 rgba(0, 212, 170, 0);
       }
     }
 
@@ -236,29 +236,131 @@
 <body>
 
   <div class="container">
-    <div class="glass-card">
-      <div class="logo-container">
-        <img class="logo-img" src="/assets/images/logo.png" alt="Kurd24 Logo">
+    <!-- Beautiful Glass Navigation Bar -->
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 50px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);">
+      <div style="font-weight: 800; font-size: 14px; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+        <i data-lucide="briefcase" style="width: 16px; height: 16px; color: var(--primary);"></i>
+        <span>Kurd24 Job</span>
       </div>
+      <nav style="display: flex; gap: 12px; font-size: 11px; font-weight: 700;">
+        <a href="#" onclick="showSection('download')" id="nav-download" style="color: var(--primary); text-decoration: none; padding: 4px 8px; border-radius: 20px; transition: all 0.2s;">گەڕان بەدوای کار</a>
+        <a href="#" onclick="showSection('services')" id="nav-services" style="color: var(--text-secondary); text-decoration: none; padding: 4px 8px; border-radius: 20px; transition: all 0.2s;">خزمەتگوزاریەکان</a>
+        <a href="#" onclick="showSection('about')" id="nav-about" style="color: var(--text-secondary); text-decoration: none; padding: 4px 8px; border-radius: 20px; transition: all 0.2s;">ئێمە</a>
+      </nav>
+    </header>
+
+    <div class="glass-card" style="padding: 30px 24px;">
       
-      <h1 id="app-title">Kurd24 Job</h1>
-      <p id="app-subtitle" class="subtitle">بارکردنی زانیارییەکان...</p>
+      <!-- SECTION 1: DOWNLOAD / SEARCH JOBS (Default) -->
+      <div id="section-download" class="landing-section-content">
+        <div class="logo-container">
+          <img class="logo-img" src="/assets/images/logo.png" alt="Kurd24 Logo">
+        </div>
+        
+        <h1 id="app-title">Kurd24 Job</h1>
+        <p id="app-subtitle" class="subtitle" style="margin-bottom: 25px;">بارکردنی زانیارییەکان...</p>
 
-      <!-- Dynamic Download/Redirect Button -->
-      <button id="install-btn" class="pulse-btn">
-        <i id="btn-icon" data-lucide="download-cloud"></i>
-        <span id="btn-text">دابەزاندنی ئەپەکە</span>
-      </button>
+        <!-- Dynamic Download/Redirect Button -->
+        <button id="install-btn" class="pulse-btn" style="margin-bottom: 30px;">
+          <i id="btn-icon" data-lucide="download-cloud"></i>
+          <span id="btn-text">دابەزاندنی ئەپەکە</span>
+        </button>
 
-      <!-- Step Guides -->
-      <div class="guide-title" id="guide-header">ڕێنمایی دابەزاندن و دامەزراندن</div>
-      <div class="guide-list" id="steps-container">
-        <!-- Will be populated dynamically based on download type -->
+        <!-- Step Guides -->
+        <div class="guide-title" id="guide-header">ڕێنمایی دابەزاندن و دامەزراندن</div>
+        <div class="guide-list" id="steps-container">
+          <!-- Will be populated dynamically based on download type -->
+        </div>
       </div>
+
+      <!-- SECTION 2: SERVICES (خزمەتگوزاریەکان) -->
+      <div id="section-services" class="landing-section-content" style="display: none;">
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--primary-glow); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <i data-lucide="cog" style="width: 24px; height: 24px;"></i>
+          </div>
+          <h2 style="font-size: 20px; font-weight: 800; color: #fff;">خزمەتگوزاریەکانی ئێمە</h2>
+          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">ئێمە چی پێشکەش دەکەین لە Kurd24 Job</p>
+        </div>
+
+        <div class="guide-list">
+          <div class="guide-step">
+            <div class="step-icon">١</div>
+            <div class="step-text">
+              <strong>گەڕان بەدوای هەلی کار:</strong> دۆزینەوەی خێرای نوێترین هەلی کار لە کەرتی گشتی و تایبەت لە سەرانسەری شارەکانی کوردستان.
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-icon">٢</div>
+            <div class="step-text">
+              <strong>بڵاوکردنەوەی هەلی کار:</strong> بەڕێوەبردن و بڵاوکردنەوەی هەلی کار بە شێوەیەکی خێرا و ئاسان لەلایەن خاوەنکارەکانەوە.
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-icon">٣</div>
+            <div class="step-text">
+              <strong>ڕیکلامی VIP درەوشاوە:</strong> نیشاندانی هەلی کارەکانت بە دیزاینێکی ئاڵتونی جوڵاو و هێشتنەوەی لە سەرەوەی لیستەکە بۆ زۆرترین بینین.
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-icon">٤</div>
+            <div class="step-text">
+              <strong>نۆتیفیکەیشنی دەستبەجێ:</strong> ئاگادارکردنەوەی بەکارهێنەران لەگەڵ بڵاوکردنەوەی هەر هەلی کارێکی نوێ بۆ ئەوەی هیچ دەرفەتێک لەدەست نەدەیت.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: ABOUT / CONTACT (ئێمە) -->
+      <div id="section-about" class="landing-section-content" style="display: none;">
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 184, 0, 0.1); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <i data-lucide="phone-call" style="width: 24px; height: 24px;"></i>
+          </div>
+          <h2 style="font-size: 20px; font-weight: 800; color: #fff;">پەیوەندیمان پێوە بکەن</h2>
+          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">بۆ بڵاوکردنەوەی ڕیکلامی ئاسایی و VIP</p>
+        </div>
+
+        <p style="font-size: 13px; text-align: center; line-height: 1.6; margin-bottom: 20px;">
+          ئێمە لە Kurd24 Job پردی سەرەکین بۆ بەیەک گەیاندنی خاوەنکاران و کارخوازان. ئەگەر دەتەوێت کارەکەت بە خێراترین کات بڵاوببێتەوە و بگاتە زۆرترین کارخواز، یان گەر دەتەوێت کارەکەت بکەیتە <strong>VIP Ad</strong> بە دیزاینێکی ئاڵتونی، لە ڕێگەی دەستەبەرەکانی خوارەوە پەیوەندیمان پێوە بکەن:
+        </p>
+
+        <div class="guide-list">
+          <div class="guide-step" style="cursor: pointer; background: rgba(37, 211, 102, 0.04); border-color: rgba(37, 211, 102, 0.1);" onclick="window.open('https://wa.me/9647501234567')">
+            <div class="step-icon" style="background: rgba(37, 211, 102, 0.15); color: #25D366;">
+              <i data-lucide="phone" style="width: 14px; height: 14px;"></i>
+            </div>
+            <div class="step-text">
+              پەیوەندی لە ڕێگەی <strong>وەتسئەپ (WhatsApp)</strong>:<br>
+              <strong style="color: #25D366; font-size: 14px;">9647501234567</strong>
+            </div>
+          </div>
+          
+          <div class="guide-step" style="cursor: pointer; background: rgba(82, 136, 193, 0.04); border-color: rgba(82, 136, 193, 0.1);" onclick="window.open('https://t.me/kurd24_job')">
+            <div class="step-icon" style="background: rgba(82, 136, 193, 0.15); color: #5288c1;">
+              <i data-lucide="send" style="width: 14px; height: 14px;"></i>
+            </div>
+            <div class="step-text">
+              پەیوەندی لە ڕێگەی <strong>تێلیگرام (Telegram)</strong>:<br>
+              <strong style="color: #5288c1; font-size: 14px;">@kurd24_job</strong>
+            </div>
+          </div>
+
+          <div class="guide-step" style="background: rgba(255, 184, 0, 0.04); border-color: rgba(255, 184, 0, 0.1);">
+            <div class="step-icon" style="background: rgba(255, 184, 0, 0.15); color: var(--accent);">
+              <i data-lucide="star" style="width: 14px; height: 14px;"></i>
+            </div>
+            <div class="step-text">
+              <strong>سەرنج:</strong> ڕیکلامی VIP ئەنیمەیشنی درەوشاوەی زێڕین لەخۆدەگرێت لەسەر لێوارەکانی لەناو ئەپدا و بۆ ماوەی دیاریکراو لە لوتکەی لیستەکەدا جێگیر دەکرێت.
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
     
     <div class="footer">
-      Kurd24 Job Platform © 2026
+      Kurd24 Job Platform © 2026 | <a href="/privacy.html" style="color:var(--text-secondary); text-decoration:underline; margin-right: 5px;">سیاسەتی پاراستنی نهێنی (Privacy Policy)</a>
     </div>
   </div>
 
@@ -274,6 +376,25 @@
     let downloadType = 'apk';
     let googlePlayUrl = '';
     let apkUrl = '/assets/kurd24-job.apk';
+
+    // Tab switcher
+    function showSection(sectionId) {
+      document.querySelectorAll('.landing-section-content').forEach(sec => sec.style.display = 'none');
+      document.getElementById('section-' + sectionId).style.display = 'block';
+      
+      const ids = ['download', 'services', 'about'];
+      ids.forEach(id => {
+        const link = document.getElementById('nav-' + id);
+        if (id === sectionId) {
+          link.style.color = 'var(--primary)';
+          link.style.background = 'var(--primary-glow)';
+        } else {
+          link.style.color = 'var(--text-secondary)';
+          link.style.background = 'transparent';
+        }
+      });
+      lucide.createIcons();
+    }
 
     // Load Settings dynamically
     async function loadSettings() {
@@ -417,6 +538,9 @@
 
     // Start configuration load
     loadSettings();
+    
+    // Set default nav active style
+    document.getElementById('nav-download').style.background = 'var(--primary-glow)';
   </script>
 </body>
 </html>

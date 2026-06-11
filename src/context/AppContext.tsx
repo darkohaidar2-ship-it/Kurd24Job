@@ -91,29 +91,49 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const getLocalizedProperty = (type: 'category' | 'city' | 'industry' | 'type' | 'experience_level', id: string) => {
     if (!id) return '';
     
-    // 1. Check if it's in local/hardcoded translations first
-    const locale = LOCALES[language];
-    if (type === 'city' && locale.cities[id]) return locale.cities[id];
-    if (type === 'category' && locale.categories[id]) return locale.categories[id];
-    if (type === 'industry' && locale.industries[id]) return locale.industries[id];
-    if (type === 'type' && locale.jobTypes[id]) return locale.jobTypes[id];
-    if (type === 'experience_level' && locale.experienceLevels[id]) return locale.experienceLevels[id];
-
-    // 2. Otherwise search in our dynamic properties list loaded from Supabase/AsyncStorage
-    let list: PropertyItem[] = [];
-    if (type === 'category') list = categories;
-    else if (type === 'city') list = cities;
-    else if (type === 'industry') list = industries;
-    else if (type === 'type') list = jobTypes;
-    else if (type === 'experience_level') list = experienceLevels;
-
-    const found = list.find(item => item.id.toLowerCase() === id.toLowerCase());
-    if (found) {
-      return language === 'ku' ? found.name_ku : found.name_en;
+    // Check if the id is a JSON array string or contains a list
+    let ids: string[] = [];
+    const trimmedId = id.trim();
+    if (trimmedId.startsWith('[') && trimmedId.endsWith(']')) {
+      try {
+        ids = JSON.parse(trimmedId);
+      } catch (e) {
+        ids = [id];
+      }
+    } else if (id.includes(',')) {
+      ids = id.split(',').map(s => s.trim());
+    } else {
+      ids = [id];
     }
 
-    // 3. Fallback: humanize the ID if it's not found
-    return id.charAt(0).toUpperCase() + id.slice(1);
+    const translateSingle = (singleId: string) => {
+      if (!singleId) return '';
+      // 1. Check if it's in local/hardcoded translations first
+      const locale = LOCALES[language];
+      if (type === 'city' && locale.cities[singleId]) return locale.cities[singleId];
+      if (type === 'category' && locale.categories[singleId]) return locale.categories[singleId];
+      if (type === 'industry' && locale.industries[singleId]) return locale.industries[singleId];
+      if (type === 'type' && locale.jobTypes[singleId]) return locale.jobTypes[singleId];
+      if (type === 'experience_level' && locale.experienceLevels[singleId]) return locale.experienceLevels[singleId];
+
+      // 2. Otherwise search in our dynamic properties list loaded from Supabase/AsyncStorage
+      let list: PropertyItem[] = [];
+      if (type === 'category') list = categories;
+      else if (type === 'city') list = cities;
+      else if (type === 'industry') list = industries;
+      else if (type === 'type') list = jobTypes;
+      else if (type === 'experience_level') list = experienceLevels;
+
+      const found = list.find(item => item.id.toLowerCase() === singleId.toLowerCase());
+      if (found) {
+        return language === 'ku' ? found.name_ku : found.name_en;
+      }
+
+      // 3. Fallback: humanize the ID if it's not found
+      return singleId.charAt(0).toUpperCase() + singleId.slice(1);
+    };
+
+    return ids.map(translateSingle).filter(Boolean).join(language === 'ku' ? ' ، ' : ', ');
   };
 
   const syncCustomBranding = async () => {
@@ -259,7 +279,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Dynamically computed colors
   const colors = React.useMemo(() => {
-    const customized = { ...baseColors };
+    const customized: any = { ...baseColors };
     if (customSettings) {
       if (theme === 'light') {
         if (customSettings.primaryColorLight) {
