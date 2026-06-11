@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useApp } from '../../context/AppContext';
-import { Briefcase, Bookmark } from 'lucide-react-native';
+import { Briefcase, Bookmark, Info } from 'lucide-react-native';
 import { Platform, StyleSheet, View } from 'react-native';
 import React from 'react';
 
@@ -67,6 +67,20 @@ export default function TabLayout() {
               focused && { backgroundColor: colors.primaryGlow }
             ]}>
               <Bookmark size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          title: t.aboutUs,
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[
+              styles.tabIconWrapper,
+              focused && { backgroundColor: colors.primaryGlow }
+            ]}>
+              <Info size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
         }}

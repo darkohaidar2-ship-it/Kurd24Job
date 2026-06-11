@@ -2112,6 +2112,48 @@
               </button>
             </div>
 
+            <!-- About Us Customization Inputs -->
+            <div class="editor-card glass" style="padding:24px; display:flex; flex-direction:column; gap:16px; margin-top:0px;">
+              <h3 class="chart-title" style="margin-bottom:10px;">دەربارەی ئێمە (About Us Settings)</h3>
+
+              <!-- WhatsApp Number -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:11px; font-weight:700; color:var(--text-secondary);">WhatsApp Number (وەتسئەپ - وەک: 9647501234567)</label>
+                <input type="text" id="about-whatsapp" class="input-field" placeholder="9647501234567" style="padding:8px 12px; font-size:12px;">
+              </div>
+
+              <!-- Telegram Username -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:11px; font-weight:700; color:var(--text-secondary);">Telegram Username/Link (تێلیگرام - وەک: @kurd24_job)</label>
+                <input type="text" id="about-telegram" class="input-field" placeholder="@kurd24_job" style="padding:8px 12px; font-size:12px;">
+              </div>
+
+              <!-- Phone Number -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:11px; font-weight:700; color:var(--text-secondary);">Direct Phone Number (تەلەفۆن - ئارەزوومەندانە)</label>
+                <input type="text" id="about-phone" class="input-field" placeholder="+964 750 123 4567" style="padding:8px 12px; font-size:12px;">
+              </div>
+
+              <!-- Kurdish Description -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:11px; font-weight:700; color:var(--text-secondary);">About Us Description (Kurdish - کوردی)</label>
+                <textarea id="about-text-ku" class="input-field" style="padding:8px 12px; font-size:12px; min-height:80px; resize:vertical; font-family:'NRT', sans-serif;" placeholder="ئێمە لە Kurd24 Job پردی سەرەکین..."></textarea>
+              </div>
+
+              <!-- English Description -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:11px; font-weight:700; color:var(--text-secondary);">About Us Description (English - ئینگلیزی)</label>
+                <textarea id="about-text-en" class="input-field" style="padding:8px 12px; font-size:12px; min-height:80px; resize:vertical;" placeholder="We at Kurd24 Job are the main bridge..."></textarea>
+              </div>
+
+              <!-- Save settings action -->
+              <button class="login-btn" id="btn-save-about" style="margin-top:10px; width:100%;" onclick="saveSystemStyle()">
+                <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+                <span>Save About Us Settings</span>
+              </button>
+            </div>
+
+
             <!-- Live Simulator -->
             <div style="display:flex; flex-direction:column; align-items:center;">
               <h4 style="font-size:14px; font-weight:700; margin-bottom:15px; color:var(--text-secondary);">Real-Time App Preview</h4>
@@ -2761,6 +2803,23 @@
         toggleDistributionFields();
       }
 
+      // Load About Us settings
+      if (document.getElementById("about-whatsapp")) {
+        document.getElementById("about-whatsapp").value = settings.aboutWhatsApp || "9647501234567";
+      }
+      if (document.getElementById("about-telegram")) {
+        document.getElementById("about-telegram").value = settings.aboutTelegram || "@kurd24_job";
+      }
+      if (document.getElementById("about-phone")) {
+        document.getElementById("about-phone").value = settings.aboutPhone || "";
+      }
+      if (document.getElementById("about-text-ku")) {
+        document.getElementById("about-text-ku").value = settings.aboutTextKu || "";
+      }
+      if (document.getElementById("about-text-en")) {
+        document.getElementById("about-text-en").value = settings.aboutTextEn || "";
+      }
+
       applyGlobalSettings(settings);
     }
 
@@ -2771,13 +2830,24 @@
       const accentColorDark = document.getElementById("style-accent-dark").value;
       const borderRadius = parseInt(document.getElementById("style-border-radius").value);
 
+      const aboutWhatsApp = document.getElementById("about-whatsapp")?.value || "";
+      const aboutTelegram = document.getElementById("about-telegram")?.value || "";
+      const aboutPhone = document.getElementById("about-phone")?.value || "";
+      const aboutTextKu = document.getElementById("about-text-ku")?.value || "";
+      const aboutTextEn = document.getElementById("about-text-en")?.value || "";
+
       const payload = {
         ...activeSettings,
         primaryColorLight,
         primaryColorDark,
         accentColorLight,
         accentColorDark,
-        borderRadius
+        borderRadius,
+        aboutWhatsApp,
+        aboutTelegram,
+        aboutPhone,
+        aboutTextKu,
+        aboutTextEn
       };
 
       const btn = document.getElementById("btn-save-style");

@@ -217,70 +217,27 @@ export default function JobDetails() {
               <Text style={[styles.jobTitle, { color: colors.text }]}>{jobTitle}</Text>
               <Text style={[styles.companyName, { color: colors.textSecondary }]}>{job.company}</Text>
 
-              {/* Tag Grid */}
+              {/* Tag Grid - ONLY City Tag */}
               <View style={[styles.tagGrid, rowStyle]}>
                 <View style={[styles.detailTag, { backgroundColor: colors.primaryGlow }]}>
                   <MapPin size={12} color={colors.primary} />
                   <Text style={[styles.tagText, { color: colors.primary }]}>{city}</Text>
                 </View>
-                <View style={[styles.detailTag, { backgroundColor: colors.accentGlow }]}>
-                  <Briefcase size={12} color={colors.accent} />
-                  <Text style={[styles.tagText, { color: colors.accent }]}>{type}</Text>
-                </View>
-                <View style={[styles.detailTag, { backgroundColor: colors.successGlow }]}>
-                  <Text style={[styles.tagText, { color: colors.success }]}>{level}</Text>
-                </View>
               </View>
             </View>
           </GlassView>
 
-          {/* Quick Info Grid */}
-          <View style={[styles.infoRow, rowStyle]}>
-            <GlassView style={styles.infoBox}>
-              <DollarSign size={18} color={colors.primary} />
-              <Text style={[styles.infoVal, { color: colors.text }]}>{job.salary}</Text>
-              <Text style={[styles.infoLbl, { color: colors.textSecondary }]}>{t.salary}</Text>
-            </GlassView>
-            <GlassView style={styles.infoBox}>
-              <Calendar size={18} color={colors.accent} />
-              <Text style={[styles.infoVal, { color: colors.text }]}>{dateFormatted}</Text>
-              <Text style={[styles.infoLbl, { color: colors.textSecondary }]}>{t.posted}</Text>
-            </GlassView>
-          </View>
-
-          {/* VIP Analytics Tracker */}
-          {job.is_vip && (
-            <GlassView style={[styles.contentCard, { borderColor: '#FFB800', borderWidth: 1.5 }]}>
-              <Text style={[styles.cardTitle, { color: '#FFB800' }, textStyle]}>
-                📊 {language === 'ku' ? 'ئاماری فەرمی کار (VIP)' : 'Official Job Stats (VIP)'}
-              </Text>
-              <View style={[styles.analyticsRow, rowStyle]}>
-                <View style={styles.analyticsItem}>
-                  <Text style={[styles.analyticsVal, { color: colors.text }]}>{job.views}</Text>
-                  <Text style={[styles.analyticsLbl, { color: colors.textSecondary }]}>
-                    {language === 'ku' ? 'بینینی گشتی' : 'Total Views'}
-                  </Text>
-                </View>
-                <View style={[styles.analyticsDivider, { backgroundColor: colors.border }]} />
-                <View style={styles.analyticsItem}>
-                  <Text style={[styles.analyticsVal, { color: colors.text }]}>{job.clicks}</Text>
-                  <Text style={[styles.analyticsLbl, { color: colors.textSecondary }]}>
-                    {language === 'ku' ? 'کلیکی وەتسئەپ' : 'WhatsApp Clicks'}
-                  </Text>
-                </View>
-              </View>
-            </GlassView>
-          )}
-
-          {/* Job Description */}
+          {/* Job Description (Details) */}
           <GlassView style={styles.contentCard}>
-            <Text style={[styles.cardTitle, { color: colors.text }, textStyle]}>{t.description}</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }, textStyle]}>
+              {language === 'ku' ? 'دیتەڵ و زانیاری کارەکە' : 'Job Details & Description'}
+            </Text>
             <Text style={[styles.descriptionText, { color: colors.textSecondary }, textStyle]}>
               {description}
             </Text>
           </GlassView>
 
-          {/* Horizontal Image Gallery (RTL Aligned for Kurdish, LTR for English) */}
+          {/* Horizontal Image Gallery */}
           {job.images && job.images.length > 0 && (
             <GlassView style={styles.contentCard}>
               <Text style={[styles.cardTitle, { color: colors.text }, textStyle]}>
@@ -310,23 +267,6 @@ export default function JobDetails() {
             </GlassView>
           )}
 
-          {/* Job Requirements */}
-          {requirementsList.length > 0 && (
-            <GlassView style={styles.contentCard}>
-              <Text style={[styles.cardTitle, { color: colors.text }, textStyle]}>{t.requirements}</Text>
-              {requirementsList.map((req, index) => (
-                <View key={index} style={[styles.bulletRow, rowStyle]}>
-                  <Text style={[styles.bulletPoint, { color: colors.primary }]}>•</Text>
-                  <Text style={[styles.bulletText, { color: colors.textSecondary }, textStyle, isRtl ? styles.marginRightTen : styles.marginLeftTen]}>
-                    {req}
-                  </Text>
-                </View>
-              ))}
-            </GlassView>
-          )}
-
-
-
           {/* Apply Action Buttons */}
           <View style={[styles.actionsCard]}>
             <TouchableOpacity 
@@ -347,7 +287,6 @@ export default function JobDetails() {
               <Text style={styles.applyBtnText}>{t.sendEmail}</Text>
             </TouchableOpacity>
           </View>
-
           <View style={{ height: 40 }} />
         </ScrollView>
       </View>

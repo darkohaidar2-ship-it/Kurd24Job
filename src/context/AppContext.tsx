@@ -29,6 +29,7 @@ interface AppContextProps {
   experienceLevels: PropertyItem[];
   refreshProperties: () => Promise<void>;
   getLocalizedProperty: (type: 'category' | 'city' | 'industry' | 'type' | 'experience_level', id: string) => string;
+  customSettings: any;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -334,6 +335,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         experienceLevels,
         refreshProperties,
         getLocalizedProperty,
+        customSettings,
       }}
     >
       {children}

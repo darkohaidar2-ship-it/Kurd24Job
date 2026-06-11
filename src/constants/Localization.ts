@@ -6,6 +6,7 @@ export interface Translations {
   findJobs: string;
   savedJobs: string;
   adminPanel: string;
+  aboutUs: string;
   
   // Feed / Filters
   searchPlaceholder: string;
@@ -89,6 +90,7 @@ export const LOCALES: Record<LanguageType, Translations> = {
     findJobs: "گەڕان بەدوای کار",
     savedJobs: "خەزنکراوەکان",
     adminPanel: "پانێڵی بەڕێوەبەر",
+    aboutUs: "ئێمە",
     
     searchPlaceholder: "گەڕان بەدوای ناونیشانی کار یان کۆمپانیا...",
     filterTitle: "فلتەری پێشکەوتوو",
@@ -206,6 +208,7 @@ export const LOCALES: Record<LanguageType, Translations> = {
     findJobs: "Find Jobs",
     savedJobs: "Bookmarks",
     adminPanel: "Admin Panel",
+    aboutUs: "About Us",
     
     searchPlaceholder: "Search job title or company...",
     filterTitle: "Advanced Filter",

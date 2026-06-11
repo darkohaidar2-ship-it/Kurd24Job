@@ -219,58 +219,7 @@ export default function JobsFeed() {
           )}
         </View>
 
-        {/* Telegram Pinned Message */}
-        {showPinned && (
-          <View style={styles.pinnedContainer}>
-            <View style={[styles.pinnedBar, rowStyle, { backgroundColor: theme === 'dark' ? 'rgba(21, 30, 40, 0.9)' : 'rgba(255, 255, 255, 0.9)', borderColor: colors.border }]}>
-              <TouchableOpacity 
-                activeOpacity={0.8} 
-                style={[styles.pinnedContent, rowStyle]}
-                onPress={() => setExpandedPinned(!expandedPinned)}
-              >
-                <Pin size={14} color={colors.primary} style={styles.pinnedPinIcon} />
-                <View style={[styles.pinnedTextWrapper, isRtl ? styles.marginRightMini : styles.marginLeftMini]}>
-                  <Text style={[styles.pinnedTitle, { color: colors.primary }, textStyle]}>
-                    {language === 'ku' ? 'نامەی دەرچوو (Pinned)' : 'Pinned Message'}
-                  </Text>
-                  <Text numberOfLines={1} style={[styles.pinnedText, { color: colors.textSecondary }, textStyle]}>
-                    {language === 'ku' 
-                      ? 'ڕێنمایی پێشکەشکردن بە وەتسئەپ، ئیمەیڵ و بارکردنی سیڤی لێرە بخوێنەرەوە...' 
-                      : 'Read guidelines for applying via WhatsApp, Email, and resume upload...'}
-                  </Text>
-                </View>
-                {expandedPinned ? <ChevronUp size={16} color={colors.textSecondary} /> : <ChevronDown size={16} color={colors.textSecondary} />}
-              </TouchableOpacity>
 
-              <TouchableOpacity 
-                activeOpacity={0.7} 
-                style={styles.pinnedClose}
-                onPress={() => setShowPinned(false)}
-              >
-                <X size={14} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Expanded Pinned Guidelines Card */}
-            {expandedPinned && (
-              <GlassView style={[styles.pinnedExpandedCard, { borderColor: colors.cardBorder }]}>
-                <Text style={[styles.pinnedCardTitle, { color: colors.text }, textStyle]}>
-                  📌 {language === 'ku' ? 'ڕێنمایی و ڕێساکان' : 'Welcome Guidelines'}
-                </Text>
-                <Text style={[styles.pinnedCardBody, { color: colors.textSecondary }, textStyle]}>
-                  {language === 'ku' 
-                    ? '١. هەموو هەلی کارەکان ڕاستەوخۆ دەتوانی پێشکەش بکەی.\n٢. بەشی ئەدمین بەکاربهێنە بۆ بڵاوکردنەوەی کار.'
-                    : '1. You can apply to all jobs directly from the feed.\n2. Use the Admin Panel to post or manage jobs.'}
-                </Text>
-                {isDemoMode && (
-                  <Text style={[styles.demoWarn, { color: colors.accent }]}>
-                    ⚠️ {t.demoModeWarning}
-                  </Text>
-                )}
-              </GlassView>
-            )}
-          </View>
-        )}
 
         {/* Telegram Messages Feed (100% pure post viewing screen) */}
         {loading ? (

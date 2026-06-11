@@ -321,28 +321,28 @@
           <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">بۆ بڵاوکردنەوەی ڕیکلامی ئاسایی و VIP</p>
         </div>
 
-        <p style="font-size: 13px; text-align: center; line-height: 1.6; margin-bottom: 20px;">
+        <p id="about-us-description" style="font-size: 13px; text-align: center; line-height: 1.6; margin-bottom: 20px;">
           ئێمە لە Kurd24 Job پردی سەرەکین بۆ بەیەک گەیاندنی خاوەنکاران و کارخوازان. ئەگەر دەتەوێت کارەکەت بە خێراترین کات بڵاوببێتەوە و بگاتە زۆرترین کارخواز، یان گەر دەتەوێت کارەکەت بکەیتە <strong>VIP Ad</strong> بە دیزاینێکی ئاڵتونی، لە ڕێگەی دەستەبەرەکانی خوارەوە پەیوەندیمان پێوە بکەن:
         </p>
 
         <div class="guide-list">
-          <div class="guide-step" style="cursor: pointer; background: rgba(37, 211, 102, 0.04); border-color: rgba(37, 211, 102, 0.1);" onclick="window.open('https://wa.me/9647501234567')">
+          <div class="guide-step" style="cursor: pointer; background: rgba(37, 211, 102, 0.04); border-color: rgba(37, 211, 102, 0.1);" id="whatsapp-btn-container">
             <div class="step-icon" style="background: rgba(37, 211, 102, 0.15); color: #25D366;">
               <i data-lucide="phone" style="width: 14px; height: 14px;"></i>
             </div>
             <div class="step-text">
               پەیوەندی لە ڕێگەی <strong>وەتسئەپ (WhatsApp)</strong>:<br>
-              <strong style="color: #25D366; font-size: 14px;">9647501234567</strong>
+              <strong id="whatsapp-number-label" style="color: #25D366; font-size: 14px;">9647501234567</strong>
             </div>
           </div>
           
-          <div class="guide-step" style="cursor: pointer; background: rgba(82, 136, 193, 0.04); border-color: rgba(82, 136, 193, 0.1);" onclick="window.open('https://t.me/kurd24_job')">
+          <div class="guide-step" style="cursor: pointer; background: rgba(82, 136, 193, 0.04); border-color: rgba(82, 136, 193, 0.1);" id="telegram-btn-container">
             <div class="step-icon" style="background: rgba(82, 136, 193, 0.15); color: #5288c1;">
               <i data-lucide="send" style="width: 14px; height: 14px;"></i>
             </div>
             <div class="step-text">
               پەیوەندی لە ڕێگەی <strong>تێلیگرام (Telegram)</strong>:<br>
-              <strong style="color: #5288c1; font-size: 14px;">@kurd24_job</strong>
+              <strong id="telegram-username-label" style="color: #5288c1; font-size: 14px;">@kurd24_job</strong>
             </div>
           </div>
 
@@ -454,6 +454,34 @@
           // Apple touch icon
           const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
           if (appleIcon) appleIcon.href = logoUrlWithCacheBuster;
+        }
+
+        // Update About Us fields dynamically
+        const whatsappNum = settings.aboutWhatsApp || "9647501234567";
+        const telegramUser = settings.aboutTelegram || "@kurd24_job";
+        const aboutTextKu = settings.aboutTextKu || "";
+
+        // Remove @ if present for username link, but keep it for label
+        const telegramClean = telegramUser.startsWith('@') ? telegramUser.substring(1) : telegramUser;
+
+        const waContainer = document.getElementById("whatsapp-btn-container");
+        if (waContainer) {
+          waContainer.onclick = () => window.open(`https://wa.me/${whatsappNum}`);
+        }
+        const tgContainer = document.getElementById("telegram-btn-container");
+        if (tgContainer) {
+          tgContainer.onclick = () => window.open(`https://t.me/${telegramClean}`);
+        }
+
+        const waLabel = document.getElementById("whatsapp-number-label");
+        if (waLabel) waLabel.textContent = whatsappNum;
+
+        const tgLabel = document.getElementById("telegram-username-label");
+        if (tgLabel) tgLabel.textContent = telegramUser;
+
+        const descLabel = document.getElementById("about-us-description");
+        if (descLabel && aboutTextKu) {
+          descLabel.textContent = aboutTextKu;
         }
 
         downloadType = settings.downloadType || 'apk';
