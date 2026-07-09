@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Supabase JS CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Local Supabase JS -->
+  <script src="supabase.js"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -1456,8 +1456,270 @@
         border-radius: 8px;
       }
     }
+    
+    /* Web Admin Stats System Styles */
+    .action-btn.btn-stats:hover {
+      background: var(--success-glow);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .stats-modal-card {
+      width: 90%;
+      max-width: 500px;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--card-border);
+      position: relative;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+      background: rgba(26, 31, 46, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .modal-overlay.active .stats-modal-card {
+      transform: translateY(0);
+    }
+
+    .stats-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    .close-modal-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-modal-btn:hover {
+      color: var(--accent);
+    }
+
+    .stats-overview-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1.3fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .stats-circle-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .stats-numbers {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stats-number-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stats-number-card i {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.5px;
+    }
+
+    .stats-value {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .stats-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* Circular Progress */
+    .progress-ring {
+      width: 100px;
+      height: 100px;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .progress-ring svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-width: 8;
+    }
+
+    .progress-ring-circle {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 251.2;
+      stroke-dashoffset: 251.2;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .stats-engagement-evaluation {
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 10px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .stats-engagement-evaluation.high {
+      background: rgba(52, 211, 153, 0.08);
+      border-color: rgba(52, 211, 153, 0.2);
+      color: var(--success);
+    }
+
+    .stats-engagement-evaluation.mid {
+      background: rgba(0, 212, 170, 0.08);
+      border-color: rgba(0, 212, 170, 0.2);
+      color: var(--primary);
+    }
+
+    .stats-engagement-evaluation.low {
+      background: rgba(236, 72, 153, 0.08);
+      border-color: rgba(236, 72, 153, 0.2);
+      color: var(--accent);
+    }
+
+    /* Top Listings Styles */
+    .top-listings-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .top-listing-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-listing-card h4 {
+      margin: 0;
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .top-listing-job-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 4px;
+    }
+
+    .top-listing-job-company {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: -6px;
+    }
+
+    .top-listing-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .top-listing-value {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .top-listing-lbl {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
   </style>
-</head>
+  </head>
 <body class="dark-preview">
 
   <!-- LOGIN SCREEN -->
@@ -1479,6 +1741,7 @@
         <label for="password">Password</label>
         <input type="password" id="password" class="input-field" placeholder="••••••••" required>
       </div>
+
 
       <button type="submit" class="login-btn" id="login-submit-btn">
         <span>Log In</span>
@@ -1510,6 +1773,10 @@
         <li class="menu-item" onclick="switchTab('create')" id="tab-create-desktop">
           <i data-lucide="plus-circle"></i>
           <span>Post New Job</span>
+        </li>
+        <li class="menu-item" onclick="switchTab('create-ad')" id="tab-create-ad-desktop">
+          <i data-lucide="megaphone"></i>
+          <span>Post Advertisement</span>
         </li>
         <li class="menu-item" onclick="switchTab('distribution')" id="tab-distribution-desktop">
           <i data-lucide="share-2"></i>
@@ -1557,6 +1824,10 @@
       <a class="bottom-nav-item" onclick="switchTab('create')" id="tab-create-mobile">
         <i data-lucide="plus-circle"></i>
         <span>Post Job</span>
+      </a>
+      <a class="bottom-nav-item" onclick="switchTab('create-ad')" id="tab-create-ad-mobile">
+        <i data-lucide="megaphone"></i>
+        <span>Post Ad</span>
       </a>
       <a class="bottom-nav-item" onclick="switchTab('distribution')" id="tab-distribution-mobile">
         <i data-lucide="share-2"></i>
@@ -1612,9 +1883,14 @@
 
         <!-- SVG Analytics Comparative Chart -->
         <div class="chart-card glass">
-          <div class="chart-header">
-            <i data-lucide="trending-up" style="color:var(--primary);"></i>
-            <span class="chart-title">Job Statistics Summary</span>
+          <div class="chart-header" style="justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="trending-up" style="color:var(--primary);"></i>
+              <span class="chart-title">Job Statistics Summary</span>
+            </div>
+            <button class="btn-secondary" onclick="exportStatsCSV()" style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px; border-radius: 8px; font-weight: 700; margin-top: 0; width: auto; height: 32px; line-height: 1;">
+              <i data-lucide="download" style="width: 14px; height: 14px;"></i> Export CSV
+            </button>
           </div>
           <div class="chart-body" id="analytics-chart">
             <svg id="svg-chart" width="100%" height="100%" viewBox="0 0 600 250" style="overflow:visible;">
@@ -1633,10 +1909,10 @@
               <rect id="chart-bar-views" x="180" y="200" width="80" height="0" rx="6" fill="url(#grad-views)"></rect>
               <!-- Applies Bar -->
               <rect id="chart-bar-applies" x="340" y="200" width="80" height="0" rx="6" fill="url(#grad-applies)"></rect>
-
+ 
               <text x="220" y="225" fill="#94a3b8" font-size="12" text-anchor="middle" font-weight="600">Total Views</text>
               <text x="380" y="225" fill="#94a3b8" font-size="12" text-anchor="middle" font-weight="600">Total Applies</text>
-
+ 
               <!-- Values labels -->
               <text id="chart-val-views" x="220" y="190" fill="#00D4AA" font-size="16" font-weight="800" text-anchor="middle">0</text>
               <text id="chart-val-applies" x="380" y="190" fill="#FFB800" font-size="16" font-weight="800" text-anchor="middle">0</text>
@@ -1653,6 +1929,28 @@
                 </linearGradient>
               </defs>
             </svg>
+          </div>
+        </div>
+
+        <!-- Top Performing Listings -->
+        <div class="top-listings-row" style="margin-bottom: 30px;">
+          <div class="top-listing-card glass glow-hover">
+            <h4><i data-lucide="eye" style="width:14px;height:14px;stroke:var(--success);"></i> Most Viewed Listing</h4>
+            <div id="top-viewed-title" class="top-listing-job-title">No Data</div>
+            <div id="top-viewed-company" class="top-listing-job-company">-</div>
+            <div class="top-listing-stat">
+              <span id="top-viewed-value" class="top-listing-value" style="color:var(--success);">0</span>
+              <span class="top-listing-lbl">Views</span>
+            </div>
+          </div>
+          <div class="top-listing-card glass glow-hover">
+            <h4><i data-lucide="send" style="width:14px;height:14px;stroke:var(--accent);"></i> Most Applied Listing</h4>
+            <div id="top-applied-title" class="top-listing-job-title">No Data</div>
+            <div id="top-applied-company" class="top-listing-job-company">-</div>
+            <div class="top-listing-stat">
+              <span id="top-applied-value" class="top-listing-value" style="color:var(--accent);">0</span>
+              <span class="top-listing-lbl">Applies</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1690,13 +1988,10 @@
             
             <!-- Hidden Fields with Defaults for Database Integrity & JS Compatibility -->
             <div style="display: none;">
-              <input type="text" id="form-company" value="Kurd24">
               <input type="checkbox" id="form-status" checked>
               <input type="text" id="form-title-en" value="">
               <input type="text" id="form-salary" value="ڕێککەوتن">
-              <input type="hidden" id="form-logo-url" value="">
-              <div id="logo-upload-slot"></div>
-              <span id="logo-status-label"></span>
+              <input type="checkbox" id="form-is-ad" style="display:none;">
               
               <select id="form-city">
                 <option value="erbil" selected>Erbil (Hewlêr)</option>
@@ -1748,6 +2043,26 @@
 
             <!-- Visible Simplified Form Fields -->
             <div class="form-row">
+              <div class="form-group" style="flex: 1 1 50%; min-width: 250px;">
+                <label>Company Name - ناوی کۆمپانیا یان خاوەن کار *</label>
+                <input type="text" id="form-company" class="input-field" value="Kurd24" placeholder="ناوی کۆمپانیا بنووسە..." oninput="updateLivePreview()">
+              </div>
+              <div class="form-group" style="flex: 1 1 50%; min-width: 250px;">
+                <label>Company Logo - لۆگۆی کۆمپانیا (گەر دیاری نەکرێت لۆگۆی ئەپەکە دەچێتە شوێنی)</label>
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                  <div id="logo-upload-slot" class="upload-slot glass" style="width: 42px; height: 42px; margin: 0; flex-shrink: 0;">
+                    <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+                    <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 2px; justify-content: center;">
+                    <span id="logo-status-label" style="font-size: 11px; color: var(--text-muted); font-weight: 500;">No logo uploaded</span>
+                    <input type="hidden" id="form-logo-url" value="">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
               <div class="form-group" style="flex: 1 1 100%;">
                 <label>Job Title / Subject - سەری بابەت یان ناونیشانی هەلی کار *</label>
                 <input type="text" id="form-title-ku" class="input-field" placeholder="ناونیشانەکە لێرە بنووسە..." oninput="updateLivePreview()">
@@ -1772,12 +2087,19 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label>WhatsApp Number - ژمارەی مۆبایل بۆ وەتسئەپ *</label>
+                <label>WhatsApp Number - ژمارەی مۆبایل بۆ وەتسئەپ (ئارەزوومەندانە)</label>
                 <input type="text" id="form-whatsapp" class="input-field" placeholder="e.g. 9647501234567" oninput="updateLivePreview()">
               </div>
               <div class="form-group">
                 <label>Email - ئیمێڵی پێشکەشکردن (ئەگەر هەبوو)</label>
                 <input type="email" id="form-email" class="input-field" placeholder="e.g. jobs@company.com" oninput="updateLivePreview()">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label>Application Form Link - بەستەری فۆرمی پێشکەشکردن (Google Forms - ئەگەر هەبوو)</label>
+                <input type="url" id="form-url" class="input-field" placeholder="e.g. https://forms.gle/..." oninput="updateLivePreview()">
               </div>
             </div>
 
@@ -1804,7 +2126,7 @@
 
             <div class="btn-row">
               <button class="btn-secondary" onclick="switchTab('manage')">Cancel</button>
-              <button class="login-btn" style="margin-top:0; width:auto;" onclick="saveJob()">
+              <button class="login-btn" id="btn-save-job" style="margin-top:0; width:auto;" onclick="saveJob()">
                 <i data-lucide="check" style="width:16px;height:16px;"></i>
                 <span id="editor-save-label">Publish Announcement</span>
               </button>
@@ -1843,22 +2165,33 @@
                 </div>
 
                 <!-- JobCard Replica -->
-                <div class="mobile-card">
+                <div class="mobile-card" style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
                   
-                  <!-- Card Window Header -->
-                  <div class="card-header">
-                    <div class="logo-placeholder" id="prev-logo-letter">C</div>
-                    <div class="card-title-info">
-                      <div class="card-title-company" id="prev-company">Company Name</div>
-                      <div class="card-title-sub">Kurd24 Job Channel</div>
+                  <!-- 1. Title & Bookmark Row -->
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; width: 100%; margin-bottom: 2px;">
+                    <div class="card-job-title" id="prev-title" style="margin-bottom: 0; font-size: 11px; font-weight: 800; flex: 1;">📢 Announcement Title</div>
+                    <i data-lucide="bookmark" class="card-bookmark" style="width:12px; height:12px; color:var(--text-muted); flex-shrink: 0; margin-top: 2px;"></i>
+                  </div>
+
+                  <!-- 2. Meta Info Row (Logo & Badges) -->
+                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px;" id="prev-meta-row">
+                    <div style="display: flex; align-items: center; gap: 3px;">
+                      <div class="logo-placeholder" id="prev-logo-letter" style="width: 18px; height: 18px; border-radius: 4px; font-size: 8px; font-weight: 800; margin-right: 0; display: flex; align-items: center; justify-content: center;">C</div>
+                      <div id="prev-verified-badge" style="display: flex; align-items: center;"><i data-lucide="check-circle-2" style="width: 8px; height: 8px; color: #3b82f6; fill: #FFF;"></i></div>
                     </div>
-                    <i data-lucide="bookmark" class="card-bookmark" style="width:10px;height:10px;color:var(--text-muted);"></i>
+                    <div id="prev-vip-badge-container" style="display: none;">
+                      <span style="font-size: 7px; font-weight: 900; color: #FFB800; background: rgba(255, 184, 0, 0.12); border: 0.5px solid #FFB800; padding: 1px 4px; border-radius: 3px;">VIP</span>
+                    </div>
+                    <div id="prev-pinned-badge-container" style="display: none;">
+                      <span style="font-size: 7px; font-weight: 800; color: var(--primary); background: var(--primary-glow); padding: 1px 4px; border-radius: 3px; display: inline-flex; align-items: center; gap: 2px;"><i data-lucide="pin" style="width: 5px; height: 5px; fill: var(--primary); color: var(--primary);"></i>📌 Pinned</span>
+                    </div>
+                    <!-- Hidden elements to maintain script references -->
+                    <span id="prev-company" style="display: none;"></span>
                   </div>
 
                   <!-- Card Window Body -->
-                  <div class="card-content">
-                    <div class="card-job-title" id="prev-title">📢 Announcement Title</div>
-                    
+                  <div class="card-content" style="padding: 0; display: flex; flex-direction: column; gap: 6px;">
+
                     <!-- Chips Row (City, Type, Salary) - Hidden on feed -->
                     <div class="card-chips-row" style="display: none;">
                       <div class="card-chip primary">
@@ -1922,6 +2255,216 @@
         </div>
       </div>
 
+      <!-- CREATE / EDIT ADVERTISEMENT PANEL -->
+      <div class="view-panel" id="panel-create-ad">
+        <div class="editor-layout">
+          <!-- Editor Form Fields -->
+          <div class="editor-card glass">
+            <h3 class="chart-title" style="margin-bottom:20px; color:#EC4899;" id="ad-editor-action-title">Post Sponsored Advertisement</h3>
+            
+            <!-- Hidden Fields with Defaults for Database Integrity & JS Compatibility -->
+            <div style="display: none;">
+              <input type="checkbox" id="form-ad-status" checked>
+              <input type="checkbox" id="form-ad-is-ad" checked>
+              <input type="checkbox" id="form-ad-is-vip" value="false">
+              <input type="text" id="form-ad-title-en" value="">
+              <input type="text" id="form-ad-desc-en" value="">
+              <input type="text" id="form-ad-salary" value="ڕێککەوتن">
+              <input type="text" id="form-ad-city" value="erbil">
+              <input type="text" id="form-ad-type" value="fullTime">
+              <input type="text" id="form-ad-experience" value="mid">
+              <input type="text" id="form-ad-category" value="software">
+              <input type="text" id="form-ad-industry" value="tech">
+            </div>
+
+            <!-- Visible Simplified Form Fields -->
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 50%; min-width: 250px;">
+                <label>Company/Sponsor Name - ناوی کۆمپانیا یان خاوەن کار *</label>
+                <input type="text" id="form-ad-company" class="input-field" value="Kurd24" placeholder="ناوی کۆمپانیا بنووسە..." oninput="updateLivePreview()">
+              </div>
+              <div class="form-group" style="flex: 1 1 50%; min-width: 250px;">
+                <label>Company Logo - لۆگۆی کۆمپانیا (گەر دیاری نەکرێت لۆگۆی ئەپەکە دەچێتە شوێنی)</label>
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                  <div id="ad-logo-upload-slot" class="upload-slot glass" style="width: 42px; height: 42px; margin: 0; flex-shrink: 0;">
+                    <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+                    <input type="file" accept="image/*" onchange="uploadAdLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 2px; justify-content: center;">
+                    <span id="ad-logo-status-label" style="font-size: 11px; color: var(--text-muted); font-weight: 500;">No logo uploaded</span>
+                    <input type="hidden" id="form-ad-logo-url" value="">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label>Ad Title / Subject - ناونیشانی بابەت یان ڕیکلامەکە *</label>
+                <input type="text" id="form-ad-title-ku" class="input-field" placeholder="ناونیشانی ڕیکلامەکە لێرە بنووسە..." oninput="updateLivePreview()">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label>Details / Description - دیتێڵ و ناوەڕۆکی ڕیکلامەکە *</label>
+                <textarea id="form-ad-desc-ku" class="input-field textarea-field" style="min-height: 120px;" placeholder="ناوەڕۆک و دیتێڵی ڕیکلامەکە لێرە بنووسە..." oninput="updateLivePreview()"></textarea>
+              </div>
+            </div>
+
+            <!-- Video & Location Section -->
+            <div class="dynamic-list-container" style="border-color: rgba(236, 72, 153, 0.3); background: rgba(236, 72, 153, 0.02); margin-top: 15px;">
+              <div class="list-title" style="border-bottom-color: rgba(236, 72, 153, 0.3);">
+                <span style="color: #EC4899; font-weight: 700;">Promo Video & Location - ڤیدیۆ و ناونیشانی ڕیکلام 📢</span>
+              </div>
+              <div class="form-row" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 15px;">
+                <div class="form-group" style="flex: 1 1 100%;">
+                  <label>Promo Video - ڤیدیۆی ڕیکلام (MP4 format only)</label>
+                  <input type="file" id="form-ad-video-file" class="input-field" accept="video/mp4" style="padding: 10px;" onchange="handleAdVideoSelection()">
+                  <div id="ad-video-upload-status" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">No video selected</div>
+                  <input type="hidden" id="form-ad-video-url">
+                  <video id="form-ad-video-preview" controls style="max-width: 100%; height: 140px; margin-top: 10px; display: none; border-radius: 8px; border: 1px solid var(--border);"></video>
+                </div>
+                <div class="form-group" style="flex: 1 1 100%;">
+                  <label>Video Orientation - ئاراستەی پیشاندانی ڤیدیۆ</label>
+                  <select id="form-ad-video-layout" class="input-field" onchange="updateLivePreview()">
+                    <option value="portrait" selected>Portrait / ستوونی (2:3)</option>
+                    <option value="landscape">Landscape / ئاسۆیی (16:9)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex: 1 1 48%;">
+                  <label>Location Address - ناونیشانی شوێن (e.g. سلێمانی جووت سایدی زەرگەتە)</label>
+                  <input type="text" id="form-ad-address" class="input-field" placeholder="Address" oninput="updateLivePreview()">
+                </div>
+                <div class="form-group" style="flex: 1 1 48%;">
+                  <label>Google Maps Link - بەستەری لۆکەیشن لەسەر نەخشە</label>
+                  <input type="url" id="form-ad-map-url" class="input-field" placeholder="e.g. https://maps.app.goo.gl/..." oninput="updateLivePreview()">
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact & External Links -->
+            <div class="form-row" style="margin-top:15px;">
+              <div class="form-group">
+                <label>WhatsApp Number - ژمارەی وەتسئەپ (ئارەزوومەندانە)</label>
+                <input type="text" id="form-ad-whatsapp" class="input-field" placeholder="e.g. 9647501234567" oninput="updateLivePreview()">
+              </div>
+              <div class="form-group">
+                <label>Email - ئیمێڵ (ئارەزوومەندانە)</label>
+                <input type="email" id="form-ad-email" class="input-field" placeholder="e.g. contact@company.com" oninput="updateLivePreview()">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label>Action Form Link - بەستەری فۆرم یان وێبسایت (ئەگەر هەبوو)</label>
+                <input type="url" id="form-ad-url" class="input-field" placeholder="e.g. https://company.com/promo" oninput="updateLivePreview()">
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-top: 10px; margin-bottom: 15px; align-items: center; gap: 20px; display: flex; flex-wrap: wrap;">
+              <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin-bottom: 0;">
+                <input type="checkbox" id="form-ad-is-pinned" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);" onchange="updateLivePreview()">
+                <label for="form-ad-is-pinned" style="margin-bottom: 0; cursor: pointer; font-weight: 700; color: var(--primary);">Pin to Top - جێگیرکردن لە سەرەوە 📌</label>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-secondary" onclick="switchTab('manage')">Cancel</button>
+              <button class="login-btn" id="btn-save-ad" style="margin-top:0; width:auto; background:#EC4899; box-shadow: 0 4px 15px rgba(236,72,153,0.25);" onclick="saveAd()">
+                <i data-lucide="check" style="width:16px;height:16px;"></i>
+                <span id="ad-editor-save-label">Publish Advertisement</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Real-Time Mobile Device Simulator for Ads -->
+          <div class="preview-sticky">
+            <h3 class="chart-title" style="margin-bottom:12px; text-align:center;">Real-Time Ad Preview</h3>
+            
+            <div class="preview-lang-bar">
+              <button class="preview-lang-btn active" id="btn-ad-prev-ku" onclick="togglePreviewLang('ku')">کوردی (RTL)</button>
+              <button class="preview-lang-btn" id="btn-ad-prev-en" onclick="togglePreviewLang('en')">English (LTR)</button>
+            </div>
+
+            <!-- Device Frame -->
+            <div class="mobile-frame">
+              <div class="mobile-notch"></div>
+              <div class="mobile-screen">
+                <!-- Telegram Channel Header Replica -->
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:0.5px solid rgba(255,255,255,0.08); padding-bottom:8px; margin-bottom:10px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:26px; height:26px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:10px;">K24</div>
+                    <div>
+                      <div style="font-size:10px; font-weight:700; display:flex; align-items:center; gap:3px;">
+                        <span>Kurd24 Job</span>
+                        <div style="width:7px; height:7px; border-radius:50%; background:#5288c1; display:flex; align-items:center; justify-content:center;"><i data-lucide="check" style="width:5px; height:5px; color:#fff; stroke-width:4px;"></i></div>
+                      </div>
+                      <div style="font-size:7px; color:var(--text-secondary);">154,203 subscribers</div>
+                    </div>
+                  </div>
+                  <div style="display:flex; gap:8px; color:var(--text-secondary);"><i data-lucide="languages" style="width:12px;height:12px;"></i><i data-lucide="moon" style="width:12px;height:12px;"></i></div>
+                </div>
+
+                <!-- Ad Card Replica -->
+                <div class="mobile-card" style="border: 2px solid #EC4899; border-radius: 10px; overflow: hidden; background: rgba(23, 20, 35, 0.95); color: #f8fafc; box-shadow: 0 0 15px rgba(236,72,153,0.35); display: flex; flex-direction: column;">
+                  <div class="card-header" style="border-bottom-color: rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.03); display: flex; align-items: center; padding: 8px 10px;">
+                    <div class="logo-placeholder" id="ad-prev-logo" style="background:#EC4899; width: 22px; height: 22px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 9px; margin-right: 8px;">K</div>
+                    <div class="card-title-info" style="flex: 1;">
+                      <div class="card-title-company" id="ad-prev-company" style="font-size: 10px; font-weight: 700;">Kurd24</div>
+                      <div class="card-title-sub" style="font-size: 8px; color: var(--text-muted);">ڕیکلامی سپۆنسەرکراو / Ad</div>
+                    </div>
+                    <i data-lucide="bookmark" class="card-bookmark" style="width:10px;height:10px;color:var(--text-muted);"></i>
+                  </div>
+
+                  <div class="card-content" style="padding: 10px; display: flex; flex-direction: column;">
+                    <div class="card-chips-row" style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px;">
+                      <span style="background: rgba(236, 72, 153, 0.12); color: #EC4899; border: 1px solid #EC4899; padding: 2px 6px; border-radius: 4px; font-size: 7.5px; font-weight: 700; align-self: center;">ڕیکلام / Sponsored</span>
+                      <span class="card-chip primary" id="ad-prev-pin-badge" style="display:none; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 4px; font-size: 7.5px; font-weight: 700;"><i data-lucide="pin" style="width:6px;height:6px;"></i>جێگیرکراو</span>
+                    </div>
+
+                    <div class="card-job-title" id="ad-prev-title" style="font-size: 11px; font-weight: 800; margin-bottom: 8px;">Ad Title</div>
+                    
+                    <div class="card-desc-val" id="ad-prev-desc-val" style="font-size: 8.5px; line-height: 12px; margin-bottom: 8px;">
+                      Advertisement description details will be shown here in real-time...
+                    </div>
+
+                    <!-- Simulated video player inside preview -->
+                    <div id="ad-prev-video-container" style="width: 100%; aspect-ratio: 2 / 3; background: #000; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 8px 0; border: 1px dashed rgba(236,72,153,0.5);">
+                      <i data-lucide="video" style="width:20px;height:20px;color:#EC4899;margin-bottom:4px;"></i>
+                      <span style="font-size:8px;color:rgba(255,255,255,0.7);">Video Preview Area</span>
+                    </div>
+
+                    <div style="font-size: 8px; font-weight: 700; margin-bottom: 8px; color: #EC4899;" id="ad-prev-address-val">
+                      📍 Location Address
+                    </div>
+
+                    <div class="card-footer" style="display: flex; justify-content: space-between; font-size: 8px; color: var(--text-muted); margin-top: 4px; align-items: center;">
+                      <div class="card-footer-left" style="display: flex; align-items: center; gap: 3px;">
+                        <i data-lucide="eye" style="width:8px;height:8px;"></i>
+                        <span>0 views</span>
+                      </div>
+                      <div class="card-footer-right" style="display: flex; align-items: center; gap: 3px;">
+                        <span>10:45 AM</span>
+                        <i data-lucide="check-check" style="width:10px;height:10px;color:#5288c1;"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Buttons Bar -->
+                  <div class="card-buttons-bar" style="border-top: 1px solid rgba(255,255,255,0.06); padding: 5px; display: flex;">
+                    <button class="card-btn" style="width: 100%; border: none; font-size: 8px; font-weight: 700; color: #EC4899; display: flex; align-items: center; justify-content: center; gap: 4px; background: none; padding: 4px 0;">
+                      <i data-lucide="search" style="width:8px;height:8px;color:#EC4899;"></i>
+                      <span>زانیاری زیاتر 🔍</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- APP SETTINGS & DESIGN PANEL -->
       <div class="view-panel" id="panel-settings">
         <!-- Pill Buttons Sub-tabs Selector -->
@@ -1937,6 +2480,10 @@
           <button class="subtab-btn" id="btn-settings-backup" onclick="switchSettingsSubTab('backup')">
             <i data-lucide="archive"></i>
             <span>Backup & Restore (پاڵپشتگیری داتا)</span>
+          </button>
+          <button class="subtab-btn" id="btn-settings-telegram" onclick="switchSettingsSubTab('telegram')">
+            <i data-lucide="bot"></i>
+            <span>Telegram Bot & Images (تەلەگرام و وێنەکان)</span>
           </button>
         </div>
 
@@ -2262,6 +2809,104 @@
           </div>
         </div>
       </div>
+
+      <!-- SUB PANEL 4: Telegram Bot & Fallback Images -->
+      <div id="sub-panel-settings-telegram" class="settings-subpanel">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%;">
+          
+          <!-- Telegram Sync Card -->
+          <div class="editor-card glass glow-hover" style="padding: 25px; display: flex; flex-direction: column; justify-content: space-between; min-height: 250px;">
+            <div>
+              <h3 class="chart-title" style="display:flex; align-items:center; gap:8px; margin-bottom: 12px;">
+                <i data-lucide="bot" style="color:var(--primary); width:20px; height:20px;"></i>
+                <span>Telegram Synchronization (هاوکاتکردنی تەلەگرام)</span>
+              </h3>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 15px;">
+                پۆستەکانی دوایینی چەناڵی تەلەگرامی <strong>@kurd24job</strong> ڕاستەوخۆ هاوکات بکە و بە شێوەی خۆکار لە ناو ئەپەکەدا بڵاویان بکەرەوە.
+              </p>
+              <div id="telegram-sync-status" style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 15px;">
+                Status: Ready to sync (ئامادەیە بۆ هاوکاتکردن)
+              </div>
+            </div>
+            
+            <button class="login-btn" id="btn-sync-telegram" onclick="triggerTelegramSync()" style="width: 100%;">
+              <i data-lucide="refresh-cw" style="width:16px; height:16px;"></i>
+              <span>هاوکاتکردنی ئێستا (Sync Telegram Now)</span>
+            </button>
+          </div>
+
+          <!-- Fallback Images Explanation Card -->
+          <div class="editor-card glass glow-hover" style="padding: 25px; display: flex; flex-direction: column; justify-content: space-between; min-height: 250px;">
+            <div>
+              <h3 class="chart-title" style="display:flex; align-items:center; gap:8px; margin-bottom: 12px;">
+                <i data-lucide="info" style="color:var(--primary); width:20px; height:20px;"></i>
+                <span>About Fallback Images (دەربارەی وێنە یەدەگەکان)</span>
+              </h3>
+              <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 0;">
+                بوتە خۆکارەکە پۆستەکانی تەلەگرام دەخوێنێتەوە. ئەگەر پۆستەکە هەلی کار بێت یان فێرکاری، وێنە لە فۆڵدەری پەیوەندیدار دیاری دەکات. وەک ڕێلامیش، هەمیشە وێنەی سێیەم دەبێتە یەکێک لە لۆگۆ یان بوستەرە ڕیکلامییەکانی Kurd24 Job کە لە فۆڵدەری سێیەم بەرزت کردووەتەوە.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Categorized Fallback Images Pools -->
+        <div class="editor-card glass" style="padding: 25px; margin-top: 25px; width: 100%;">
+          <h3 class="chart-title" style="display:flex; align-items:center; gap:8px; margin-bottom: 15px;">
+            <i data-lucide="images" style="color:var(--primary); width:20px; height:20px;"></i>
+            <span>Categorized Fallback Images (فۆڵدەرەکانی وێنە یەدەگەکان)</span>
+          </h3>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 15px;">
+            <!-- 1. Job Images Pool -->
+            <div style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: rgba(255,255,255,0.01); display: flex; flex-direction: column; gap: 12px;">
+              <span style="font-size: 13px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="briefcase" style="width:14px; height:14px;"></i>
+                Job Fallbacks (هەلی کار)
+              </span>
+              <div style="border: 2px dashed var(--card-border); padding: 12px; text-align: center; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('input-job-images').click()">
+                <i data-lucide="upload-cloud" style="width: 20px; height: 20px; color: var(--text-secondary); margin: 0 auto 4px;"></i>
+                <span style="font-size: 11px; font-weight: 700; color: var(--text);">Upload Job Image</span>
+                <input type="file" id="input-job-images" style="display: none;" accept="image/*" onchange="uploadGroupImage(event, 'jobImages')">
+              </div>
+              <div id="job-images-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; min-height: 70px;">
+                <!-- Loaded Dynamically -->
+              </div>
+            </div>
+
+            <!-- 2. Training Images Pool -->
+            <div style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: rgba(255,255,255,0.01); display: flex; flex-direction: column; gap: 12px;">
+              <span style="font-size: 13px; font-weight: 700; color: #10B981; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="graduation-cap" style="width:14px; height:14px;"></i>
+                Training Fallbacks (فێرکاری)
+              </span>
+              <div style="border: 2px dashed var(--card-border); padding: 12px; text-align: center; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('input-training-images').click()">
+                <i data-lucide="upload-cloud" style="width: 20px; height: 20px; color: var(--text-secondary); margin: 0 auto 4px;"></i>
+                <span style="font-size: 11px; font-weight: 700; color: var(--text);">Upload Training Image</span>
+                <input type="file" id="input-training-images" style="display: none;" accept="image/*" onchange="uploadGroupImage(event, 'trainingImages')">
+              </div>
+              <div id="job-training-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; min-height: 70px;">
+                <!-- Loaded Dynamically -->
+              </div>
+            </div>
+
+            <!-- 3. Kurd24 Promo Banners -->
+            <div style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: rgba(255,255,255,0.01); display: flex; flex-direction: column; gap: 12px;">
+              <span style="font-size: 13px; font-weight: 700; color: #EC4899; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="award" style="width:14px; height:14px;"></i>
+                Promo Banners (ڕیکلامەکان)
+              </span>
+              <div style="border: 2px dashed var(--card-border); padding: 12px; text-align: center; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('input-promo-images').click()">
+                <i data-lucide="upload-cloud" style="width: 20px; height: 20px; color: var(--text-secondary); margin: 0 auto 4px;"></i>
+                <span style="font-size: 11px; font-weight: 700; color: var(--text);">Upload Promo Image</span>
+                <input type="file" id="input-promo-images" style="display: none;" accept="image/*" onchange="uploadGroupImage(event, 'promoImages')">
+              </div>
+              <div id="job-promo-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; min-height: 70px;">
+                <!-- Loaded Dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div> <!-- Closes panel-settings -->
 
     <!-- APP DISTRIBUTION PANEL -->
@@ -2398,6 +3043,60 @@
       </div>
     </div>
 
+  <!-- Detailed Job Stats Modal -->
+  <div id="stats-modal-overlay" class="modal-overlay" onclick="closeStatsModal(event)">
+    <div class="stats-modal-card glass" onclick="event.stopPropagation()">
+      <div class="stats-modal-header">
+        <div>
+          <h3 id="stats-job-title" style="margin: 0; font-size: 16px; font-weight: 800; color: var(--text);">Job Title</h3>
+          <div id="stats-job-company" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Company Name</div>
+        </div>
+        <button class="close-modal-btn" onclick="closeStatsModal()">&times;</button>
+      </div>
+      <div class="stats-modal-body">
+        <div class="stats-overview-grid">
+          <!-- Circular Conversion Rate -->
+          <div class="stats-circle-container">
+            <div class="progress-ring">
+              <svg>
+                <circle class="progress-ring-circle-bg" cx="50" cy="50" r="40"></circle>
+                <circle id="stats-progress-ring" class="progress-ring-circle" cx="50" cy="50" r="40" stroke="var(--primary)"></circle>
+              </svg>
+              <div id="stats-conversion-text" class="progress-ring-text">0%</div>
+            </div>
+            <div class="stats-label">Conversion Rate</div>
+          </div>
+          
+          <!-- Views and Clicks Cards -->
+          <div class="stats-numbers">
+            <div class="stats-number-card">
+              <div class="stat-icon" style="background:var(--success-glow); color:var(--success); padding:6px; border-radius:6px; display:flex;">
+                <i data-lucide="eye"></i>
+              </div>
+              <div>
+                <div id="stats-views-val" class="stats-value" style="color:var(--success);">0</div>
+                <div class="stats-label">Total Views</div>
+              </div>
+            </div>
+            <div class="stats-number-card">
+              <div class="stat-icon" style="background:var(--accent-glow); color:var(--accent); padding:6px; border-radius:6px; display:flex;">
+                <i data-lucide="send"></i>
+              </div>
+              <div>
+                <div id="stats-clicks-val" class="stats-value" style="color:var(--accent);">0</div>
+                <div class="stats-label">Total Applies</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="stats-evaluation" class="stats-engagement-evaluation mid">
+          No data analyzed yet.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Global Error Handler for UI debugging
     window.addEventListener('error', function(e) {
@@ -2432,6 +3131,124 @@
     let session = null;
     let jobsList = [];
     let imageInputs = ["", "", "", "", ""]; // Fits 5 slots
+
+    // Guest Mode helpers & Fallbacks
+    function isGuestMode() {
+      return session && session.user && session.user.email === "guest@kurd24.job";
+    }
+
+    const MOCK_CATEGORIES = [
+      { id: "software", name_ku: "گەشەپێدانی نەرمەکاڵا", name_en: "Software Development" },
+      { id: "design", name_ku: "دیزاین و دروستکردن", name_en: "Design & Creative" },
+      { id: "marketing", name_ku: "مارکێتینگ", name_en: "Marketing" },
+      { id: "finance", name_ku: "دارایی و ژمێریاری", name_en: "Finance & Accounting" },
+      { id: "sales", name_ku: "فرۆشتن", name_en: "Sales" },
+      { id: "hr", name_ku: "سەرچاوە مرۆییەکان", name_en: "Human Resources" },
+      { id: "customer_support", name_ku: "پشتیوانی کڕیاران", name_en: "Customer Support" },
+      { id: "writing", name_ku: "نووسین و وەرگێڕان", name_en: "Writing & Translation" },
+      { id: "healthcare", name_ku: "تەندروستی", name_en: "Healthcare & Medical" },
+      { id: "engineering", name_ku: "ئەندازیاری", name_en: "Engineering" },
+      { id: "education", name_ku: "پەروەردە", name_en: "Education" },
+      { id: "other", name_ku: "ھیتر", name_en: "Other" }
+    ];
+
+    const MOCK_CITIES = [
+      { id: "erbil", name_ku: "هەولێر", name_en: "Erbil" },
+      { id: "sulaymaniyah", name_ku: "سلێمانی", name_en: "Sulaymaniyah" },
+      { id: "duhok", name_ku: "دهۆک", name_en: "Duhok" },
+      { id: "halabja", name_ku: "هەڵەبجە", name_en: "Halabja" },
+      { id: "kirkuk", name_ku: "کەرکووک", name_en: "Kirkuk" },
+      { id: "baghdad", name_ku: "بەغداد", name_en: "Baghdad" },
+      { id: "other", name_ku: "شارەکانی تر", name_en: "Other Cities" }
+    ];
+
+    const MOCK_INDUSTRIES = [
+      { id: "tech", name_ku: "تەکنەلۆژیا", name_en: "Technology" },
+      { id: "business", name_ku: "بازرگانی", name_en: "Business & Commerce" },
+      { id: "education", name_ku: "پەروەردە", name_en: "Education & Academia" },
+      { id: "health", name_ku: "تەندروستی", name_en: "Healthcare & Medicine" },
+      { id: "hospitality", name_ku: "گەشتیاری و چێشتخانە", name_en: "Hospitality & Tourism" },
+      { id: "finance", name_ku: "بانک و دارایی", name_en: "Banking & Finance" },
+      { id: "construction", name_ku: "بیناسازی", name_en: "Construction" },
+      { id: "oil_gas", name_ku: "نەوت و گاز", name_en: "Oil & Gas" },
+      { id: "retail", name_ku: "فرۆشگای تاکەکەسی", name_en: "Retail & Wholesale" },
+      { id: "media", name_ku: "میدیا و ڕاگەیاندن", name_en: "Media & Journalism" },
+      { id: "ngo", name_ku: "ڕێکخراوەیی", name_en: "NGO & Non-Profit" },
+      { id: "other", name_ku: "بواری تر", name_en: "Other Industry" }
+    ];
+
+    const MOCK_JOB_TYPES = [
+      { id: "fullTime", name_ku: "تەواو کات", name_en: "Full-time" },
+      { id: "partTime", name_ku: "نیوە کات", name_en: "Part-time" },
+      { id: "contract", name_ku: "گرێبەست", name_en: "Contract" },
+      { id: "internship", name_ku: "ڕاهێنان", name_en: "Internship" },
+      { id: "temporary", name_ku: "کاتی", name_en: "Temporary" },
+      { id: "freelance", name_ku: "سەربەخۆ", name_en: "Freelance" },
+      { id: "remote", name_ku: "دوورەکار", name_en: "Remote" }
+    ];
+
+    const MOCK_EXPERIENCE_LEVELS = [
+      { id: "junior", name_ku: "سەرەتایی", name_en: "Junior (1-2 years)" },
+      { id: "mid", name_ku: "ناوەند", name_en: "Mid-Level (3-5 years)" },
+      { id: "senior", name_ku: "پێشکەوتوو", name_en: "Senior (5+ years)" },
+      { id: "lead", name_ku: "سەرپەرشتیار", name_en: "Lead / Manager" },
+      { id: "director", name_ku: "بەڕێوەبەر", name_en: "Director / Executive" }
+    ];
+
+    function getMockJobs() {
+      return [
+        {
+          id: "mock-1",
+          title_ku: "گەشەپێدەری ئەپی مۆبایل (React Native)",
+          title_en: "Mobile App Developer (React Native)",
+          company: "Kurd24 Tech Solutions",
+          industry: "tech",
+          city_ku: "[\"erbil\"]",
+          city_en: "[\"erbil\"]",
+          category: "software",
+          type: "fullTime",
+          experience_level: "mid",
+          salary: "$1,500 - $2,200",
+          description_ku: "ئێمە بەدوای گەشەپێدەرێکی لێهاتووی React Native دەگەڕێین بۆ کارکردن لەسەر پڕۆژە سەرنجڕاکێشەکانمان.",
+          description_en: "We are looking for a skilled React Native developer to work on our exciting projects.",
+          requirements_ku: "١. ئەزموونی زیاتر لە ٢ ساڵ لە React Native\n٢. شارەزایی لە TypeScript و Redux Toolkit\n٣. کارکردنی پێشوو لەگەڵ API و Supabase",
+          requirements_en: "1. More than 2 years of React Native experience\n2. Proficiency in TypeScript and Redux Toolkit\n3. Previous integration work with APIs and Supabase",
+          whatsapp: "9647501234567",
+          email: "careers@kurd24.job",
+          status: "published",
+          views: 342,
+          clicks: 89,
+          created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+          is_vip: true,
+          is_pinned: true
+        },
+        {
+          id: "mock-2",
+          title_ku: "دیزاینەری UI/UX",
+          title_en: "UI/UX Designer",
+          company: "Kurdish Creative Agency",
+          industry: "design",
+          city_ku: "[\"sulaymaniyah\"]",
+          city_en: "[\"sulaymaniyah\"]",
+          category: "design",
+          type: "fullTime",
+          experience_level: "junior",
+          salary: "$800 - $1,200",
+          description_ku: "بەدوای دیزاینەرێکی داهێنەر دەگەڕێین بۆ دروستکردنی دیزاینی ناوازە بۆ وێبسایت و ئەپەکان.",
+          description_en: "Looking for a creative designer to build awesome designs for websites and mobile apps.",
+          requirements_ku: "١. لانی کەم ١ ساڵ کار لە بواری دیزاینی دیجیتال\n٢. شارەزایی تەواو لە Figma\n٣. توانای تێگەیشتن لە ڕەفتاری بەکارهێنەران",
+          requirements_en: "1. At least 1 year in digital design field\n2. Excellent command of Figma\n3. Ability to understand user experience & behavior",
+          whatsapp: "9647701234567",
+          email: "design@kurdcreative.com",
+          status: "published",
+          views: 215,
+          clicks: 45,
+          created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
+          is_vip: false,
+          is_pinned: false
+        }
+      ];
+    }
     let previewLang = "ku";
     let editModeJobId = null;
 
@@ -2489,7 +3306,9 @@
     async function sendPushNotification(jobData) {
       try {
         if (!supabaseClient) return;
-        const { data: tokensData, error } = await supabaseClient.from("push_tokens").select("token");
+        
+        // Fetch tokens and their languages
+        const { data: tokensData, error } = await supabaseClient.from("push_tokens").select("token, lang");
         if (error) {
           console.error("Failed to fetch push tokens for notifications:", error);
           return;
@@ -2498,26 +3317,85 @@
           console.log("No registered push tokens found.");
           return;
         }
-        const tokens = tokensData.map(t => t.token);
-        console.log(`Sending notifications to ${tokens.length} devices...`);
+        
+        console.log(`Sending notifications to ${tokensData.length} devices...`);
 
-        const messages = tokens.map(token => ({
-          to: token,
-          sound: "default",
-          title: jobData.is_vip ? "⭐️ VIP Job Listing" : "📢 New Job Listing",
-          body: `${jobData.company}: ${jobData.title_ku}`,
-          badge: 1,
-          data: { jobId: jobData.id }
-        }));
+        // Localized City Helper for Notifications
+        const cityNames = {
+          ku: { erbil: "هەولێر", sulaymaniyah: "سلێمانی", duhok: "دهۆک", kirkuk: "کەرکوک", halabja: "هەڵەبجە", remote: "دوورەکار" },
+          en: { erbil: "Erbil", sulaymaniyah: "Sulaymaniyah", duhok: "Duhok", kirkuk: "Kirkuk", halabja: "Halabja", remote: "Remote" }
+        };
+
+        function getNotificationCityLabel(cityStr, lang) {
+          if (!cityStr) return lang === 'ku' ? 'کوردستان' : 'Kurdistan';
+          let firstCity = cityStr.trim();
+          if (firstCity.startsWith('[') && firstCity.endsWith(']')) {
+            try {
+              const arr = JSON.parse(firstCity);
+              if (arr.length > 1) {
+                return lang === 'ku' ? 'چەند شارێک' : 'Multiple Cities';
+              }
+              firstCity = arr[0] || 'remote';
+            } catch(e) {}
+          } else if (firstCity.includes(',')) {
+            return lang === 'ku' ? 'چەند شارێک' : 'Multiple Cities';
+          }
+          
+          firstCity = firstCity.toLowerCase().trim();
+          return (cityNames[lang] && cityNames[lang][firstCity]) || firstCity;
+        }
+
+        const messages = tokensData.map(item => {
+          const userLang = (item.lang || "ku").toLowerCase();
+          const isKurdish = userLang === "ku";
+          const cityLabel = getNotificationCityLabel(jobData.city_en, userLang);
+          
+          let title = "";
+          let body = "";
+          
+          if (isKurdish) {
+            title = jobData.is_ad
+              ? "✨ سپۆنسەر: دەرفەتێکی نوێ ✨"
+              : jobData.is_vip 
+                ? "⭐️ دەرفەتی کاری ناوازە (VIP) ⭐️" 
+                : "📢 هەلی کاری نوێ";
+            body = jobData.is_ad
+              ? "پۆستێکی ڕیکلامی نوێ بڵاوکراوەتەوە. کلیک بکە بۆ خوێندنەوەی دیتێڵ."
+              : "پۆستێکی نوێی هەلی کار لە ئەپەکە بڵاوکراوەتەوە. کلیک بکە بۆ خوێندنەوەی دیتێڵ.";
+          } else {
+            title = jobData.is_ad
+              ? "✨ Sponsored Opportunity ✨"
+              : jobData.is_vip 
+                ? "⭐️ Premium VIP Job Opportunity ⭐️" 
+                : "📢 New Job Opportunity";
+            body = jobData.is_ad
+              ? "A new sponsored advertisement has been posted. Tap to read details."
+              : "A new job opportunity has been posted in the app. Tap to read details.";
+          }
+
+          return {
+            to: item.token,
+            sound: "default",
+            title: title,
+            body: body,
+            badge: 1,
+            channelId: "default",
+            data: { jobId: jobData.id }
+          };
+        });
+
+        let apiHost = window.location.origin;
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          apiHost = 'https://kurd24-job.vercel.app';
+        }
 
         for (let i = 0; i < messages.length; i += 100) {
           const chunk = messages.slice(i, i + 100);
-          const response = await fetch("https://exp.host/--/api/v2/push/send", {
+          const response = await fetch(`${apiHost}/api/send-push`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Accept-encoding": "gzip, deflate"
+              "Accept": "application/json"
             },
             body: JSON.stringify(chunk)
           });
@@ -2780,6 +3658,8 @@
       if (activeFontLabel && settings.fontUrl) {
         activeFontLabel.textContent = settings.fontUrl.split('/').pop();
       }
+
+
 
       // Update active release file display name
       const apkInfoLabel = document.getElementById("apk-info-label");
@@ -3224,22 +4104,25 @@
         showMainApp();
       } catch (err) {
         console.error("Login error:", err);
-        // Admin credentials bypass for local offline testing (requested by user)
-        if (email === "admin@kurd24.job" && password === "admin123") {
-          console.warn("Bypassing Supabase login for local admin credentials.");
-          session = { user: { email: email } };
-          localStorage.setItem("demo_session", JSON.stringify(session));
-          showMainApp();
-          return;
-        }
-
-        errorDiv.textContent = err.message || "Invalid email or password.";
+        const errMsg = err.message || "Invalid email or password.";
+        errorDiv.textContent = errMsg;
         errorDiv.style.display = "block";
+        alert("🔒 Login Failed / لۆگین سەرکەوتوو نەبوو:\n\n" + errMsg + "\n\nTip: If it says 'Email not confirmed', please check your email inbox to confirm your account, or go to Supabase Dashboard -> Authentication -> Providers -> Email -> toggle OFF 'Confirm email'.");
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<span>Log In</span><i data-lucide="log-in" style="width:16px;height:16px;"></i>';
         lucide.createIcons();
       }
+    }
+
+    function handleGuestLogin() {
+      session = {
+        user: {
+          email: "guest@kurd24.job"
+        }
+      };
+      localStorage.setItem("demo_session", JSON.stringify(session));
+      showMainApp();
     }
 
     async function handleLogout() {
@@ -3328,6 +4211,11 @@
         if (!editModeJobId) {
           clearEditorForm();
         }
+      } else if (tabName === "create-ad") {
+        headerLabel.textContent = editModeJobId ? "Edit Advertisement" : "Post Advertisement";
+        if (!editModeJobId) {
+          clearEditorForm();
+        }
       } else if (tabName === "properties" || tabName === "design" || tabName === "settings") {
         headerLabel.textContent = "App Settings & Design";
         loadProperties();
@@ -3353,8 +4241,157 @@
         document.getElementById("sub-panel-settings-backup").classList.add("active");
         document.getElementById("btn-settings-backup").classList.add("active");
         checkDatabaseIntegrity();
+      } else if (subTabName === 'telegram') {
+        document.getElementById("sub-panel-settings-telegram").classList.add("active");
+        document.getElementById("btn-settings-telegram").classList.add("active");
+        renderTelegramSettings();
       }
       lucide.createIcons();
+    }
+
+    // Telegram & Fallback Images Handlers
+    async function triggerTelegramSync() {
+      const statusDiv = document.getElementById("telegram-sync-status");
+      const btn = document.getElementById("btn-sync-telegram");
+      
+      btn.disabled = true;
+      btn.innerHTML = `<span style="width:16px;height:16px;border:2px solid;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;margin-right:8px;vertical-align:middle;"></span> Syncing...`;
+      statusDiv.textContent = "Status: Scraped and syncing posts...";
+      statusDiv.style.color = "var(--primary)";
+      
+      try {
+        const secret = "kurd24_secret";
+        const origin = window.location.origin;
+        const res = await fetch(`${origin}/api/sync-telegram?secret=${secret}`);
+        const data = await res.json();
+        
+        if (data.success) {
+          statusDiv.textContent = `Status: Successfully synced ${data.synchronized} jobs!`;
+          statusDiv.style.color = "#34d399";
+          alert(`بەسەرکەوتوویی ${data.synchronized} پۆستی نوێ هاوکات کرا!`);
+          
+          // Reload job list if visible
+          if (typeof loadJobs === 'function') {
+            loadJobs();
+          }
+        } else {
+          throw new Error(data.error || 'Server returned an error');
+        }
+      } catch (e) {
+        console.error(e);
+        statusDiv.textContent = `Status: Sync failed (${e.message})`;
+        statusDiv.style.color = "var(--accent)";
+        alert(`کێشەیەک ڕوویدا لە کاتی هاوکاتکردندا: ${e.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="refresh-cw" style="width:16px; height:16px;"></i><span>هاوکاتکردنی ئێستا (Sync Telegram Now)</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    function renderTelegramSettings() {
+      renderGroupGrid("job-images-grid", "jobImages");
+      renderGroupGrid("job-training-grid", "trainingImages");
+      renderGroupGrid("job-promo-grid", "promoImages");
+    }
+
+    function renderGroupGrid(gridId, groupKey) {
+      const grid = document.getElementById(gridId);
+      if (!grid) return;
+      
+      const images = activeSettings[groupKey] || [];
+      if (images.length === 0) {
+        grid.innerHTML = `
+          <div style="color: var(--text-muted); font-size: 11px; text-align: center; grid-column: 1 / -1; padding: 12px;">
+            هیچ وێنەیەک بارنەکراوە (Empty)
+          </div>
+        `;
+        return;
+      }
+      
+      grid.innerHTML = images.map((imgUrl, index) => `
+        <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--card-border); background: #0A0A0F; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;">
+          <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+          <button onclick="deleteGroupImage(${index}, '${groupKey}')" style="position: absolute; top: 4px; right: 4px; background: rgba(239, 68, 68, 0.9); border: none; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: var(--transition);" title="Delete Image">
+            <i data-lucide="x" style="width: 10px; height: 10px;"></i>
+          </button>
+        </div>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+
+    async function uploadGroupImage(event, groupKey) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+      if (isDemo) {
+        alert("Cannot upload images in Demo mode.");
+        return;
+      }
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+        const filePath = `defaults/${groupKey}/${fileName}`;
+
+        const { data, error } = await supabaseClient.storage
+          .from('job-images')
+          .upload(filePath, file);
+
+        if (error) throw error;
+
+        const { data: publicUrlData } = supabaseClient.storage
+          .from('job-images')
+          .getPublicUrl(filePath);
+
+        const publicUrl = publicUrlData.publicUrl;
+
+        if (!activeSettings[groupKey]) {
+          activeSettings[groupKey] = [];
+        }
+        
+        activeSettings[groupKey].push(publicUrl);
+
+        const { error: saveError } = await supabaseClient
+          .from("system_settings")
+          .upsert({ id: "app-config", settings: activeSettings, updated_at: new Date().toISOString() });
+
+        if (saveError) throw saveError;
+
+        alert("Image uploaded successfully!");
+        renderTelegramSettings();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to upload image: " + err.message);
+      }
+    }
+
+    async function deleteGroupImage(index, groupKey) {
+      if (!confirm("Are you sure you want to delete this fallback image?")) return;
+      
+      const isDemo = !supabaseClient || document.getElementById("active-mode").textContent.includes("Demo");
+      if (isDemo) {
+        alert("Cannot delete images in Demo mode.");
+        return;
+      }
+
+      try {
+        activeSettings[groupKey].splice(index, 1);
+
+        const { error: saveError } = await supabaseClient
+          .from("system_settings")
+          .upsert({ id: "app-config", settings: activeSettings, updated_at: new Date().toISOString() });
+
+        if (saveError) throw saveError;
+
+        alert("Image deleted successfully!");
+        renderTelegramSettings();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete image: " + err.message);
+      }
     }
 
     // Database check & warning UI
@@ -3536,8 +4573,14 @@
     // Database loaders
     async function loadData() {
       if (!supabaseClient) {
-        document.getElementById("active-mode").textContent = "Disconnected";
-        alert("Supabase client is not initialized.");
+        document.getElementById("active-mode").textContent = isGuestMode() ? "Guest Mode (Disconnected)" : "Disconnected";
+        if (isGuestMode()) {
+          jobsList = getMockJobs();
+          populateTable();
+          calculateStats();
+        } else {
+          alert("Supabase client is not initialized.");
+        }
         return;
       }
       document.getElementById("active-mode").textContent = "Syncing...";
@@ -3549,14 +4592,18 @@
         jobsList = data || [];
         populateTable();
         calculateStats();
-        document.getElementById("active-mode").textContent = "Live Syncing";
+        document.getElementById("active-mode").textContent = isGuestMode() ? "Guest Mode (Live Sync)" : "Live Syncing";
       } catch (e) {
         console.error("Load failed:", e);
-        document.getElementById("active-mode").textContent = "Sync Error";
-        jobsList = [];
+        document.getElementById("active-mode").textContent = isGuestMode() ? "Guest Mode (Mock Data)" : "Sync Error";
+        
+        jobsList = getMockJobs();
         populateTable();
         calculateStats();
-        alert("Failed to load jobs from Supabase: " + e.message + "\n\nPlease make sure your database is configured correctly and your internet connection is active.");
+        
+        if (!isGuestMode()) {
+          alert("Failed to load jobs from Supabase: " + e.message + "\n\nPlease make sure your database is configured correctly and your internet connection is active.");
+        }
       }
     }
 
@@ -3576,6 +4623,9 @@
         const statusBadge = job.status === "published" 
           ? `<span class="badge badge-published">Published</span>` 
           : `<span class="badge badge-draft">Draft</span>`;
+        const adBadge = job.is_ad 
+          ? `<span class="badge" style="background:rgba(236,72,153,0.12); color:#EC4899; border:1px solid #EC4899; margin-left:4px;">Ad / ڕیکلام</span>`
+          : ``;
         
         tr.innerHTML = `
           <td>
@@ -3590,13 +4640,14 @@
           <td>${getLocalizedCity(job.city_en, 'en')}</td>
           <td>${job.category}</td>
           <td style="font-weight:600;">${job.salary}</td>
-          <td>${statusBadge}</td>
+          <td>${statusBadge}${adBadge}</td>
           <td style="font-weight:600;">
             <span style="color:var(--primary);">${job.views || 0}</span> / 
             <span style="color:var(--accent);">${job.clicks || 0}</span>
           </td>
           <td>
             <div class="actions-cell">
+              <button class="action-btn btn-stats" title="View Statistics" onclick="viewJobStats('${job.id}')"><i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i></button>
               <button class="action-btn btn-edit" title="Edit" onclick="editJob('${job.id}')"><i data-lucide="edit-3" style="width:14px;height:14px;"></i></button>
               <button class="action-btn btn-delete" title="Delete" onclick="deleteJob('${job.id}')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
             </div>
@@ -3643,6 +4694,39 @@
       // Update values positions
       document.getElementById("chart-val-views").setAttribute("y", 190 - heightViews);
       document.getElementById("chart-val-applies").setAttribute("y", 190 - heightApplies);
+
+      // Calculate Top Performing Listings
+      let topViewed = null;
+      let topApplied = null;
+      
+      jobsList.forEach(j => {
+        if (!topViewed || (j.views || 0) > (topViewed.views || 0)) {
+          topViewed = j;
+        }
+        if (!topApplied || (j.clicks || 0) > (topApplied.clicks || 0)) {
+          topApplied = j;
+        }
+      });
+
+      if (topViewed && (topViewed.views || 0) > 0) {
+        document.getElementById("top-viewed-title").textContent = topViewed.title_en || topViewed.title_ku;
+        document.getElementById("top-viewed-company").textContent = topViewed.company;
+        document.getElementById("top-viewed-value").textContent = topViewed.views || 0;
+      } else {
+        document.getElementById("top-viewed-title").textContent = "No Data";
+        document.getElementById("top-viewed-company").textContent = "-";
+        document.getElementById("top-viewed-value").textContent = "0";
+      }
+
+      if (topApplied && (topApplied.clicks || 0) > 0) {
+        document.getElementById("top-applied-title").textContent = topApplied.title_en || topApplied.title_ku;
+        document.getElementById("top-applied-company").textContent = topApplied.company;
+        document.getElementById("top-applied-value").textContent = topApplied.clicks || 0;
+      } else {
+        document.getElementById("top-applied-title").textContent = "No Data";
+        document.getElementById("top-applied-company").textContent = "-";
+        document.getElementById("top-applied-value").textContent = "0";
+      }
     }
 
     // Render Upload Slots Grid (3 to 5 images)
@@ -3743,13 +4827,29 @@
     // Live mobile card preview engine
     function togglePreviewLang(lang) {
       previewLang = lang;
-      document.getElementById("btn-prev-ku").classList.remove("active");
-      document.getElementById("btn-prev-en").classList.remove("active");
-      document.getElementById(`btn-prev-${lang}`).classList.add("active");
+      
+      const btnKu = document.getElementById("btn-prev-ku");
+      const btnEn = document.getElementById("btn-prev-en");
+      if (btnKu) btnKu.classList.remove("active");
+      if (btnEn) btnEn.classList.remove("active");
+      
+      const btnPrev = document.getElementById(`btn-prev-${lang}`);
+      if (btnPrev) btnPrev.classList.add("active");
+
+      // Also sync Ad preview buttons
+      const btnAdKu = document.getElementById("btn-ad-prev-ku");
+      const btnAdEn = document.getElementById("btn-ad-prev-en");
+      if (btnAdKu) btnAdKu.classList.remove("active");
+      if (btnAdEn) btnAdEn.classList.remove("active");
+      
+      const btnAdPrev = document.getElementById(`btn-ad-prev-${lang}`);
+      if (btnAdPrev) btnAdPrev.classList.add("active");
+
       updateLivePreview();
     }
 
     function updateLivePreview() {
+      // 1. Regular job preview values:
       const company = document.getElementById("form-company").value || "Company Name";
       const isPublished = document.getElementById("form-status").checked;
       const titleKu = document.getElementById("form-title-ku").value || "ناونیشانی کارەکە";
@@ -3759,6 +4859,7 @@
       const expKey = document.getElementById("form-experience").value;
       const descKu = document.getElementById("form-desc-ku").value || "دەربارە و کورتەی کارەکە لێرە پێشان دەدرێت بە زمانی کوردی...";
       const descEn = document.getElementById("form-desc-en").value || "The job description overview will be displayed here in English...";
+      const logoLetterEl = document.getElementById("prev-logo-letter");
 
       // Toggle draft indicator
       const label = document.getElementById("status-toggle-label");
@@ -3779,88 +4880,188 @@
       const type = (trans.types || {})[typeKey] || typeKey;
       const exp = (trans.experience || {})[expKey] || expKey;
 
-      // Update Preview HTML elements
-      const card = document.querySelector(".mobile-card");
-      if (card) {
+      // Update Preview HTML elements RTL/LTR
+      document.querySelectorAll(".mobile-card").forEach(card => {
         if (previewLang === "ku") {
           card.classList.add("rtl");
         } else {
           card.classList.remove("rtl");
         }
-      }
+      });
 
-        const isVip = document.getElementById("form-is-vip").checked;
-        const isPinned = document.getElementById("form-is-pinned").checked;
-        const cardEl = document.querySelector(".mobile-card");
-        const seeMoreBtn = document.getElementById("prev-see-more-btn");
-        const logoLetterEl = document.getElementById("prev-logo-letter");
+      const isVip = document.getElementById("form-is-vip").checked;
+      const isPinned = document.getElementById("form-is-pinned").checked;
+      const cardEl = document.querySelector(".mobile-card");
+      const seeMoreBtn = document.getElementById("prev-see-more-btn");
 
-        if (cardEl && seeMoreBtn) {
-          if (isVip) {
-            cardEl.style.border = "2px solid #FFB800";
-            cardEl.style.borderRadius = "12px";
-            cardEl.style.background = simTheme === 'dark' ? 'rgba(255, 184, 0, 0.03)' : 'rgba(255, 184, 0, 0.06)';
-            document.getElementById("prev-title").textContent = "⭐️ " + title;
-            seeMoreBtn.style.color = "#FFB800";
-            seeMoreBtn.style.borderColor = "#FFB800";
-            seeMoreBtn.style.background = "rgba(255, 184, 0, 0.12)";
-            const icon = seeMoreBtn.querySelector("svg") || seeMoreBtn.querySelector("i");
-            if (icon) icon.style.color = "#FFB800";
+      if (cardEl && seeMoreBtn) {
+        if (isVip) {
+          cardEl.style.border = "2px solid #FFB800";
+          cardEl.style.borderRadius = "12px";
+          cardEl.style.background = simTheme === 'dark' ? 'rgba(255, 184, 0, 0.03)' : 'rgba(255, 184, 0, 0.06)';
+          document.getElementById("prev-title").textContent = "⭐️ " + title;
+          seeMoreBtn.style.color = "#FFB800";
+          seeMoreBtn.style.borderColor = "#FFB800";
+          seeMoreBtn.style.background = "rgba(255, 184, 0, 0.12)";
+          const icon = seeMoreBtn.querySelector("svg") || seeMoreBtn.querySelector("i");
+          if (icon) icon.style.color = "#FFB800";
+          if (logoLetterEl) {
             logoLetterEl.style.color = "#FFB800";
             logoLetterEl.style.background = "rgba(255, 184, 0, 0.15)";
-          } else {
-            cardEl.style.border = simTheme === 'dark' ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)";
-            cardEl.style.borderRadius = "12px";
-            cardEl.style.background = simTheme === 'dark' ? 'rgba(21, 30, 40, 0.82)' : 'rgba(255, 255, 255, 0.9)';
-            document.getElementById("prev-title").textContent = "📢 " + title;
-            seeMoreBtn.style.color = "var(--primary)";
-            seeMoreBtn.style.borderColor = "var(--primary)";
-            seeMoreBtn.style.background = "var(--primary-glow)";
-            const icon = seeMoreBtn.querySelector("svg") || seeMoreBtn.querySelector("i");
-            if (icon) icon.style.color = "var(--primary)";
+          }
+        } else {
+          cardEl.style.border = simTheme === 'dark' ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)";
+          cardEl.style.borderRadius = "12px";
+          cardEl.style.background = simTheme === 'dark' ? 'rgba(21, 30, 40, 0.82)' : 'rgba(255, 255, 255, 0.9)';
+          document.getElementById("prev-title").textContent = "📢 " + title;
+          seeMoreBtn.style.color = "var(--primary)";
+          seeMoreBtn.style.borderColor = "var(--primary)";
+          seeMoreBtn.style.background = "var(--primary-glow)";
+          const icon = seeMoreBtn.querySelector("svg") || seeMoreBtn.querySelector("i");
+          if (icon) icon.style.color = "var(--primary)";
+          if (logoLetterEl) {
             logoLetterEl.style.color = "var(--primary)";
             logoLetterEl.style.background = "var(--primary-glow)";
           }
         }
+      }
 
-        // Render company name with Pin icon if pinned
-        let displayCompany = company;
-        if (isPinned) {
-          displayCompany = "📌 " + displayCompany;
+      // Show/hide simulator badges
+      const prevVipBadge = document.getElementById("prev-vip-badge-container");
+      if (prevVipBadge) {
+        prevVipBadge.style.display = isVip ? "block" : "none";
+      }
+      const prevPinnedBadge = document.getElementById("prev-pinned-badge-container");
+      if (prevPinnedBadge) {
+        prevPinnedBadge.style.display = isPinned ? "block" : "none";
+      }
+
+      // Render company name with Pin icon if pinned
+      let displayCompany = company;
+      if (isPinned) {
+        displayCompany = "📌 " + displayCompany;
+      }
+      const prevCompanyEl = document.getElementById("prev-company");
+      if (prevCompanyEl) {
+        prevCompanyEl.textContent = displayCompany;
+      }
+      
+      const logoUrlInput = document.getElementById("form-logo-url").value;
+      if (logoLetterEl) {
+        if (logoUrlInput && logoUrlInput.trim() !== "") {
+          logoLetterEl.innerHTML = `<img src="${logoUrlInput}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`;
+        } else {
+          logoLetterEl.textContent = company.substring(0, 1).toUpperCase();
         }
-        document.getElementById("prev-company").textContent = displayCompany;
-        document.getElementById("prev-logo-letter").textContent = company.substring(0, 1).toUpperCase();
+      }
       
       // Meta labels
-      document.getElementById("lbl-city").textContent = trans.lblCity;
-      document.getElementById("lbl-type").textContent = trans.lblType;
-      document.getElementById("lbl-salary").textContent = trans.lblSalary;
-      document.getElementById("lbl-exp").textContent = trans.lblExp;
-      document.getElementById("lbl-desc").textContent = trans.lblDesc;
+      const lblCity = document.getElementById("lbl-city");
+      if (lblCity) lblCity.textContent = trans.lblCity;
+      const lblType = document.getElementById("lbl-type");
+      if (lblType) lblType.textContent = trans.lblType;
+      const lblSalary = document.getElementById("lbl-salary");
+      if (lblSalary) lblSalary.textContent = trans.lblSalary;
+      const lblExp = document.getElementById("lbl-exp");
+      if (lblExp) lblExp.textContent = trans.lblExp;
+      const lblDesc = document.getElementById("lbl-desc");
+      if (lblDesc) lblDesc.textContent = trans.lblDesc;
       
       // Meta values
-      document.getElementById("prev-city").textContent = city;
-      document.getElementById("prev-type").textContent = type;
-      document.getElementById("prev-salary").textContent = salary;
-      document.getElementById("prev-experience").textContent = exp;
-      document.getElementById("prev-desc").textContent = desc;
+      const prevCity = document.getElementById("prev-city");
+      if (prevCity) prevCity.textContent = city;
+      const prevType = document.getElementById("prev-type");
+      if (prevType) prevType.textContent = type;
+      const prevSalary = document.getElementById("prev-salary");
+      if (prevSalary) prevSalary.textContent = salary;
+      const prevExp = document.getElementById("prev-experience");
+      if (prevExp) prevExp.textContent = exp;
+      const prevDesc = document.getElementById("prev-desc");
+      if (prevDesc) prevDesc.textContent = desc;
 
       // Populate Image Gallery preview
       const gallery = document.getElementById("prev-gallery");
-      gallery.innerHTML = "";
-      
-      const activeImages = imageInputs.map(img => img.trim()).filter(img => img !== "");
-      if (activeImages.length > 0) {
-        gallery.style.display = "flex";
-        activeImages.forEach(imgUrl => {
-          const img = document.createElement("img");
-          img.className = "card-thumb";
-          img.src = imgUrl;
-          img.onerror = () => { img.style.display = "none"; }; // hide broken urls
-          gallery.appendChild(img);
-        });
-      } else {
-        gallery.style.display = "none";
+      if (gallery) {
+        gallery.innerHTML = "";
+        const activeImages = imageInputs.map(img => img.trim()).filter(img => img !== "");
+        if (activeImages.length > 0) {
+          gallery.style.display = "flex";
+          activeImages.forEach(imgUrl => {
+            const img = document.createElement("img");
+            img.className = "card-thumb";
+            img.src = imgUrl;
+            img.onerror = () => { img.style.display = "none"; }; // hide broken urls
+            gallery.appendChild(img);
+          });
+        } else {
+          gallery.style.display = "none";
+        }
+      }
+
+      // 2. ADVERTISEMENT PREVIEW UPDATES
+      const adCompany = document.getElementById("form-ad-company").value || "Company Name";
+      const adTitleKu = document.getElementById("form-ad-title-ku").value || "ناونیشانی ڕیکلامەکە";
+      const adDescKu = document.getElementById("form-ad-desc-ku").value || "ناوەڕۆک و دیتێڵی ڕیکلامەکە لێرە پێشان دەدرێت لەم شوێنەدا...";
+      const adAddress = document.getElementById("form-ad-address").value;
+      const adIsPinned = document.getElementById("form-ad-is-pinned").checked;
+      const adLogoUrl = document.getElementById("form-ad-logo-url").value;
+      const adVideoUrl = document.getElementById("form-ad-video-url").value;
+      const adVideoPreview = document.getElementById("form-ad-video-preview");
+      const adVideoLayout = document.getElementById("form-ad-video-layout").value || "portrait";
+
+      const adPrevCompany = document.getElementById("ad-prev-company");
+      if (adPrevCompany) {
+        adPrevCompany.textContent = adIsPinned ? "📌 " + adCompany : adCompany;
+      }
+
+      const adPrevTitle = document.getElementById("ad-prev-title");
+      if (adPrevTitle) {
+        adPrevTitle.textContent = adTitleKu;
+      }
+
+      const adPrevDesc = document.getElementById("ad-prev-desc-val");
+      if (adPrevDesc) {
+        adPrevDesc.textContent = adDescKu;
+      }
+
+      const adPrevAddress = document.getElementById("ad-prev-address-val");
+      if (adPrevAddress) {
+        if (adAddress && adAddress.trim() !== "") {
+          adPrevAddress.textContent = previewLang === "ku" ? `📍 ناونیشان: ${adAddress}` : `📍 Location: ${adAddress}`;
+          adPrevAddress.style.display = "block";
+        } else {
+          adPrevAddress.style.display = "none";
+        }
+      }
+
+      const adPrevPinBadge = document.getElementById("ad-prev-pin-badge");
+      if (adPrevPinBadge) {
+        adPrevPinBadge.style.display = adIsPinned ? "inline-flex" : "none";
+      }
+
+      const adPrevLogo = document.getElementById("ad-prev-logo");
+      if (adPrevLogo) {
+        if (adLogoUrl && adLogoUrl.trim() !== "") {
+          adPrevLogo.innerHTML = `<img src="${adLogoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`;
+        } else {
+          adPrevLogo.textContent = adCompany.substring(0, 1).toUpperCase();
+        }
+      }
+
+      const adPrevVideoContainer = document.getElementById("ad-prev-video-container");
+      if (adPrevVideoContainer) {
+        adPrevVideoContainer.style.aspectRatio = adVideoLayout === "landscape" ? "16 / 9" : "2 / 3";
+        
+        if (adVideoPreview && adVideoPreview.src) {
+          adPrevVideoContainer.innerHTML = `<video src="${adVideoPreview.src}" controls muted autoplay loop style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></video>`;
+        } else if (adVideoUrl && adVideoUrl.trim() !== "") {
+          adPrevVideoContainer.innerHTML = `<video src="${adVideoUrl}" controls muted autoplay loop style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></video>`;
+        } else {
+          adPrevVideoContainer.innerHTML = `
+            <i data-lucide="video" style="width:20px;height:20px;color:#EC4899;margin-bottom:4px;"></i>
+            <span style="font-size:8px;color:rgba(255,255,255,0.7);">Video Preview Area</span>
+          `;
+        }
       }
 
       // Re-initialize Lucide Icons on layout update
@@ -3869,8 +5070,11 @@
 
     function clearEditorForm() {
       editModeJobId = null;
-      document.getElementById("editor-action-title").textContent = "Create New Job Announcement";
-      document.getElementById("editor-save-label").textContent = "Publish Announcement";
+      
+      const edActionTitle = document.getElementById("editor-action-title");
+      if (edActionTitle) edActionTitle.textContent = "Create New Job Announcement";
+      const edSaveLabel = document.getElementById("editor-save-label");
+      if (edSaveLabel) edSaveLabel.textContent = "Publish Announcement";
       
       document.getElementById("form-company").value = "";
       document.getElementById("form-status").checked = true;
@@ -3901,6 +5105,44 @@
       document.getElementById("form-req-en").value = "";
       document.getElementById("form-whatsapp").value = "";
       document.getElementById("form-email").value = "";
+      document.getElementById("form-url").value = "";
+      
+      // Reset Advertisement Form fields
+      const adEdActionTitle = document.getElementById("ad-editor-action-title");
+      if (adEdActionTitle) adEdActionTitle.textContent = "Post Sponsored Advertisement";
+      const adEdSaveLabel = document.getElementById("ad-editor-save-label");
+      if (adEdSaveLabel) adEdSaveLabel.textContent = "Publish Advertisement";
+      document.getElementById("form-ad-company").value = "Kurd24";
+      document.getElementById("form-ad-title-ku").value = "";
+      document.getElementById("form-ad-desc-ku").value = "";
+      document.getElementById("form-ad-video-url").value = "";
+      document.getElementById("form-ad-video-file").value = "";
+      document.getElementById("form-ad-video-layout").value = "portrait";
+      document.getElementById("form-ad-address").value = "";
+      document.getElementById("form-ad-map-url").value = "";
+      document.getElementById("form-ad-whatsapp").value = "";
+      document.getElementById("form-ad-email").value = "";
+      document.getElementById("form-ad-url").value = "";
+      document.getElementById("form-ad-is-pinned").checked = false;
+      document.getElementById("form-ad-logo-url").value = "";
+      
+      const adLogoSlot = document.getElementById("ad-logo-upload-slot");
+      if (adLogoSlot) {
+        adLogoSlot.innerHTML = `
+          <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+          <input type="file" accept="image/*" onchange="uploadAdLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+        `;
+      }
+      const adLogoStatus = document.getElementById("ad-logo-status-label");
+      if (adLogoStatus) adLogoStatus.textContent = "No logo uploaded";
+      
+      const adVideoStatus = document.getElementById("ad-video-upload-status");
+      if (adVideoStatus) adVideoStatus.textContent = "No video selected";
+      const adVideoPreview = document.getElementById("form-ad-video-preview");
+      if (adVideoPreview) {
+        adVideoPreview.src = "";
+        adVideoPreview.style.display = "none";
+      }
       
       imageInputs = ["", "", "", "", ""];
       renderUploadGrid();
@@ -4000,60 +5242,123 @@
       if (!job) return;
 
       editModeJobId = jobId;
-      document.getElementById("editor-action-title").textContent = "Edit Job Details (" + job.company + ")";
-      document.getElementById("editor-save-label").textContent = "Save Changes";
 
-      document.getElementById("form-company").value = job.company || "";
-      document.getElementById("form-status").checked = job.status === "published";
-      document.getElementById("form-is-vip").checked = job.is_vip === true;
-      document.getElementById("form-is-pinned").checked = job.is_pinned === true;
-      document.getElementById("form-title-ku").value = job.title_ku || "";
-      document.getElementById("form-title-en").value = job.title_en || "";
-      document.getElementById("form-salary").value = job.salary || "";
-      
-      // Load Logo
-      document.getElementById("form-logo-url").value = job.logo_url || "";
-      const logoSlot = document.getElementById("logo-upload-slot");
-      const statusLabel = document.getElementById("logo-status-label");
-      if (job.logo_url) {
-        logoSlot.innerHTML = `
-          <img src="${job.logo_url}" style="width:100%;height:100%;object-fit:cover;">
-          <button class="remove-image-btn" onclick="removeLogo(event)" style="top:2px;right:2px;padding:2px;">
-            <i data-lucide="trash" style="width:10px;height:10px;"></i>
-          </button>
-        `;
-        statusLabel.textContent = "Logo loaded";
+      if (job.is_ad === true) {
+        // Load Ad Form fields
+        document.getElementById("ad-editor-action-title").textContent = "Edit Advertisement (" + job.company + ")";
+        document.getElementById("ad-editor-save-label").textContent = "Save Changes";
+
+        document.getElementById("form-ad-company").value = job.company || "";
+        document.getElementById("form-ad-title-ku").value = job.title_ku || "";
+        document.getElementById("form-ad-desc-ku").value = job.description_ku || "";
+        document.getElementById("form-ad-video-url").value = job.video_url || "";
+        document.getElementById("form-ad-video-layout").value = job.video_layout || "portrait";
+        document.getElementById("form-ad-address").value = job.address || "";
+        document.getElementById("form-ad-map-url").value = job.map_url || "";
+        document.getElementById("form-ad-whatsapp").value = job.whatsapp || "";
+        document.getElementById("form-ad-email").value = job.email || "";
+        document.getElementById("form-ad-url").value = job.form_url || "";
+        document.getElementById("form-ad-is-pinned").checked = job.is_pinned === true;
+
+        // Load Ad Logo
+        document.getElementById("form-ad-logo-url").value = job.logo_url || "";
+        const adLogoSlot = document.getElementById("ad-logo-upload-slot");
+        const adLogoStatus = document.getElementById("ad-logo-status-label");
+        if (job.logo_url) {
+          adLogoSlot.innerHTML = `
+            <img src="${job.logo_url}" style="width:100%;height:100%;object-fit:cover;">
+            <button class="remove-image-btn" onclick="removeAdLogo(event)" style="top:2px;right:2px;padding:2px;">
+              <i data-lucide="trash" style="width:10px;height:10px;"></i>
+            </button>
+          `;
+          adLogoStatus.textContent = "Logo loaded";
+        } else {
+          adLogoSlot.innerHTML = `
+            <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+            <input type="file" accept="image/*" onchange="uploadAdLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+          `;
+          adLogoStatus.textContent = "No logo uploaded";
+        }
+
+        // Load Ad Video preview
+        const adVideoStatus = document.getElementById("ad-video-upload-status");
+        const adVideoPreview = document.getElementById("form-ad-video-preview");
+        if (job.video_url) {
+          if (adVideoStatus) adVideoStatus.textContent = "Current video loaded";
+          if (adVideoPreview) {
+            adVideoPreview.src = job.video_url;
+            adVideoPreview.style.display = "block";
+          }
+        } else {
+          if (adVideoStatus) adVideoStatus.textContent = "No video selected";
+          if (adVideoPreview) {
+            adVideoPreview.src = "";
+            adVideoPreview.style.display = "none";
+          }
+        }
+
+        lucide.createIcons();
+        updateLivePreview();
+        switchTab("create-ad");
       } else {
-        logoSlot.innerHTML = `
-          <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
-          <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
-        `;
-        statusLabel.textContent = "No logo uploaded";
-      }
-      
-      document.getElementById("form-city").value = job.city_en || "erbil";
-      populateCityCheckboxes(citiesList, job.city_en || "erbil");
-      document.getElementById("form-type").value = job.type || "fullTime";
-      document.getElementById("form-experience").value = job.experience_level || "junior";
-      document.getElementById("form-category").value = job.category || "software";
-      document.getElementById("form-industry").value = job.industry || "tech";
-      document.getElementById("form-desc-ku").value = job.description_ku || "";
-      document.getElementById("form-desc-en").value = job.description_en || "";
-      document.getElementById("form-req-ku").value = job.requirements_ku || "";
-      document.getElementById("form-req-en").value = job.requirements_en || "";
-      document.getElementById("form-whatsapp").value = job.whatsapp || "";
-      document.getElementById("form-email").value = job.email || "";
+        // Load Job Details Form fields
+        document.getElementById("editor-action-title").textContent = "Edit Job Details (" + job.company + ")";
+        document.getElementById("editor-save-label").textContent = "Save Changes";
 
-      // Load images
-      const jobImgs = job.images || [];
-      imageInputs = [...jobImgs];
-      while (imageInputs.length < 5) {
-        imageInputs.push("");
-      }
+        document.getElementById("form-company").value = job.company || "";
+        document.getElementById("form-status").checked = job.status === "published";
+        document.getElementById("form-is-vip").checked = job.is_vip === true;
+        document.getElementById("form-is-pinned").checked = job.is_pinned === true;
+        document.getElementById("form-title-ku").value = job.title_ku || "";
+        document.getElementById("form-title-en").value = job.title_en || "";
+        document.getElementById("form-salary").value = job.salary || "";
+        
+        // Load Logo
+        document.getElementById("form-logo-url").value = job.logo_url || "";
+        const logoSlot = document.getElementById("logo-upload-slot");
+        const statusLabel = document.getElementById("logo-status-label");
+        if (job.logo_url) {
+          logoSlot.innerHTML = `
+            <img src="${job.logo_url}" style="width:100%;height:100%;object-fit:cover;">
+            <button class="remove-image-btn" onclick="removeLogo(event)" style="top:2px;right:2px;padding:2px;">
+              <i data-lucide="trash" style="width:10px;height:10px;"></i>
+            </button>
+          `;
+          statusLabel.textContent = "Logo loaded";
+        } else {
+          logoSlot.innerHTML = `
+            <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+            <input type="file" accept="image/*" onchange="uploadLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+          `;
+          statusLabel.textContent = "No logo uploaded";
+        }
+        
+        document.getElementById("form-city").value = job.city_en || "erbil";
+        populateCityCheckboxes(citiesList, job.city_en || "erbil");
+        document.getElementById("form-type").value = job.type || "fullTime";
+        document.getElementById("form-experience").value = job.experience_level || "junior";
+        document.getElementById("form-category").value = job.category || "software";
+        document.getElementById("form-industry").value = job.industry || "tech";
+        document.getElementById("form-desc-ku").value = job.description_ku || "";
+        document.getElementById("form-desc-en").value = job.description_en || "";
+        document.getElementById("form-req-ku").value = job.requirements_ku || "";
+        document.getElementById("form-req-en").value = job.requirements_en || "";
+        document.getElementById("form-whatsapp").value = job.whatsapp || "";
+        document.getElementById("form-email").value = job.email || "";
+        document.getElementById("form-url").value = job.form_url || "";
 
-      renderUploadGrid();
-      updateLivePreview();
-      switchTab("create");
+        // Load images
+        const jobImgs = job.images || [];
+        imageInputs = [...jobImgs];
+        while (imageInputs.length < 5) {
+          imageInputs.push("");
+        }
+
+        lucide.createIcons();
+        renderUploadGrid();
+        updateLivePreview();
+        switchTab("create");
+      }
     }
 
     // Delete Job Action
@@ -4062,6 +5367,14 @@
       if (!job) return;
 
       if (!confirm(`Are you sure you want to delete the job listing "${job.title_en || job.title_ku}" from "${job.company}"?`)) {
+        return;
+      }
+
+      if (isGuestMode()) {
+        jobsList = jobsList.filter(j => j.id !== jobId);
+        populateTable();
+        calculateStats();
+        alert("Listing successfully deleted! (Note: In guest mode, this only affects your browser view temporarily)");
         return;
       }
 
@@ -4076,6 +5389,42 @@
       }
     }
 
+    function toggleAdFields() {
+      const isAd = document.getElementById("form-is-ad").checked;
+      const adSection = document.getElementById("ad-details-section");
+      if (adSection) {
+        adSection.style.display = isAd ? "block" : "none";
+      }
+    }
+
+    function handleVideoSelection() {
+      const fileInput = document.getElementById("form-video-file");
+      const status = document.getElementById("video-upload-status");
+      const preview = document.getElementById("form-video-preview");
+      
+      if (fileInput.files && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.type !== "video/mp4") {
+          alert("Please select an MP4 video file.");
+          fileInput.value = "";
+          status.textContent = "No video selected";
+          preview.src = "";
+          preview.style.display = "none";
+          return;
+        }
+        
+        status.textContent = `Selected: ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+        const fileUrl = URL.createObjectURL(file);
+        preview.src = fileUrl;
+        preview.style.display = "block";
+      } else {
+        status.textContent = "No video selected";
+        preview.src = "";
+        preview.style.display = "none";
+      }
+    }
+
+    // Save Job Form Submission with fallback defaults (Optional fields)
     // Save Job Form Submission with fallback defaults (Optional fields)
     async function saveJob() {
       const company = document.getElementById("form-company").value.trim() || "Kurd24";
@@ -4084,6 +5433,7 @@
       const isPublished = document.getElementById("form-status").checked;
       const isVip = document.getElementById("form-is-vip").checked;
       const isPinned = document.getElementById("form-is-pinned").checked;
+      const isAd = false; // Normal job creation form never creates ads anymore
 
       // Validation for simplified fields
       if (!titleKu) {
@@ -4098,8 +5448,11 @@
       }
 
       const whatsapp = document.getElementById("form-whatsapp").value.trim();
-      if (!whatsapp) {
-        alert("تکایە ژمارەی مۆبایل بۆ پەیوەندی وەتسئەپ بنووسە.\nPlease enter a WhatsApp number.");
+      const email = document.getElementById("form-email").value.trim();
+      const formUrl = document.getElementById("form-url").value.trim();
+
+      if (!whatsapp && !email && !formUrl) {
+        alert("تکایە لانی کەم یەکێک لەم ڕێگایانە بۆ پێشکەشکردن دیاری بکە: وەتسئەپ، ئیمێڵ، یاخود بەستەری فۆرم.\nPlease provide at least one contact method: WhatsApp, Email, or Form Link.");
         return;
       }
 
@@ -4115,7 +5468,7 @@
       const finalTitleKu = titleKu;
       const finalTitleEn = titleEn || titleKu;
       const salary = document.getElementById("form-salary").value.trim() || "ڕێککەوتن";
-      const logoUrl = document.getElementById("form-logo-url").value.trim() || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80";
+      const logoUrl = document.getElementById("form-logo-url").value.trim() || "";
       
       const type = document.getElementById("form-type").value;
       const experience = document.getElementById("form-experience").value;
@@ -4125,36 +5478,80 @@
       const descEn = document.getElementById("form-desc-en").value.trim() || descKu;
       const reqKu = document.getElementById("form-req-ku").value.trim() || "-";
       const reqEn = document.getElementById("form-req-en").value.trim() || "-";
-      const email = document.getElementById("form-email").value.trim() || "";
 
       const activeImages = imageInputs.map(img => img.trim()).filter(img => img !== "");
-
-      const payload = {
-        title_ku: finalTitleKu,
-        title_en: finalTitleEn,
-        company: company,
-        industry: industry,
-        logo_url: logoUrl,
-        images: activeImages,
-        city_ku: cityString,
-        city_en: cityString,
-        category: category,
-        type: type,
-        experience_level: experience,
-        salary: salary,
-        description_ku: descKu,
-        description_en: descEn,
-        requirements_ku: reqKu,
-        requirements_en: reqEn,
-        whatsapp: whatsapp,
-        email: email,
-        status: isPublished ? "published" : "draft",
-        is_vip: isVip,
-        is_pinned: isPinned
-      };
+      
+      const btnSave = document.getElementById("btn-save-job");
+      if (btnSave) {
+        btnSave.disabled = true;
+        btnSave.innerHTML = '<span>Processing...</span>';
+      }
 
       try {
+        const payload = {
+          title_ku: finalTitleKu,
+          title_en: finalTitleEn,
+          company: company,
+          industry: industry,
+          logo_url: logoUrl,
+          images: activeImages,
+          city_ku: cityString,
+          city_en: cityString,
+          category: category,
+          type: type,
+          experience_level: experience,
+          salary: salary,
+          description_ku: descKu,
+          description_en: descEn,
+          requirements_ku: reqKu,
+          requirements_en: reqEn,
+          whatsapp: whatsapp,
+          email: email,
+          form_url: formUrl,
+          status: isPublished ? "published" : "draft",
+          is_vip: isVip,
+          is_pinned: isPinned,
+          is_ad: isAd,
+          video_url: "",
+          address: "",
+          map_url: ""
+        };
+
+        if (isGuestMode()) {
+          if (editModeJobId) {
+            // Update in-memory
+            const idx = jobsList.findIndex(j => j.id === editModeJobId);
+            if (idx !== -1) {
+              jobsList[idx] = { 
+                ...jobsList[idx], 
+                ...payload 
+              };
+            }
+            alert("Job announcement successfully updated! (Note: In guest mode, this only affects your browser view temporarily)");
+          } else {
+            // Insert in-memory
+            const mockNewJob = {
+              id: "guest-job-" + Date.now(),
+              ...payload,
+              views: 0,
+              clicks: 0,
+              created_at: new Date().toISOString()
+            };
+            jobsList.unshift(mockNewJob);
+            alert("New job announcement successfully published! (Note: In guest mode, this only affects your browser view temporarily)");
+          }
+          populateTable();
+          calculateStats();
+          clearEditorForm();
+          switchTab("manage");
+          return;
+        }
+
         if (!supabaseClient) throw new Error("Supabase client is not connected.");
+
+        if (btnSave) {
+          btnSave.innerHTML = '<span>Saving Details...</span>';
+        }
 
         if (editModeJobId) {
           // Update
@@ -4163,7 +5560,7 @@
           alert("Job announcement successfully updated!");
         } else {
           // Insert
-          const { data, error } = await supabaseClient.from("jobs").insert([payload]).select().single();
+          const { data, error } = await supabaseClient.from("jobs").insert([{ ...payload, views: 0, clicks: 0 }]).select().single();
           if (error) throw error;
           alert("New job announcement successfully published!");
           
@@ -4177,6 +5574,299 @@
         switchTab("manage");
       } catch (e) {
         alert("Failed to save job details: " + e.message);
+      } finally {
+        if (btnSave) {
+          btnSave.disabled = false;
+          btnSave.innerHTML = '<i data-lucide="check" style="width:16px;height:16px;"></i><span id="editor-save-label">' + (editModeJobId ? "Save Changes" : "Publish Announcement") + '</span>';
+          lucide.createIcons();
+        }
+      }
+    }
+
+    // Logo upload functions for Ads
+    async function uploadAdLogo(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const slot = document.getElementById("ad-logo-upload-slot");
+      const statusLabel = document.getElementById("ad-logo-status-label");
+      
+      slot.innerHTML = `<div class="spinner" style="width:16px;height:16px;margin:0;"></div>`;
+      statusLabel.textContent = "Uploading...";
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `logo_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `logos/${fileName}`;
+
+        // Upload to 'job-images' bucket
+        let { data, error } = await supabaseClient.storage
+          .from('job-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          if (error.message.includes('Bucket not found')) {
+            const { data: fbData, error: fbError } = await supabaseClient.storage
+              .from('resumes')
+              .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (fbError) throw fbError;
+            
+            const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(filePath);
+            document.getElementById("form-ad-logo-url").value = urlData.publicUrl;
+            slot.innerHTML = `
+              <img src="${urlData.publicUrl}" style="width:100%;height:100%;object-fit:cover;">
+              <button class="remove-image-btn" onclick="removeAdLogo(event)" style="top:2px;right:2px;padding:2px;">
+                <i data-lucide="trash" style="width:10px;height:10px;"></i>
+              </button>
+            `;
+            statusLabel.textContent = "Logo uploaded";
+            lucide.createIcons();
+            updateLivePreview();
+            return;
+          }
+          throw error;
+        }
+
+        const { data: urlData } = supabaseClient.storage.from('job-images').getPublicUrl(filePath);
+        document.getElementById("form-ad-logo-url").value = urlData.publicUrl;
+        slot.innerHTML = `
+          <img src="${urlData.publicUrl}" style="width:100%;height:100%;object-fit:cover;">
+          <button class="remove-image-btn" onclick="removeAdLogo(event)" style="top:2px;right:2px;padding:2px;">
+            <i data-lucide="trash" style="width:10px;height:10px;"></i>
+          </button>
+        `;
+        statusLabel.textContent = "Logo uploaded";
+        lucide.createIcons();
+        updateLivePreview();
+      } catch (err) {
+        alert("Logo Upload Failed: " + err.message);
+        slot.innerHTML = `
+          <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+          <input type="file" accept="image/*" onchange="uploadAdLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+        `;
+        statusLabel.textContent = "Upload failed";
+        lucide.createIcons();
+      }
+    }
+
+    function removeAdLogo(event) {
+      if (event) event.stopPropagation();
+      document.getElementById("form-ad-logo-url").value = "";
+      const logoSlot = document.getElementById("ad-logo-upload-slot");
+      logoSlot.innerHTML = `
+        <i data-lucide="upload-cloud" style="width:16px;height:16px;color:var(--text-muted);"></i>
+        <input type="file" accept="image/*" onchange="uploadAdLogo(this)" style="position:absolute;width:100%;height:100%;opacity:0;cursor:pointer;z-index:5;">
+      `;
+      document.getElementById("ad-logo-status-label").textContent = "No logo uploaded";
+      lucide.createIcons();
+      updateLivePreview();
+    }
+
+    function handleAdVideoSelection() {
+      const fileInput = document.getElementById("form-ad-video-file");
+      const videoStatus = document.getElementById("ad-video-upload-status");
+      const videoPreview = document.getElementById("form-ad-video-preview");
+
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        if (file.type !== "video/mp4") {
+          alert("تکایە تەنها فایل بە فۆرماتی MP4 هەڵبژێرە.\nPlease select an MP4 video file.");
+          fileInput.value = "";
+          if (videoStatus) videoStatus.textContent = "No video selected";
+          if (videoPreview) {
+            videoPreview.src = "";
+            videoPreview.style.display = "none";
+          }
+          return;
+        }
+        
+        if (videoStatus) videoStatus.textContent = `Selected: ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+        if (videoPreview) {
+          videoPreview.src = URL.createObjectURL(file);
+          videoPreview.style.display = "block";
+        }
+      } else {
+        if (videoStatus) videoStatus.textContent = "No video selected";
+        if (videoPreview) {
+          videoPreview.src = "";
+          videoPreview.style.display = "none";
+        }
+      }
+    }
+
+    // Save Advertisement Form Submission
+    async function saveAd() {
+      const company = document.getElementById("form-ad-company").value.trim() || "Kurd24";
+      const titleKu = document.getElementById("form-ad-title-ku").value.trim();
+      const descKu = document.getElementById("form-ad-desc-ku").value.trim();
+      
+      if (!titleKu) {
+        alert("تکایە ناونیشانی ڕیکلامەکە بنووسە.\nPlease enter Ad Title / Subject.");
+        return;
+      }
+      if (!descKu) {
+        alert("تکایە ناوەڕۆک یان دیتێڵی ڕیکلامەکە بنووسە.\nPlease enter Ad Details.");
+        return;
+      }
+
+      const whatsapp = document.getElementById("form-ad-whatsapp").value.trim();
+      const email = document.getElementById("form-ad-email").value.trim();
+      const formUrl = document.getElementById("form-ad-url").value.trim();
+      const address = document.getElementById("form-ad-address").value.trim();
+      const mapUrl = document.getElementById("form-ad-map-url").value.trim();
+      
+      const isPinned = document.getElementById("form-ad-is-pinned").checked;
+      const logoUrl = document.getElementById("form-ad-logo-url").value.trim() || "";
+
+      // Payload configuration
+      const payload = {
+        title_ku: titleKu,
+        title_en: titleKu,
+        company: company,
+        industry: "tech",
+        logo_url: logoUrl,
+        images: [],
+        city_ku: JSON.stringify(["erbil"]), // fallback city
+        city_en: JSON.stringify(["erbil"]),
+        category: "software",
+        type: "fullTime",
+        experience_level: "mid",
+        salary: "ڕێککەوتن",
+        description_ku: descKu,
+        description_en: descKu,
+        requirements_ku: "-",
+        requirements_en: "-",
+        whatsapp: whatsapp,
+        email: email,
+        form_url: formUrl,
+        status: "published",
+        is_vip: false,
+        is_pinned: isPinned,
+        is_ad: true,
+        video_url: document.getElementById("form-ad-video-url").value || "",
+        address: address,
+        map_url: mapUrl,
+        video_layout: document.getElementById("form-ad-video-layout").value || "portrait"
+      };
+
+      const btnSave = document.getElementById("btn-save-ad");
+      if (btnSave) {
+        btnSave.disabled = true;
+        btnSave.innerHTML = '<span>Processing...</span>';
+      }
+
+      try {
+        let videoUrl = document.getElementById("form-ad-video-url").value;
+        const videoFileInput = document.getElementById("form-ad-video-file");
+
+        // Upload MP4 video if selected
+        if (videoFileInput && videoFileInput.files && videoFileInput.files.length > 0) {
+          if (btnSave) {
+            btnSave.innerHTML = '<span>Uploading Video...</span>';
+          }
+          const file = videoFileInput.files[0];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `videos/${fileName}`;
+
+          let { data: uploadData, error: uploadError } = await supabaseClient.storage
+            .from('job-images')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            if (uploadError.message.includes('Bucket not found')) {
+              const { data: fbData, error: fbError } = await supabaseClient.storage
+                .from('resumes')
+                .upload(filePath, file, {
+                  cacheControl: '3600',
+                  upsert: false
+                });
+              if (fbError) throw fbError;
+              const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(filePath);
+              videoUrl = urlData.publicUrl;
+            } else {
+              throw uploadError;
+            }
+          } else {
+            const { data: urlData } = supabaseClient.storage.from('job-images').getPublicUrl(filePath);
+            videoUrl = urlData.publicUrl;
+          }
+          payload.video_url = videoUrl;
+        }
+
+        if (isGuestMode()) {
+          if (editModeJobId) {
+            // Update in-memory
+            const idx = jobsList.findIndex(j => j.id === editModeJobId);
+            if (idx !== -1) {
+              jobsList[idx] = { 
+                ...jobsList[idx], 
+                ...payload 
+              };
+            }
+            alert("Advertisement successfully updated! (Note: In guest mode, this only affects your browser view temporarily)");
+          } else {
+            // Insert in-memory
+            const mockNewAd = {
+              id: "guest-ad-" + Date.now(),
+              ...payload,
+              views: 0,
+              clicks: 0,
+              created_at: new Date().toISOString()
+            };
+            jobsList.unshift(mockNewAd);
+            alert("New advertisement successfully published! (Note: In guest mode, this only affects your browser view temporarily)");
+          }
+          populateTable();
+          calculateStats();
+          clearEditorForm();
+          switchTab("manage");
+          return;
+        }
+
+        if (!supabaseClient) throw new Error("Supabase client is not connected.");
+
+        if (btnSave) {
+          btnSave.innerHTML = '<span>Saving Details...</span>';
+        }
+
+        if (editModeJobId) {
+          // Update
+          const { error } = await supabaseClient.from("jobs").update(payload).eq("id", editModeJobId);
+          if (error) throw error;
+          alert("Advertisement successfully updated!");
+        } else {
+          // Insert
+          const { data, error } = await supabaseClient.from("jobs").insert([{ ...payload, views: 0, clicks: 0 }]).select().single();
+          if (error) throw error;
+          alert("New advertisement successfully published!");
+          
+          // Trigger push notifications
+          if (data) {
+            await sendPushNotification(data);
+          }
+        }
+        
+        clearEditorForm();
+        switchTab("manage");
+      } catch (e) {
+        alert("Failed to save advertisement details: " + e.message);
+      } finally {
+        if (btnSave) {
+          btnSave.disabled = false;
+          btnSave.innerHTML = '<i data-lucide="check" style="width:16px;height:16px;"></i><span id="ad-editor-save-label">' + (editModeJobId ? "Save Changes" : "Publish Advertisement") + '</span>';
+          lucide.createIcons();
+        }
       }
     }
 
@@ -4191,6 +5881,15 @@
     async function loadProperties() {
       if (!supabaseClient) {
         console.error("Supabase client is not initialized.");
+        if (isGuestMode()) {
+          categoriesList = MOCK_CATEGORIES;
+          citiesList = MOCK_CITIES;
+          industriesList = MOCK_INDUSTRIES;
+          jobTypesList = MOCK_JOB_TYPES;
+          experienceLevelsList = MOCK_EXPERIENCE_LEVELS;
+          renderPropertiesTable();
+          populateDropdowns();
+        }
         return;
       }
 
@@ -4210,24 +5909,28 @@
         if (jtypes.error) throw jtypes.error;
         if (exps.error) throw exps.error;
 
-        if (cats.data) categoriesList = cats.data;
-        if (cits.data) citiesList = cits.data;
-        if (indus.data) industriesList = indus.data;
-        if (jtypes.data) jobTypesList = jtypes.data;
-        if (exps.data) experienceLevelsList = exps.data;
+        if (cats.data && cats.data.length > 0) categoriesList = cats.data; else categoriesList = MOCK_CATEGORIES;
+        if (cits.data && cits.data.length > 0) citiesList = cits.data; else citiesList = MOCK_CITIES;
+        if (indus.data && indus.data.length > 0) industriesList = indus.data; else industriesList = MOCK_INDUSTRIES;
+        if (jtypes.data && jtypes.data.length > 0) jobTypesList = jtypes.data; else jobTypesList = MOCK_JOB_TYPES;
+        if (exps.data && exps.data.length > 0) experienceLevelsList = exps.data; else experienceLevelsList = MOCK_EXPERIENCE_LEVELS;
 
         renderPropertiesTable();
         populateDropdowns();
       } catch (err) {
         console.error("Failed to load properties from database:", err);
-        categoriesList = [];
-        citiesList = [];
-        industriesList = [];
-        jobTypesList = [];
-        experienceLevelsList = [];
+        categoriesList = MOCK_CATEGORIES;
+        citiesList = MOCK_CITIES;
+        industriesList = MOCK_INDUSTRIES;
+        jobTypesList = MOCK_JOB_TYPES;
+        experienceLevelsList = MOCK_EXPERIENCE_LEVELS;
+        
         renderPropertiesTable();
         populateDropdowns();
-        alert("Failed to load properties from database: " + err.message + "\n\nTip: You might be missing some tables in Supabase. Check the DB Status under Settings.");
+        
+        if (!isGuestMode()) {
+          alert("Failed to load properties from database: " + err.message + "\n\nTip: You might be missing some tables in Supabase. Check the DB Status under Settings.");
+        }
       }
     }
 
@@ -4296,6 +5999,32 @@
 
       const newItem = { id, name_ku: nameKu, name_en: nameEn };
 
+      if (isGuestMode()) {
+        let listToUpdate;
+        if (currentPropertyType === "categories") listToUpdate = categoriesList;
+        else if (currentPropertyType === "cities") listToUpdate = citiesList;
+        else if (currentPropertyType === "industries") listToUpdate = industriesList;
+        else if (currentPropertyType === "job_types") listToUpdate = jobTypesList;
+        else if (currentPropertyType === "experience_levels") listToUpdate = experienceLevelsList;
+        
+        if (listToUpdate) {
+          if (listToUpdate.some(item => item.id === id)) {
+            alert("Item with this ID already exists.");
+            return;
+          }
+          listToUpdate.push(newItem);
+          alert("Item successfully added! (Note: In guest mode, this only affects your browser view temporarily)");
+          renderPropertiesTable();
+          populateDropdowns();
+        }
+        
+        // Reset form
+        document.getElementById("prop-id").value = "";
+        document.getElementById("prop-name-ku").value = "";
+        document.getElementById("prop-name-en").value = "";
+        return;
+      }
+
       try {
         if (!supabaseClient) throw new Error("Supabase client is not connected.");
         const { error } = await supabaseClient.from(currentPropertyType).insert([newItem]);
@@ -4314,6 +6043,19 @@
 
     async function deleteProperty(itemId) {
       if (!confirm(`Are you sure you want to delete the item "${itemId}" from ${currentPropertyType}?`)) {
+        return;
+      }
+
+      if (isGuestMode()) {
+        if (currentPropertyType === "categories") categoriesList = categoriesList.filter(i => i.id !== itemId);
+        else if (currentPropertyType === "cities") citiesList = citiesList.filter(i => i.id !== itemId);
+        else if (currentPropertyType === "industries") industriesList = industriesList.filter(i => i.id !== itemId);
+        else if (currentPropertyType === "job_types") jobTypesList = jobTypesList.filter(i => i.id !== itemId);
+        else if (currentPropertyType === "experience_levels") experienceLevelsList = experienceLevelsList.filter(i => i.id !== itemId);
+        
+        alert("Item successfully deleted! (Note: In guest mode, this only affects your browser view temporarily)");
+        renderPropertiesTable();
+        populateDropdowns();
         return;
       }
 
@@ -4419,6 +6161,123 @@
         select.appendChild(opt);
       });
       select.value = currentValue;
+    }
+
+    // VIEW STATISTICS MODAL
+    function viewJobStats(jobId) {
+      const job = jobsList.find(j => j.id === jobId);
+      if (!job) {
+        alert("Job listing not found.");
+        return;
+      }
+      
+      document.getElementById("stats-job-title").textContent = job.title_en || job.title_ku;
+      document.getElementById("stats-job-company").textContent = job.company || "-";
+      
+      const views = job.views || 0;
+      const clicks = job.clicks || 0;
+      
+      document.getElementById("stats-views-val").textContent = views;
+      document.getElementById("stats-clicks-val").textContent = clicks;
+      
+      // Calculate conversion rate
+      const rate = views > 0 ? Math.round((clicks / views) * 100) : 0;
+      document.getElementById("stats-conversion-text").textContent = rate + "%";
+      
+      // Update circular progress svg dashoffset
+      // Circumference of r=40 circle is 2 * Math.PI * 40 = 251.2
+      const strokeDashoffset = 251.2 - (251.2 * Math.min(rate, 100)) / 100;
+      const progressRingCircle = document.getElementById("stats-progress-ring");
+      progressRingCircle.style.strokeDashoffset = strokeDashoffset;
+      
+      // Color conversion: high (>15%), mid (5-15%), low (<5%)
+      const evalBox = document.getElementById("stats-evaluation");
+      evalBox.className = "stats-engagement-evaluation"; // Reset classes
+      
+      if (views === 0) {
+        evalBox.classList.add("mid");
+        evalBox.textContent = "No views recorded yet. Shares on WhatsApp and social channels will boost visibility.";
+      } else if (rate >= 15) {
+        evalBox.classList.add("high");
+        evalBox.textContent = `High Engagement (Conversion: ${rate}%). This job matches applicant interests perfectly and contact buttons are highly active.`;
+      } else if (rate >= 5) {
+        evalBox.classList.add("mid");
+        evalBox.textContent = `Medium Engagement (Conversion: ${rate}%). Good performance. Consider featuring as VIP to get more attention.`;
+      } else {
+        evalBox.classList.add("low");
+        evalBox.textContent = `Low Engagement (Conversion: ${rate}%). Many people viewed the post but few contacted you. Consider updating description or salary offer.`;
+      }
+      
+      // Open modal
+      const overlay = document.getElementById("stats-modal-overlay");
+      overlay.style.display = "flex";
+      setTimeout(() => {
+        overlay.classList.add("active");
+      }, 10);
+    }
+    
+    function closeStatsModal(event) {
+      // If event is passed, close only if clicked on backdrop
+      if (event && event.target !== document.getElementById("stats-modal-overlay")) {
+        return;
+      }
+      const overlay = document.getElementById("stats-modal-overlay");
+      overlay.classList.remove("active");
+      setTimeout(() => {
+        overlay.style.display = "none";
+      }, 300);
+    }
+
+    // EXPORT STATS TO CSV
+    function exportStatsCSV() {
+      if (!jobsList || jobsList.length === 0) {
+        alert("No job listings available to export.");
+        return;
+      }
+      
+      // CSV Headers
+      const headers = ["Job Title (EN)", "Job Title (KU)", "Company", "City", "Category", "Salary", "Status", "Views", "Applies (Clicks)", "Conversion Rate %", "Date Created"];
+      
+      const rows = jobsList.map(j => {
+        const titleEn = j.title_en ? j.title_en.replace(/"/g, '""') : "";
+        const titleKu = j.title_ku ? j.title_ku.replace(/"/g, '""') : "";
+        const company = j.company ? j.company.replace(/"/g, '""') : "";
+        const city = j.city_en ? j.city_en.replace(/"/g, '""') : "";
+        const category = j.category ? j.category.replace(/"/g, '""') : "";
+        const salary = j.salary ? j.salary.replace(/"/g, '""') : "";
+        const status = j.status || "";
+        const views = j.views || 0;
+        const clicks = j.clicks || 0;
+        const rate = views > 0 ? Math.round((clicks / views) * 100) : 0;
+        const date = j.created_at ? new Date(j.created_at).toLocaleDateString() : "";
+        
+        return [
+          `"${titleEn}"`,
+          `"${titleKu}"`,
+          `"${company}"`,
+          `"${city}"`,
+          `"${category}"`,
+          `"${salary}"`,
+          `"${status}"`,
+          views,
+          clicks,
+          `${rate}%`,
+          `"${date}"`
+        ];
+      });
+      
+      // Construct CSV content (using standard comma separator and carriage returns)
+      // Note: we prepend UTF-8 BOM so Kurdish characters render correctly in Excel
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+      
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `kurd24_job_statistics_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   </script>
 </body>

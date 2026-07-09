@@ -9,7 +9,7 @@ echo.
 echo [1/3] Checking Vercel login status...
 echo Please select your login option and complete it in your browser.
 echo.
-call npx vercel login
+powershell -ExecutionPolicy Bypass -Command "npx vercel login"
 if %errorlevel% neq 0 (
     echo.
     echo [ERROR] Vercel login failed or was cancelled.
@@ -32,7 +32,9 @@ echo.
 echo [3/3] Deploying project to Vercel...
 echo Uploading site files...
 echo.
-call npx vercel --prod --yes
+cd dist
+powershell -ExecutionPolicy Bypass -Command "npx vercel --prod --yes"
+cd ..
  
 :end
 echo.

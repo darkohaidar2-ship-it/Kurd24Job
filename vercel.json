@@ -1,3 +1,12 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "buildCommand": "echo 'No build step needed'",
+  "installCommand": "echo 'No install step needed'",
+  "outputDirectory": ".",
+  "crons": [
+    {
+      "path": "/api/sync-telegram?secret=kurd24_secret",
+      "schedule": "0 0 * * *"
+    }
+  ]
 }

@@ -3,8 +3,8 @@ import { Stack, useRouter } from 'expo-router';
 import * as Font from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
-import { Appearance, Platform } from 'react-native';
-import { AppContextProvider } from '../context/AppContext';
+import { Appearance, Platform, AppState, AppStateStatus } from 'react-native';
+import { AppContextProvider, useApp } from '../context/AppContext';
 import { supabase } from '../services/SupabaseClient';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
@@ -130,6 +130,7 @@ async function registerForPushNotificationsAsync() {
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7A',
+      sound: 'default',
     });
   }
 
@@ -137,7 +138,13 @@ async function registerForPushNotificationsAsync() {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
+      const { status } = await Notifications.requestPermissionsAsync({
+        ios: {
+          allowAlert: true,
+          allowBadge: true,
+          allowSound: true,
+        },
+      });
       finalStatus = status;
     }
     if (finalStatus !== 'granted') {
@@ -146,7 +153,8 @@ async function registerForPushNotificationsAsync() {
     }
     const projectId =
       Constants?.expoConfig?.extra?.eas?.projectId ??
-      Constants?.easConfig?.projectId;
+      Constants?.easConfig?.projectId ??
+      'b3c8ccdc-f507-4089-a524-01fc60998b3e';
     if (projectId) {
       token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
     }
@@ -158,6 +166,7 @@ async function registerForPushNotificationsAsync() {
 // Helper component inside AppContextProvider to handle router logic
 function NotificationHandler() {
   const router = useRouter();
+  const { language } = useApp();
 
   useEffect(() => {
     async function setupNotifications() {
@@ -169,19 +178,15 @@ function NotificationHandler() {
 
         const token = await registerForPushNotificationsAsync();
         if (token && supabase) {
-          const savedToken = await AsyncStorage.getItem('@kurd24_push_token');
-          if (savedToken !== token) {
-            const { error } = await supabase
-              .from('push_tokens')
-              .upsert([{ token }], { onConflict: 'token' });
-            if (!error) {
-              await AsyncStorage.setItem('@kurd24_push_token', token);
-              console.log('Push token synced successfully:', token);
-            } else {
-              console.warn('Failed to sync push token:', error.message);
-            }
+          // Sync token and language on startup
+          const { error } = await supabase
+            .from('push_tokens')
+            .upsert([{ token, lang: language }], { onConflict: 'token' });
+          if (!error) {
+            await AsyncStorage.setItem('@kurd24_push_token', token);
+            console.log('Push token synced successfully with lang:', language);
           } else {
-            console.log('Push token already synced:', token);
+            console.warn('Failed to sync push token:', error.message);
           }
         }
       } catch (err) {
@@ -193,15 +198,44 @@ function NotificationHandler() {
 
     const subscription = Notifications.addNotificationResponseReceivedListener(response => {
       const jobId = response.notification.request.content.data?.jobId;
+      if (Platform.OS !== 'web') {
+        Notifications.setBadgeCountAsync(0);
+      }
       if (jobId) {
         router.push(`/job/${jobId}`);
       }
     });
 
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active' && Platform.OS !== 'web') {
+        Notifications.setBadgeCountAsync(0);
+      }
+    };
+    const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
+
     return () => {
       subscription.remove();
+      appStateSubscription.remove();
     };
   }, []);
+
+  // Sync language changes dynamically
+  useEffect(() => {
+    async function syncLanguagePreference() {
+      try {
+        const token = await AsyncStorage.getItem('@kurd24_push_token');
+        if (token && supabase) {
+          await supabase
+            .from('push_tokens')
+            .upsert([{ token, lang: language }], { onConflict: 'token' });
+          console.log('Push notification language preference updated to:', language);
+        }
+      } catch (err) {
+        console.error('Error updating push notification language preference:', err);
+      }
+    }
+    syncLanguagePreference();
+  }, [language]);
 
   return null;
 }

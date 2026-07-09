@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -42,31 +42,64 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { JobStorage, Job } from '../../services/JobStorage';
 import JobCard from '../../components/JobCard';
 import GlassView from '../../components/GlassView';
+import SkeletonLoader from '../../components/SkeletonLoader';
+import { supabase } from '../../services/SupabaseClient';
+
+// Persistent module-level scroll offset variable to restore position on back navigation
+let persistentScrollOffset = 0;
 
 export default function JobsFeed() {
   const router = useRouter();
-  const { colors, theme, toggleTheme, language, setLanguage, t, isDemoMode, categories, cities, industries, jobTypes, experienceLevels, refreshProperties, logoUrl, getLocalizedProperty } = useApp();
+  const { colors, theme, toggleTheme, language, setLanguage, t, isDemoMode, categories, cities, industries, jobTypes, experienceLevels, refreshProperties, logoUrl, getLocalizedProperty, customSettings } = useApp();
   const isRtl = language === 'ku';
   const insets = useSafeAreaInsets();
+  
+  const flatListRef = useRef<FlatList>(null);
+
+  const handleLogoPress = async () => {
+    const tgLink = customSettings?.aboutTelegram || 'https://t.me/kurd24_job';
+    let url = tgLink.trim();
+    if (url.startsWith('@')) {
+      url = `https://t.me/${url.substring(1)}`;
+    } else if (!url.startsWith('http')) {
+      url = `https://t.me/${url}`;
+    }
+    try {
+      await Linking.openURL(url);
+    } catch (e) {
+      console.warn('Failed to open Telegram link:', e);
+    }
+  };
 
   // State
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  
-  // Telegram Pinned message state
-  const [showPinned, setShowPinned] = useState<boolean>(true);
-  const [expandedPinned, setExpandedPinned] = useState<boolean>(false);
-
-  // Details Sheet Drawer State (Removed)
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
 
   // Search State
   const [search, setSearch] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
-  // Apply filters logic (Search text only)
-  const applyFilters = (allJobs: Job[], searchQuery: string) => {
+  // Active Visible Job ID for Video Autoplay
+  const [activeVisibleJobId, setActiveVisibleJobId] = useState<string | null>(null);
+
+  const onViewableItemsChanged = React.useRef(({ viewableItems }: { viewableItems: any[] }) => {
+    if (viewableItems && viewableItems.length > 0) {
+      const firstVisible = viewableItems[0];
+      if (firstVisible && firstVisible.isViewable) {
+        setActiveVisibleJobId(firstVisible.key);
+      }
+    }
+  }).current;
+
+  const viewabilityConfig = React.useRef({
+    itemVisiblePercentThreshold: 50
+  }).current;
+
+  // Apply filters logic (Search text & Multi-City filter)
+  const applyFilters = (allJobs: Job[], searchQuery: string, citiesSelected: string[]) => {
     let result = [...allJobs];
 
     if (searchQuery.trim()) {
@@ -80,6 +113,23 @@ export default function JobsFeed() {
       );
     }
 
+    if (citiesSelected.length > 0) {
+      result = result.filter(j => {
+        let jobCities: string[] = [];
+        const trimmedCity = j.city_en ? j.city_en.trim() : '';
+        if (trimmedCity.startsWith('[') && trimmedCity.endsWith(']')) {
+          try {
+            jobCities = JSON.parse(trimmedCity);
+          } catch (e) {
+            jobCities = [j.city_en];
+          }
+        } else if (j.city_en) {
+          jobCities = j.city_en.split(',').map(s => s.trim().toLowerCase());
+        }
+        return jobCities.some(jc => citiesSelected.includes(jc.toLowerCase()));
+      });
+    }
+
     setFilteredJobs(result);
   };
 
@@ -89,7 +139,7 @@ export default function JobsFeed() {
     try {
       const data = await JobStorage.getJobs(false); // Only published
       setJobs(data);
-      applyFilters(data, search);
+      applyFilters(data, search, selectedCities);
     } catch (e) {
       console.error(e);
     } finally {
@@ -99,7 +149,41 @@ export default function JobsFeed() {
 
   useEffect(() => {
     loadJobs();
+
+    // Subscribe to realtime changes in the jobs table
+    let subscription: any = null;
+    if (supabase) {
+      subscription = supabase
+        .channel('realtime:jobs')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'jobs' },
+          (payload) => {
+            console.log('Realtime jobs update detected:', payload);
+            loadJobs();
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      if (subscription && supabase) {
+        supabase.removeChannel(subscription);
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    if (!loading && filteredJobs.length > 0 && persistentScrollOffset > 0) {
+      const timer = setTimeout(() => {
+        flatListRef.current?.scrollToOffset({
+          offset: persistentScrollOffset,
+          animated: false
+        });
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, filteredJobs]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -107,13 +191,13 @@ export default function JobsFeed() {
       await refreshProperties();
       const data = await JobStorage.getJobs(false);
       setJobs(data);
-      applyFilters(data, search);
+      applyFilters(data, search, selectedCities);
     } catch (e) {
       console.error(e);
     } finally {
       setRefreshing(false);
     }
-  }, [search, refreshProperties]);
+  }, [search, selectedCities, refreshProperties]);
 
   const toggleLanguage = () => {
     setLanguage(language === 'ku' ? 'en' : 'ku');
@@ -139,7 +223,18 @@ export default function JobsFeed() {
 
       <View style={[styles.safeArea, { paddingTop: insets.top }]}>
         {/* Telegram Header / Search Bar Header */}
-        <View style={[styles.tgHeader, rowStyle, { borderBottomColor: colors.border }]}>
+        <View
+          style={[
+            styles.tgHeader,
+            rowStyle,
+            {
+              borderBottomColor: colors.border,
+              backgroundColor: theme === 'dark'
+                ? 'rgba(12, 18, 30, 0.88)'
+                : 'rgba(255, 255, 255, 0.88)',
+            }
+          ]}
+        >
           {isSearching ? (
             <View style={[styles.searchHeaderWrapper, rowStyle]}>
               <TouchableOpacity 
@@ -148,7 +243,7 @@ export default function JobsFeed() {
                 onPress={() => {
                   setIsSearching(false);
                   setSearch('');
-                  applyFilters(jobs, '');
+                  applyFilters(jobs, '', selectedCities);
                 }}
               >
                 <X size={20} color={colors.text} />
@@ -158,7 +253,7 @@ export default function JobsFeed() {
                 autoFocus={true}
                 onChangeText={(text) => {
                   setSearch(text);
-                  applyFilters(jobs, text);
+                  applyFilters(jobs, text, selectedCities);
                 }}
                 placeholder={language === 'ku' ? 'گەڕان بەدوای کار یان کۆمپانیا...' : 'Search jobs or companies...'}
                 placeholderTextColor={colors.textMuted}
@@ -175,10 +270,12 @@ export default function JobsFeed() {
           ) : (
             <>
               <View style={[styles.tgHeaderLeft, rowStyle]}>
-                <Image 
-                  source={logoUrl ? { uri: logoUrl } : require('../../../assets/images/logo.png')} 
-                  style={styles.logoIcon} 
-                />
+                <TouchableOpacity activeOpacity={0.8} onPress={handleLogoPress}>
+                  <Image 
+                    source={logoUrl ? { uri: logoUrl } : require('../../../assets/images/logo.png')} 
+                    style={styles.logoIcon} 
+                  />
+                </TouchableOpacity>
                 <View style={[styles.tgChannelInfo, isRtl ? styles.marginRight : styles.marginLeft]}>
                   <View style={[styles.tgTitleRow, rowStyle]}>
                     <Text style={[styles.tgChannelName, { color: colors.text }]}>{t.appName}</Text>
@@ -219,23 +316,98 @@ export default function JobsFeed() {
           )}
         </View>
 
+        {/* Horizontal Cities Checklist Bar */}
+        <View style={styles.citiesFilterContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={[
+              styles.citiesFilterScroll,
+              { flexDirection: isRtl ? 'row-reverse' : 'row' }
+            ]}
+          >
+            {/* "All" Chip */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[
+                styles.cityChip,
+                selectedCities.length === 0 && { backgroundColor: colors.primary, borderColor: colors.primary }
+              ]}
+              onPress={() => {
+                setSelectedCities([]);
+                applyFilters(jobs, search, []);
+              }}
+            >
+              <Text
+                style={[
+                  styles.cityChipText,
+                  { color: selectedCities.length === 0 ? '#FFF' : colors.textSecondary }
+                ]}
+              >
+                {t.cities.all}
+              </Text>
+            </TouchableOpacity>
+
+            {/* City Chips */}
+            {['erbil', 'sulaymaniyah', 'duhok', 'kirkuk', 'halabja', 'remote'].map((cityId) => {
+              const isSelected = selectedCities.includes(cityId);
+              const cityName = t.cities[cityId] || cityId;
+              return (
+                <TouchableOpacity
+                  key={cityId}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.cityChip,
+                    isSelected && { backgroundColor: colors.primary, borderColor: colors.primary }
+                  ]}
+                  onPress={() => {
+                    let updated: string[];
+                    if (selectedCities.includes(cityId)) {
+                      updated = selectedCities.filter(c => c !== cityId);
+                    } else {
+                      updated = [...selectedCities, cityId];
+                    }
+                    setSelectedCities(updated);
+                    applyFilters(jobs, search, updated);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.cityChipText,
+                      { color: isSelected ? '#FFF' : colors.textSecondary }
+                    ]}
+                  >
+                    {cityName}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
 
 
         {/* Telegram Messages Feed (100% pure post viewing screen) */}
         {loading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color={colors.primary} />
-          </View>
+          <SkeletonLoader count={5} />
         ) : (
           <FlatList
+            ref={flatListRef}
             data={filteredJobs}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <JobCard
                 job={item}
                 onPress={() => router.push(`/job/${item.id}`)}
+                activeVisibleJobId={activeVisibleJobId}
               />
             )}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+            onScroll={(e) => {
+              persistentScrollOffset = e.nativeEvent.contentOffset.y;
+            }}
+            scrollEventThrottle={16}
             style={{ flex: 1 }}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
@@ -300,6 +472,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 0.5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   tgHeaderLeft: {
     alignItems: 'center',
@@ -689,5 +866,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-  }
+  },
+  citiesFilterContainer: {
+    paddingVertical: 8,
+    backgroundColor: 'transparent',
+  },
+  citiesFilterScroll: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  cityChip: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cityChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    fontFamily: font,
+    letterSpacing: 0.3,
+  },
 });

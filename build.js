@@ -23,15 +23,24 @@ copy('admin-web/privacy.html', 'dist/privacy.html');
 // Copy index.html to dist/admin-portal/index.html
 copy('admin-web/index.html', 'dist/admin-portal/index.html');
 
-// Copy manifest/sw/run files to dist/admin-portal/ and dist/
-const files = ['manifest.json', 'sw.js', 'run.js'];
+// Copy index.html to dist/admin-web/index.html for backward compatibility
+copy('admin-web/index.html', 'dist/admin-web/index.html');
+
+// Copy manifest/sw/run/supabase files to dist/admin-portal/, dist/admin-web/ and dist/
+const files = ['manifest.json', 'sw.js', 'run.js', 'supabase.js'];
 files.forEach(file => {
   copy(`admin-web/${file}`, `dist/admin-portal/${file}`);
+  copy(`admin-web/${file}`, `dist/admin-web/${file}`);
   copy(`admin-web/${file}`, `dist/${file}`);
 });
 
 // Copy vercel.json to dist/vercel.json
 copy('vercel.json', 'dist/vercel.json');
+
+// Copy api folder to dist/api
+fs.mkdirSync('dist/api', { recursive: true });
+copy('api/send-push.js', 'dist/api/send-push.js');
+copy('api/sync-telegram.js', 'dist/api/sync-telegram.js');
 
 // Copy Vercel project settings to dist/.vercel/project.json for correct targeting
 if (fs.existsSync('.vercel/project.json')) {

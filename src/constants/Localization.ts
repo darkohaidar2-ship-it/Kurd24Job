@@ -37,6 +37,7 @@ export interface Translations {
   applyNow: string;
   sendWhatsApp: string;
   sendEmail: string;
+  fillForm: string;
   shareJob: string;
   uploadCV: string;
   cvUploaded: string;
@@ -161,6 +162,7 @@ export const LOCALES: Record<LanguageType, Translations> = {
     applyNow: "پێشکەشکردنی داواکاری",
     sendWhatsApp: "ناردن بە وەتسئەپ",
     sendEmail: "پێشکەشکردن بە ئیمەیڵ",
+    fillForm: "پڕکردنەوەی فۆرم",
     shareJob: "هاوبەشکردنی کارەکە",
     uploadCV: "بارکردنی سیڤی (PDF)",
     cvUploaded: "سیڤی بارکرا: ",
@@ -279,6 +281,7 @@ export const LOCALES: Record<LanguageType, Translations> = {
     applyNow: "Apply Now",
     sendWhatsApp: "Send via WhatsApp",
     sendEmail: "Apply by Email",
+    fillForm: "Fill Google Form",
     shareJob: "Share Job",
     uploadCV: "Upload Resume (PDF)",
     cvUploaded: "CV Uploaded: ",

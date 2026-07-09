@@ -18,7 +18,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.darkohaidar.kurd24job"
+      "package": "com.darkohaidar.kurd24job",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -35,7 +36,8 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -44,7 +46,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "b3c8ccdc-f507-4089-a524-01fc60998b3e"
+        "projectId": "5a38c457-1fda-424c-b637-b08bd4df6cd7"
       }
     }
   }

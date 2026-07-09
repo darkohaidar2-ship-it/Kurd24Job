@@ -1,7 +1,7 @@
 @echo off
-title Kurd24 Job APK Builder
+title Kurd24 Job AAB Builder
 echo ===================================================
-echo           Kurd24 Job - APK Build Automator
+echo    Kurd24 Job - AAB Build Automator (Play Store)
 echo ===================================================
 echo.
 
@@ -29,10 +29,10 @@ if %errorlevel% neq 0 (
 echo.
 
 :: Step 3: Run the build
-echo [3/3] Initiating Android APK build...
-echo This will upload the project to Expo servers and build the APK.
+echo [3/3] Initiating Android AAB build for Google Play Store...
+echo This will upload the project to Expo servers and build the AAB bundle.
 echo.
-call npx eas.cmd build --platform android --profile preview
+call npx eas.cmd build --platform android --profile production
 
 :end
 echo.

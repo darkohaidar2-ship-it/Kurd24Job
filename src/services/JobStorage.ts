@@ -27,6 +27,12 @@ export interface Job {
   created_at: string;
   is_vip?: boolean;
   is_pinned?: boolean;
+  form_url?: string;
+  is_ad?: boolean;
+  video_url?: string;
+  address?: string;
+  map_url?: string;
+  video_layout?: 'portrait' | 'landscape';
 }
 
 export interface PropertyItem {

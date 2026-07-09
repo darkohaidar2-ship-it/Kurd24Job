@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "829170220917",
+    "project_id": "kurd24-job",
+    "storage_bucket": "kurd24-job.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829170220917:android:28508597a946c9c4891d3c",
+        "android_client_info": {
+          "package_name": "com.darkohaidar.kurd24job"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1DDAW1Xii3JWT4iJQv8_UAs6ipmBvRPE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

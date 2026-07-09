@@ -17,16 +17,51 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, ArrowRight, MapPin, Briefcase, Calendar, DollarSign, MessageCircle, Mail, Share2, FileText, CheckCircle, X } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, MapPin, Briefcase, Calendar, DollarSign, MessageCircle, Mail, Share2, FileText, CheckCircle, X, Phone, Globe } from 'lucide-react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { useIsFocused } from '@react-navigation/native';
 import { useApp } from '../../context/AppContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { JobStorage, Job } from '../../services/JobStorage';
 import GlassView from '../../components/GlassView';
 
+const DetailsVideoPlayer: React.FC<{ videoUrl: string; layout?: 'portrait' | 'landscape' }> = ({ videoUrl, layout }) => {
+  const isFocused = useIsFocused();
+  const player = useVideoPlayer(videoUrl, playerInstance => {
+    playerInstance.loop = true;
+    playerInstance.muted = false;
+  });
+
+  useEffect(() => {
+    if (isFocused) {
+      player.play();
+    } else {
+      player.pause();
+    }
+  }, [isFocused, player]);
+
+  const isLandscape = layout === 'landscape';
+  const videoStyle = [
+    styles.detailsVideo,
+    { aspectRatio: isLandscape ? 16 / 9 : 2 / 3 }
+  ];
+
+  if (!isFocused) return null;
+
+  return (
+    <VideoView
+      player={player}
+      style={videoStyle}
+      allowsFullscreen={true}
+      nativeControls={true}
+    />
+  );
+};
+
 export default function JobDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { colors, theme, t, language, getLocalizedProperty } = useApp();
+  const { colors, theme, t, language, getLocalizedProperty, logoUrl } = useApp();
   const isRtl = language === 'ku';
   const insets = useSafeAreaInsets();
 
@@ -108,15 +143,71 @@ export default function JobDetails() {
     }
   };
 
+  // Form Apply CTA
+  const handleApplyForm = async () => {
+    if (!job || !job.form_url) return;
+
+    // Track click
+    await JobStorage.incrementClicks(job.id);
+    
+    try {
+      await Linking.openURL(job.form_url);
+    } catch (e) {
+      console.error(e);
+      Alert.alert(
+        language === 'ku' ? 'کێشە' : 'Error',
+        language === 'ku' ? 'نەتوانرا بەستەرەکە بکرێتەوە.' : 'Could not open the link.'
+      );
+    }
+  };
+
+  // Open Map Link CTA
+  const handleOpenMap = async () => {
+    if (!job || !job.map_url) return;
+    
+    try {
+      await Linking.openURL(job.map_url);
+    } catch (e) {
+      console.error(e);
+      Alert.alert(
+        language === 'ku' ? 'کێشە' : 'Error',
+        language === 'ku' ? 'نەتوانرا نەخشەکە بکرێتەوە.' : 'Could not open the map link.'
+      );
+    }
+  };
+
   // Share Job
   const handleShareJob = async () => {
     if (!job) return;
     const jobTitle = isRtl ? job.title_ku : job.title_en;
     const city = t.cities[job.city_en] || job.city_ku;
-    const shareText = 
-      language === 'ku'
-        ? `هەلی کار لە کۆمپانیای ${job.company}!\n\nناونیشانی کار: ${jobTitle}\nشار: ${city}\nمووچە: ${job.salary}\n\nپێشکەشکردن بە وەتسئەپ: wa.me/${job.whatsapp}\nپێشکەشکردن بە ئیمەیڵ: ${job.email}\nبڵاوکراوە لە ڕێگەی ئەپی Kurd24 Job`
-        : `New Job Opportunity at ${job.company}!\n\nTitle: ${jobTitle}\nCity: ${city}\nSalary: ${job.salary}\n\nApply via WhatsApp: wa.me/${job.whatsapp}\nApply via Email: ${job.email}\nShared via Kurd24 Job app`;
+    
+    let shareText = '';
+    if (language === 'ku') {
+      shareText = `هەلی کار لە کۆمپانیای ${job.company}!\n\nناونیشانی کار: ${jobTitle}\nشار: ${city}\nمووچە: ${job.salary}\n`;
+      if (job.whatsapp && job.whatsapp.trim() !== "" && job.whatsapp.trim() !== "770") {
+        shareText += `پێشکەشکردن بە وەتسئەپ: wa.me/${job.whatsapp}\n`;
+      }
+      if (job.email && job.email.trim() !== "") {
+        shareText += `پێشکەشکردن بە ئیمەیڵ: ${job.email}\n`;
+      }
+      if (job.form_url && job.form_url.trim() !== "") {
+        shareText += `پڕکردنەوەی فۆرم: ${job.form_url}\n`;
+      }
+      shareText += `بڵاوکراوە لە ڕێگەی ئەپی Kurd24 Job`;
+    } else {
+      shareText = `New Job Opportunity at ${job.company}!\n\nTitle: ${jobTitle}\nCity: ${city}\nSalary: ${job.salary}\n`;
+      if (job.whatsapp && job.whatsapp.trim() !== "" && job.whatsapp.trim() !== "770") {
+        shareText += `Apply via WhatsApp: wa.me/${job.whatsapp}\n`;
+      }
+      if (job.email && job.email.trim() !== "") {
+        shareText += `Apply via Email: ${job.email}\n`;
+      }
+      if (job.form_url && job.form_url.trim() !== "") {
+        shareText += `Fill Form: ${job.form_url}\n`;
+      }
+      shareText += `Shared via Kurd24 Job app`;
+    }
 
     try {
       await Share.share({
@@ -168,6 +259,10 @@ export default function JobDetails() {
     { month: 'short', day: 'numeric', year: 'numeric' }
   );
 
+  const logoSource = (job.logo_url && job.logo_url.trim() !== '' && !job.logo_url.includes('unsplash.com/photo-1618005182384-a83a8bd57fbe'))
+    ? { uri: job.logo_url }
+    : (logoUrl ? { uri: logoUrl } : require('../../../assets/images/logo.png'));
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} />
@@ -208,11 +303,11 @@ export default function JobDetails() {
           {/* Main Glass Header Card */}
           <GlassView style={styles.mainHeaderCard}>
             <View style={styles.center}>
-              <View style={[styles.companyLogoPlaceholder, { backgroundColor: colors.primaryGlow }]}>
-                <Text style={[styles.logoLetter, { color: colors.primary }]}>
-                  {job.company.substring(0, 2).toUpperCase()}
-                </Text>
-              </View>
+              <Image 
+                source={logoSource} 
+                style={styles.companyLogo}
+                resizeMode="cover"
+              />
 
               <Text style={[styles.jobTitle, { color: colors.text }]}>{jobTitle}</Text>
               <Text style={[styles.companyName, { color: colors.textSecondary }]}>{job.company}</Text>
@@ -236,6 +331,28 @@ export default function JobDetails() {
               {description}
             </Text>
           </GlassView>
+
+          {/* Ad Video Player */}
+          {job.is_ad && job.video_url ? (
+            <GlassView style={styles.contentCard}>
+              <Text style={[styles.cardTitle, { color: colors.text }, textStyle]}>
+                {language === 'ku' ? 'ڤیدیۆی ڕیکلام 📹' : 'Sponsored Video 📹'}
+              </Text>
+              <DetailsVideoPlayer videoUrl={job.video_url} layout={job.video_layout} />
+            </GlassView>
+          ) : null}
+
+          {/* Ad Location Address */}
+          {job.is_ad && job.address ? (
+            <GlassView style={styles.contentCard}>
+              <Text style={[styles.cardTitle, { color: colors.text }, textStyle]}>
+                📍 {language === 'ku' ? 'ناونیشانی شوێن' : 'Location Address'}
+              </Text>
+              <Text style={[styles.descriptionText, { color: colors.textSecondary }, textStyle]}>
+                {job.address}
+              </Text>
+            </GlassView>
+          ) : null}
 
           {/* Horizontal Image Gallery */}
           {job.images && job.images.length > 0 && (
@@ -269,23 +386,83 @@ export default function JobDetails() {
 
           {/* Apply Action Buttons */}
           <View style={[styles.actionsCard]}>
-            <TouchableOpacity 
-              activeOpacity={0.9} 
-              style={[styles.applyWhatsAppBtn, { backgroundColor: '#25D366' }]}
-              onPress={handleApplyWhatsApp}
-            >
-              <MessageCircle size={20} color="#FFF" />
-              <Text style={styles.applyBtnText}>{t.sendWhatsApp}</Text>
-            </TouchableOpacity>
+            {/* WhatsApp Button (Both normal and ad posts) */}
+            {job.whatsapp && job.whatsapp.trim() !== "" && job.whatsapp.trim() !== "770" && (
+              <TouchableOpacity 
+                activeOpacity={0.9} 
+                style={[styles.applyWhatsAppBtn, { backgroundColor: '#25D366' }]}
+                onPress={handleApplyWhatsApp}
+              >
+                <MessageCircle size={20} color="#FFF" />
+                <Text style={styles.applyBtnText}>{t.sendWhatsApp}</Text>
+              </TouchableOpacity>
+            )}
 
-            <TouchableOpacity 
-              activeOpacity={0.9} 
-              style={[styles.applyEmailBtn, { backgroundColor: colors.primary }]}
-              onPress={handleApplyEmail}
-            >
-              <Mail size={18} color="#FFF" />
-              <Text style={styles.applyBtnText}>{t.sendEmail}</Text>
-            </TouchableOpacity>
+            {/* Phone Call Button (Only for advertisement posts) */}
+            {job.is_ad && job.whatsapp && job.whatsapp.trim() !== "" && job.whatsapp.trim() !== "770" && (
+              <TouchableOpacity 
+                activeOpacity={0.9} 
+                style={[styles.applyPhoneBtn, { backgroundColor: '#0088CC' }]}
+                onPress={() => Linking.openURL(`tel:${job.whatsapp}`)}
+              >
+                <Phone size={18} color="#FFF" />
+                <Text style={styles.applyBtnText}>
+                  {language === 'ku' ? 'پەیوەندی تەلەفۆنی 📞' : 'Phone Call 📞'}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Email Button (Only for normal posts) */}
+            {!job.is_ad && job.email && job.email.trim() !== "" && (
+              <TouchableOpacity 
+                activeOpacity={0.9} 
+                style={[styles.applyEmailBtn, { backgroundColor: colors.primary }]}
+                onPress={handleApplyEmail}
+              >
+                <Mail size={18} color="#FFF" />
+                <Text style={styles.applyBtnText}>{t.sendEmail}</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Fill Form Button (Only for normal posts) */}
+            {!job.is_ad && job.form_url && job.form_url.trim() !== "" && (
+              <TouchableOpacity 
+                activeOpacity={0.9} 
+                style={[styles.applyFormBtn, { backgroundColor: colors.accent }]}
+                onPress={handleApplyForm}
+              >
+                <FileText size={18} color="#FFF" />
+                <Text style={styles.applyBtnText}>{t.fillForm}</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Social Media / Web Link Button (Only for advertisement posts) */}
+            {job.is_ad && job.form_url && job.form_url.trim() !== "" && (
+              <TouchableOpacity 
+                activeOpacity={0.9} 
+                style={[styles.applySocialBtn, { backgroundColor: '#8B5CF6' }]}
+                onPress={handleApplyForm}
+              >
+                <Globe size={18} color="#FFF" />
+                <Text style={styles.applyBtnText}>
+                  {language === 'ku' ? 'تۆڕی کۆمەڵایەتی / بەستەر 🌐' : 'Social Media / Link 🌐'}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Location Button (Only for advertisement posts) */}
+            {job.is_ad && job.map_url && job.map_url.trim() !== "" && (
+              <TouchableOpacity 
+                activeOpacity={0.9} 
+                style={[styles.applyMapBtn, { backgroundColor: '#FFB800' }]}
+                onPress={handleOpenMap}
+              >
+                <MapPin size={18} color="#000" />
+                <Text style={[styles.applyBtnText, { color: '#000' }]}>
+                  {language === 'ku' ? 'لۆکەیشن لەسەر نەخشە 📍' : 'Map Location 📍'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
           <View style={{ height: 40 }} />
         </ScrollView>
@@ -379,12 +556,10 @@ const styles = StyleSheet.create({
   center: {
     alignItems: 'center',
   },
-  companyLogoPlaceholder: {
+  companyLogo: {
     width: 64,
     height: 64,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 14,
   },
   logoLetter: {
@@ -553,6 +728,66 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,
+  },
+  applyFormBtn: {
+    flexDirection: 'row',
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  applyPhoneBtn: {
+    flexDirection: 'row',
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: '#0088CC',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  applySocialBtn: {
+    flexDirection: 'row',
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  applyMapBtn: {
+    flexDirection: 'row',
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  detailsVideo: {
+    width: '100%',
+    aspectRatio: 2 / 3,
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    marginVertical: 10,
   },
   applyBtnText: {
     fontSize: 14,

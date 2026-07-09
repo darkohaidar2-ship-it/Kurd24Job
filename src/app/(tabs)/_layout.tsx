@@ -1,12 +1,18 @@
 import { Tabs } from 'expo-router';
 import { useApp } from '../../context/AppContext';
 import { Briefcase, Bookmark, Info } from 'lucide-react-native';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import React from 'react';
 
 export default function TabLayout() {
   const { colors, theme, t, language } = useApp();
+  const { bottom } = useSafeAreaInsets();
   const isRtl = language === 'ku';
+
+  // Calculate dynamic heights to account for Android 3-button or iOS home indicators
+  const tabHeight = 64 + (bottom > 0 ? bottom - 4 : 0);
+  const tabPaddingBottom = bottom > 0 ? bottom : 4;
 
   return (
     <Tabs
@@ -14,10 +20,10 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.tabIconDefault,
         headerShown: false,
+        tabBarShowLabel: false, // Hide default labels under icons
         tabBarStyle: {
-          // Fixed bottom tab bar — standard Android style
           position: 'relative',
-          height: 64,
+          height: tabHeight,
           borderTopWidth: 1,
           borderTopColor: colors.cardBorder,
           backgroundColor: theme === 'dark' ? '#12121C' : '#FFFFFF',
@@ -26,20 +32,14 @@ export default function TabLayout() {
           shadowOpacity: 0.08,
           shadowRadius: 8,
           elevation: 8,
-          paddingBottom: Platform.OS === 'ios' ? 20 : 4,
+          paddingBottom: tabPaddingBottom,
           paddingTop: 4,
           flexDirection: isRtl ? 'row-reverse' : 'row',
         },
         tabBarItemStyle: {
           height: 56,
-          paddingVertical: 4,
           justifyContent: 'center',
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '700',
-          fontFamily: 'NRT',
-          marginTop: 2,
+          alignItems: 'center',
         }
       }}
     >
@@ -50,9 +50,16 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <View style={[
               styles.tabIconWrapper,
-              focused && { backgroundColor: colors.primaryGlow }
+              focused 
+                ? [styles.activeCapsule, { backgroundColor: colors.primaryGlow, flexDirection: isRtl ? 'row-reverse' : 'row' }] 
+                : styles.inactiveIcon
             ]}>
-              <Briefcase size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <Briefcase size={18} color={focused ? colors.primary : color} strokeWidth={focused ? 2.5 : 2} />
+              {focused && (
+                <Text style={[styles.tabLabel, { color: colors.primary }, isRtl ? styles.marginRightMini : styles.marginLeftMini]}>
+                  {t.findJobs}
+                </Text>
+              )}
             </View>
           ),
         }}
@@ -64,9 +71,16 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <View style={[
               styles.tabIconWrapper,
-              focused && { backgroundColor: colors.primaryGlow }
+              focused 
+                ? [styles.activeCapsule, { backgroundColor: colors.primaryGlow, flexDirection: isRtl ? 'row-reverse' : 'row' }] 
+                : styles.inactiveIcon
             ]}>
-              <Bookmark size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <Bookmark size={18} color={focused ? colors.primary : color} strokeWidth={focused ? 2.5 : 2} />
+              {focused && (
+                <Text style={[styles.tabLabel, { color: colors.primary }, isRtl ? styles.marginRightMini : styles.marginLeftMini]}>
+                  {t.savedJobs}
+                </Text>
+              )}
             </View>
           ),
         }}
@@ -78,9 +92,16 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <View style={[
               styles.tabIconWrapper,
-              focused && { backgroundColor: colors.primaryGlow }
+              focused 
+                ? [styles.activeCapsule, { backgroundColor: colors.primaryGlow, flexDirection: isRtl ? 'row-reverse' : 'row' }] 
+                : styles.inactiveIcon
             ]}>
-              <Info size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <Info size={18} color={focused ? colors.primary : color} strokeWidth={focused ? 2.5 : 2} />
+              {focused && (
+                <Text style={[styles.tabLabel, { color: colors.primary }, isRtl ? styles.marginRightMini : styles.marginLeftMini]}>
+                  {t.aboutUs}
+                </Text>
+              )}
             </View>
           ),
         }}
@@ -97,11 +118,28 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabIconWrapper: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 2,
+  },
+  activeCapsule: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inactiveIcon: {
+    padding: 8,
+  },
+  tabLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    fontFamily: 'NRT',
+  },
+  marginLeftMini: {
+    marginLeft: 6,
+  },
+  marginRightMini: {
+    marginRight: 6,
   }
 });

@@ -20,11 +20,55 @@ import {
   Pin
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { useIsFocused } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Job } from '../services/JobStorage';
 import GlassView from './GlassView';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+interface AdVideoPlayerProps {
+  videoUrl: string;
+  isActive: boolean;
+  layout?: 'portrait' | 'landscape';
+}
+
+const AdVideoPlayer: React.FC<AdVideoPlayerProps> = ({ videoUrl, isActive, layout }) => {
+  const isFocused = useIsFocused();
+  const player = useVideoPlayer(videoUrl, playerInstance => {
+    playerInstance.loop = true;
+    playerInstance.muted = true;
+  });
+
+  useEffect(() => {
+    if (isActive && isFocused) {
+      player.play();
+    } else {
+      player.pause();
+    }
+  }, [isActive, isFocused, player]);
+
+  const isLandscape = layout === 'landscape';
+  const videoStyle = [
+    styles.adVideo,
+    { aspectRatio: isLandscape ? 16 / 9 : 2 / 3 }
+  ];
+
+  if (!isFocused) {
+    return <View style={videoStyle} />;
+  }
+
+  return (
+    <VideoView
+      player={player}
+      style={videoStyle}
+      allowsFullscreen={false}
+      nativeControls={false}
+    />
+  );
+};
 
 interface JobCardProps {
   job: Job;
@@ -32,6 +76,7 @@ interface JobCardProps {
   isAdmin?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  activeVisibleJobId?: string | null;
 }
 
 export const JobCard: React.FC<JobCardProps> = ({
@@ -39,9 +84,10 @@ export const JobCard: React.FC<JobCardProps> = ({
   onPress,
   isAdmin = false,
   onEdit,
-  onDelete
+  onDelete,
+  activeVisibleJobId = null
 }) => {
-  const { language, toggleBookmark, isBookmarked, colors, theme, getLocalizedProperty } = useApp();
+  const { language, toggleBookmark, isBookmarked, colors, theme, logoUrl } = useApp();
   const isRtl = language === 'ku';
   const bookmarked = isBookmarked(job.id);
 
@@ -49,12 +95,23 @@ export const JobCard: React.FC<JobCardProps> = ({
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [currentImgIndex, setCurrentImgIndex] = useState<number>(0);
 
-  // Animation for VIP Shine Sweep & Pulsing Border
+  // Entrance animation
+  const entranceAnim = useRef(new Animated.Value(0)).current;
+
+  // Animation for VIP/Ad Shine Sweep & Pulsing Border
   const shimmerAnim = useRef(new Animated.Value(-1.5)).current;
   const borderGlowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (job.is_vip) {
+    // Entrance fade+scale
+    Animated.timing(entranceAnim, {
+      toValue: 1,
+      duration: 380,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+
+    if (job.is_vip || job.is_ad) {
       Animated.loop(
         Animated.sequence([
           Animated.timing(shimmerAnim, {
@@ -63,7 +120,7 @@ export const JobCard: React.FC<JobCardProps> = ({
             easing: Easing.out(Easing.quad),
             useNativeDriver: true,
           }),
-          Animated.delay(1800), // Delay between sweeps for subtle elegance
+          Animated.delay(1800),
         ])
       ).start();
 
@@ -84,14 +141,19 @@ export const JobCard: React.FC<JobCardProps> = ({
         ])
       ).start();
     }
-  }, [job.is_vip]);
+  }, [job.is_vip, job.is_ad]);
 
   const borderColor = job.is_vip 
     ? borderGlowAnim.interpolate({
         inputRange: [0, 1],
         outputRange: ['#FFB800', '#FFE57F']
       })
-    : colors.cardBorder;
+    : (job.is_ad
+      ? borderGlowAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['#EC4899', '#8B5CF6']
+        })
+      : (theme === 'dark' ? 'rgba(56, 189, 248, 0.45)' : 'rgba(14, 165, 233, 0.35)'));
 
   const translateX = shimmerAnim.interpolate({
     inputRange: [-1.5, 1.5],
@@ -122,30 +184,66 @@ export const JobCard: React.FC<JobCardProps> = ({
   // Alignments based on RTL
   const rowStyle = isRtl ? styles.rowReverse : styles.row;
   const textStyle = isRtl ? styles.textRight : styles.textLeft;
+  const titlePaddingStyle = isRtl ? { paddingLeft: 8 } : { paddingRight: 8 };
+
+  // Company Logo Resolution
+  const logoSource = (job.logo_url && job.logo_url.trim() !== '' && !job.logo_url.includes('unsplash.com/photo-1618005182384-a83a8bd57fbe'))
+    ? { uri: job.logo_url }
+    : (logoUrl ? { uri: logoUrl } : require('../../assets/images/logo.png'));
+
+  // Gradient colors for the card background
+  const cardGradientColors: [string, string, string] = theme === 'dark'
+    ? (job.is_vip
+        ? ['rgba(38, 30, 10, 0.98)', 'rgba(28, 25, 20, 0.92)', 'rgba(22, 22, 18, 0.88)']
+        : (job.is_ad
+            ? ['rgba(32, 18, 45, 0.98)', 'rgba(23, 20, 35, 0.92)', 'rgba(18, 18, 30, 0.88)']
+            : ['rgba(22, 32, 48, 0.99)', 'rgba(18, 26, 40, 0.94)', 'rgba(14, 20, 34, 0.88)']))
+    : (job.is_vip
+        ? ['rgba(255, 253, 235, 0.99)', 'rgba(255, 251, 225, 0.95)', 'rgba(250, 245, 215, 0.9)']
+        : (job.is_ad
+            ? ['rgba(252, 248, 255, 0.99)', 'rgba(248, 243, 255, 0.95)', 'rgba(242, 236, 255, 0.9)']
+            : ['rgba(255, 255, 255, 0.99)', 'rgba(247, 250, 255, 0.95)', 'rgba(238, 244, 255, 0.88)']));
+
+  const entranceStyle = {
+    opacity: entranceAnim,
+    transform: [{
+      scale: entranceAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.97, 1],
+      })
+    }]
+  };
 
   return (
-    <View style={styles.cardContainer}>
+    <Animated.View style={[styles.cardContainer, entranceStyle]}>
       <Animated.View
         style={{
-          borderWidth: job.is_vip ? 2 : 1,
+          borderWidth: (job.is_vip || job.is_ad) ? 1.5 : 0,
           borderColor: borderColor,
-          borderRadius: 12,
+          borderRadius: 0,
           overflow: 'hidden',
         }}
       >
-        <GlassView 
+        {/* Subtle gradient background for all cards */}
+        <LinearGradient
+          colors={cardGradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={[styles.cardGradientBase]}
+        />
+        <GlassView
           noPadding={true}
           style={[
-            styles.windowCard, 
-            { 
-              backgroundColor: theme === 'dark' ? 'rgba(21, 30, 40, 0.82)' : 'rgba(255, 255, 255, 0.9)',
+            styles.windowCard,
+            {
+              backgroundColor: 'transparent',
               borderWidth: 0,
-              borderRadius: 12,
+              borderRadius: 0,
             }
           ]}
         >
-          {/* Animated Gold Shine Sweep Overlay for VIP */}
-          {job.is_vip && (
+          {/* Animated Gold/Pink Shine Sweep Overlay */}
+          {(job.is_vip || job.is_ad) && (
             <Animated.View
               style={[
                 StyleSheet.absoluteFillObject,
@@ -160,12 +258,18 @@ export const JobCard: React.FC<JobCardProps> = ({
               ]}
             >
               <LinearGradient
-                colors={[
+                colors={job.is_vip ? [
                   'rgba(255, 215, 0, 0)',
                   'rgba(255, 215, 0, 0.02)',
-                  'rgba(255, 223, 0, 0.25)', // Glowing gold sweep
+                  'rgba(255, 223, 0, 0.25)',
                   'rgba(255, 215, 0, 0.02)',
                   'rgba(255, 215, 0, 0)',
+                ] : [
+                  'rgba(236, 72, 153, 0)',
+                  'rgba(236, 72, 153, 0.02)',
+                  'rgba(139, 92, 246, 0.25)',
+                  'rgba(236, 72, 153, 0.02)',
+                  'rgba(236, 72, 153, 0)',
                 ]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -180,32 +284,15 @@ export const JobCard: React.FC<JobCardProps> = ({
             style={styles.cardClickableArea}
             onPress={onPress}
           >
-            {/* Header Row */}
-            <View style={[styles.headerRow, rowStyle]}>
-              <View style={[styles.companyLogoPlaceholder, { backgroundColor: colors.primaryGlow }]}>
-                <Text style={[styles.logoLetter, { color: colors.primary }]}>
-                  {job.company.substring(0, 1).toUpperCase()}
-                </Text>
-              </View>
-              
-              <View style={[styles.companyDetails, isRtl ? styles.marginRight : styles.marginLeft]}>
-                <View style={[styles.companyNameRow, rowStyle]}>
-                  <Text style={[styles.companyName, { color: colors.text }]}>{job.company}</Text>
-                  <CheckCircle2 size={13} color="#3b82f6" fill="#FFF" style={styles.verifiedIcon} />
-                  {job.is_pinned && (
-                    <View style={[styles.pinBadge, { backgroundColor: colors.primaryGlow }]}>
-                      <Pin size={9} color={colors.primary} fill={colors.primary} />
-                      <Text style={[styles.pinBadgeText, { color: colors.primary }]}>
-                        {language === 'ku' ? 'جێگیرکراو' : 'Pinned'}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={[styles.companySubtitle, { color: colors.textSecondary }]}>
-                  Kurd24 Job Channel
-                </Text>
-              </View>
-
+            {/* 1. Job Title & Bookmark Row */}
+            <View style={[styles.titleBookmarkRow, rowStyle]}>
+              <Text 
+                numberOfLines={2} 
+                ellipsizeMode="tail" 
+                style={[styles.jobTitle, { color: colors.text }, textStyle, titlePaddingStyle]}
+              >
+                📢 {title}
+              </Text>
               {!isAdmin && (
                 <TouchableOpacity 
                   activeOpacity={0.7} 
@@ -221,102 +308,159 @@ export const JobCard: React.FC<JobCardProps> = ({
               )}
             </View>
 
-            {/* Job Title */}
-            <Text style={[styles.jobTitle, { color: colors.text }, textStyle]}>
-              📢 {title}
+            {/* 2. Meta Info Row (Logo & Badges) */}
+            <View style={[styles.metaRow, rowStyle]}>
+              <View style={[styles.logoContainer, rowStyle]}>
+                <Image 
+                  source={logoSource} 
+                  style={styles.metaLogo}
+                  resizeMode="cover"
+                />
+                <CheckCircle2 size={12} color="#3b82f6" fill="#FFF" style={isRtl ? { marginRight: 4 } : { marginLeft: 4 }} />
+              </View>
+
+              {job.is_vip && (
+                <View style={styles.vipBadge}>
+                  <Text style={styles.vipBadgeText}>
+                    👑 {language === 'ku' ? 'VIP' : 'VIP'}
+                  </Text>
+                </View>
+              )}
+
+              {job.is_ad && (
+                <View style={styles.adBadge}>
+                  <Text style={styles.adBadgeText}>
+                    {language === 'ku' ? 'ڕیکلام' : 'Sponsored'}
+                  </Text>
+                </View>
+              )}
+              
+              {job.is_pinned && (
+                <View style={[styles.pinBadge, { backgroundColor: colors.primaryGlow }]}>
+                  <Pin size={9} color={colors.primary} fill={colors.primary} />
+                  <Text style={[styles.pinBadgeText, { color: colors.primary }]}>
+                    {language === 'ku' ? 'جێگیرکراو' : 'Pinned'}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* 3. Description Snippet */}
+            <Text 
+              numberOfLines={3} 
+              ellipsizeMode="tail"
+              style={[styles.descriptionSnippet, { color: colors.textSecondary }, textStyle]}
+            >
+              {description}
             </Text>
 
-          {/* Description Snippet */}
-          <Text 
-            numberOfLines={3} 
-            ellipsizeMode="tail"
-            style={[styles.descriptionSnippet, { color: colors.textSecondary }, textStyle]}
-          >
-            {description}
-          </Text>
-
-          {/* Premium Overlap Image Slider */}
-          {job.images && job.images.length > 0 && (
-            <View style={styles.sliderContainer}>
-              <ScrollView 
-                horizontal 
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onScroll={handleScroll}
-                scrollEventThrottle={16}
-                contentContainerStyle={{ flexDirection: isRtl ? 'row-reverse' : 'row' }}
-                style={styles.sliderScroll}
-              >
-                {job.images.map((imgUrl, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    activeOpacity={0.9}
-                    onPress={() => setActiveImage(imgUrl)}
-                    style={styles.slideWrapper}
+            {/* 4. Ad Video Player or Image Gallery Slider */}
+            {job.is_ad && job.video_url ? (
+              <AdVideoPlayer 
+                videoUrl={job.video_url} 
+                isActive={activeVisibleJobId === job.id} 
+                layout={job.video_layout}
+              />
+            ) : (
+              job.images && job.images.length > 0 && (
+                <View style={styles.sliderContainer}>
+                  <ScrollView 
+                    horizontal 
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
+                    contentContainerStyle={{ flexDirection: isRtl ? 'row-reverse' : 'row' }}
+                    style={styles.sliderScroll}
                   >
-                    <Image source={{ uri: imgUrl }} style={styles.slideImage} />
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+                    {job.images.map((imgUrl, idx) => (
+                      <TouchableOpacity
+                        key={idx}
+                        activeOpacity={0.9}
+                        onPress={() => setActiveImage(imgUrl)}
+                        style={styles.slideWrapper}
+                      >
+                        <Image source={{ uri: imgUrl }} style={styles.slideImage} />
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
 
-              {/* Floating translucent counter badge */}
-              <View style={styles.counterOverlay}>
-                <Text style={styles.counterText}>
-                  {currentImgIndex + 1}/{job.images.length}
+                  {/* Floating translucent counter badge */}
+                  <View style={styles.counterOverlay}>
+                    <Text style={styles.counterText}>
+                      {currentImgIndex + 1}/{job.images.length}
+                    </Text>
+                  </View>
+                </View>
+              )
+            )}
+
+            {/* Ad Location Address */}
+            {job.is_ad && job.address ? (
+              <View style={[styles.adAddressContainer, rowStyle, { marginBottom: 12 }]}>
+                <Text style={[styles.adAddressText, { color: colors.textSecondary }, textStyle]}>
+                  📍 {language === 'ku' ? `ناونیشان: ${job.address}` : `Location: ${job.address}`}
                 </Text>
               </View>
+            ) : null}
+
+            {/* 5. Time & Views footer */}
+            <View style={[styles.footerRow, rowStyle]}>
+              <View style={[styles.footerItem, rowStyle]}>
+                <Eye size={12} color={colors.textMuted} />
+                <Text style={[styles.footerText, { color: colors.textMuted }, isRtl ? styles.marginRightMini : styles.marginLeftMini]}>
+                  {job.views} {language === 'ku' ? 'بینین' : 'views'}
+                </Text>
+              </View>
+              <View style={[styles.footerItem, rowStyle]}>
+                <Text style={[styles.footerText, { color: colors.textMuted }]}>{timeFormatted}</Text>
+                <CheckCheck size={14} color="#5288c1" style={isRtl ? styles.marginRightMini : styles.marginLeftMini} />
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          {/* Admin actions row */}
+          {isAdmin && (
+            <View style={[styles.adminActionsRow, { borderTopColor: colors.border }, rowStyle]}>
+              <TouchableOpacity onPress={onEdit} style={[styles.adminBtn, { backgroundColor: colors.primaryGlow }]}>
+                <Text style={[styles.adminBtnText, { color: colors.primary }]}>{language === 'ku' ? 'دەستکاری' : 'Edit'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onDelete} style={[styles.adminBtn, { backgroundColor: colors.accentGlow }]}>
+                <Text style={[styles.adminBtnText, { color: colors.accent }]}>{language === 'ku' ? 'سڕینەوە' : 'Delete'}</Text>
+              </TouchableOpacity>
             </View>
           )}
 
-          {/* Time & Views footer */}
-          <View style={[styles.footerRow, rowStyle]}>
-            <View style={[styles.footerItem, rowStyle]}>
-              <Eye size={12} color={colors.textMuted} />
-              <Text style={[styles.footerText, { color: colors.textMuted }, isRtl ? styles.marginRightMini : styles.marginLeftMini]}>
-                {job.views} {language === 'ku' ? 'بینین' : 'views'}
+          {/* Action button: See More (زانیاری زیاتر) */}
+          <View style={[styles.seeMoreContainer, { borderTopColor: colors.border }]}>
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              style={[
+                styles.seeMoreBtn, 
+                { 
+                  backgroundColor: job.is_vip ? 'rgba(255, 184, 0, 0.12)' : colors.primaryGlow,
+                  borderColor: job.is_vip ? '#FFB800' : colors.primary,
+                }
+              ]}
+              onPress={onPress}
+            >
+              <Text style={[
+                styles.seeMoreBtnText, 
+                { color: job.is_vip ? '#FFB800' : colors.primary }
+              ]}>
+                {language === 'ku' ? 'زانیاری زیاتر 🔍' : 'More Info 🔍'}
               </Text>
-            </View>
-            <View style={[styles.footerItem, rowStyle]}>
-              <Text style={[styles.footerText, { color: colors.textMuted }]}>{timeFormatted}</Text>
-              <CheckCheck size={14} color="#5288c1" style={isRtl ? styles.marginRightMini : styles.marginLeftMini} />
-            </View>
-          </View>
-        </TouchableOpacity>
-
-        {/* Admin actions row */}
-        {isAdmin && (
-          <View style={[styles.adminActionsRow, { borderTopColor: colors.border }, rowStyle]}>
-            <TouchableOpacity onPress={onEdit} style={[styles.adminBtn, { backgroundColor: colors.primaryGlow }]}>
-              <Text style={[styles.adminBtnText, { color: colors.primary }]}>{language === 'ku' ? 'دەستکاری' : 'Edit'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onDelete} style={[styles.adminBtn, { backgroundColor: colors.accentGlow }]}>
-              <Text style={[styles.adminBtnText, { color: colors.accent }]}>{language === 'ku' ? 'سڕینەوە' : 'Delete'}</Text>
             </TouchableOpacity>
           </View>
-        )}
+        </GlassView>
+        </Animated.View>
 
-        {/* Action button: See More (زانیاری زیاتر) */}
-        <View style={[styles.seeMoreContainer, { borderTopColor: colors.border }]}>
-          <TouchableOpacity 
-            activeOpacity={0.8}
-            style={[
-              styles.seeMoreBtn, 
-              { 
-                backgroundColor: job.is_vip ? 'rgba(255, 184, 0, 0.12)' : colors.primaryGlow,
-                borderColor: job.is_vip ? '#FFB800' : colors.primary,
-              }
-            ]}
-            onPress={onPress}
-          >
-            <Text style={[
-              styles.seeMoreBtnText, 
-              { color: job.is_vip ? '#FFB800' : colors.primary }
-            ]}>
-              {language === 'ku' ? 'زانیاری زیاتر 🔍' : 'More Info 🔍'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </GlassView>
+      <View
+        style={[
+          styles.solidDivider,
+          { backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.05)' }
+        ]}
+      />
 
       {/* Full screen image lightbox zoom */}
       <Modal
@@ -342,8 +486,7 @@ export const JobCard: React.FC<JobCardProps> = ({
           )}
         </View>
       </Modal>
-      </Animated.View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -365,9 +508,13 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   cardContainer: {
-    marginBottom: 16,
+    marginBottom: 0,
     width: '100%',
-    paddingHorizontal: 12,
+    paddingHorizontal: 0,
+  },
+  cardGradientBase: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
   },
   windowCard: {
     padding: 0,
@@ -381,40 +528,28 @@ const styles = StyleSheet.create({
   cardClickableArea: {
     padding: 16,
     paddingBottom: 12,
-  },
-  headerRow: {
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  companyLogoPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoLetter: {
-    fontSize: 15,
-    fontWeight: '800',
-    fontFamily: font,
-  },
-  companyDetails: {
     flex: 1,
   },
-  companyNameRow: {
-    gap: 4,
+  titleBookmarkRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  logoContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  companyName: {
-    fontSize: 14,
-    fontWeight: '700',
-    fontFamily: font,
-  },
-  companySubtitle: {
-    fontSize: 10,
-    opacity: 0.6,
-    fontFamily: font,
-    marginTop: 1,
+  metaLogo: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
   },
   verifiedIcon: {
     marginTop: 1,
@@ -433,22 +568,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   jobTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
-    lineHeight: 24,
-    marginBottom: 10,
+    lineHeight: 22,
     fontFamily: font,
+    flex: 1,
   },
   descriptionSnippet: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
     opacity: 0.8,
     fontFamily: font,
     marginBottom: 12,
   },
   sliderContainer: {
     position: 'relative',
-    height: 180,
+    height: 150,
     width: '100%',
     borderRadius: 14,
     overflow: 'hidden',
@@ -460,8 +595,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   slideWrapper: {
-    width: SCREEN_WIDTH - 56,
-    height: 180,
+    width: SCREEN_WIDTH - 32, // Edges-to-edge minus cardClickableArea horizontal padding
+    height: 150,
   },
   slideImage: {
     width: '100%',
@@ -539,13 +674,14 @@ const styles = StyleSheet.create({
   vipBadge: {
     paddingHorizontal: 6,
     paddingVertical: 1,
-    borderRadius: 4,
-    marginLeft: 6,
-    marginRight: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FFB800',
+    backgroundColor: 'rgba(255, 184, 0, 0.12)',
     alignSelf: 'center',
   },
   vipBadgeText: {
-    color: '#000',
+    color: '#FFB800',
     fontSize: 9,
     fontWeight: '900',
     fontFamily: font,
@@ -557,8 +693,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
-    marginLeft: 6,
-    marginRight: 6,
     alignSelf: 'center',
   },
   pinBadgeText: {
@@ -587,6 +721,45 @@ const styles = StyleSheet.create({
   lightboxImage: {
     width: '90%',
     height: '75%',
+  },
+  adBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#EC4899',
+    backgroundColor: 'rgba(236, 72, 153, 0.12)',
+    alignSelf: 'center',
+  },
+  adBadgeText: {
+    color: '#EC4899',
+    fontSize: 9,
+    fontWeight: '900',
+    fontFamily: font,
+  },
+  adVideo: {
+    width: '100%',
+    aspectRatio: 2 / 3,
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    marginBottom: 12,
+  },
+  adAddressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  adAddressText: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: font,
+  },
+  solidDivider: {
+    height: 1,
+    width: '100%',
+    marginTop: 14,
   }
 });
 
